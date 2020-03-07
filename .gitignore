@@ -1,7 +1,5 @@
 # ignored files
 /.idea/workspace.xml
-/package-lock.json
-/ToDo.md
 /node_modules/
 /.nyc_output/
 /coverage/
