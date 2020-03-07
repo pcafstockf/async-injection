@@ -1,0 +1,6 @@
+# Default ignored files
+/.idea/workspace.xml
+/lib/
+/package-lock.json
+/ToDo.md
+/node_modules/

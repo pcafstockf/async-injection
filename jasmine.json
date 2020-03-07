@@ -1,0 +1,11 @@
+{
+	"spec_dir": "src",
+	"spec_files": [
+		"*.spec.ts"
+	],
+	"helpers": [
+		"../tst/reporter.js"
+	],
+	"stopSpecOnExpectationFailure": false,
+	"random": false
+}

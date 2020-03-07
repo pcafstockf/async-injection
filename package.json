@@ -1,0 +1,53 @@
+{
+	"name": "async-injection",
+	"version": "1.0.1",
+	"description": "",
+	"author": "",
+	"license": "MIT",
+	"keywords": [
+		"ioc",
+		"di",
+		"async",
+		"dependency",
+		"injection",
+		"dependency injection",
+		"inversion of control",
+		"injector",
+		"container",
+		"typescript"
+	],
+	"main": "lib/index.js",
+	"types": "lib/index.d.ts",
+	"typings": "lib/index.d.ts",
+	"directories": {
+		"lib": "lib"
+	},
+	"scripts": {
+		"clean": "rimraf ./lib",
+		"fullclean": "npm run clean && rimraf ./node_modules && rimraf ./package-lock.json",
+		"test": "jasmine-ts --project tsconfig.json --config=jasmine.json",
+		"coverage": "nyc -e .ts -x \"**/*.spec.ts\" -x \"tst/*\" --reporter=text-summary --reporter=lcov npm run test",
+		"build": "npm run clean && tsc -p tsconfig.json"
+	},
+	"dependencies": {
+		"reflect-metadata": "~0.1.13",
+		"tslib": "~1.11.1"
+	},
+	"devDependencies": {
+		"@types/jasmine": "~3.5.8",
+		"jasmine": "~3.5.0",
+		"jasmine-console-reporter": "~3.1.0",
+		"jasmine-ts": "~0.3.0",
+		"nyc": "~14.1.1",
+		"source-map-support": "~0.5.16",
+		"ts-node": "~8.6.2",
+		"tsconfig-paths": "~3.9.0",
+		"typedoc": "~0.16.11",
+		"typescript": "~3.7.5"
+	},
+	"nyc": {
+		"extends": "@istanbuljs/nyc-config-typescript",
+		"all": true,
+		"check-coverage": true
+	}
+}
