@@ -1,8 +1,8 @@
 {
 	"name": "async-injection",
 	"version": "1.0.1",
-	"description": "",
-	"author": "",
+	"description": "A robust lightweight dependency injection library for TypeScript.",
+	"author": "Frank Stock",
 	"license": "MIT",
 	"keywords": [
 		"ioc",
@@ -28,6 +28,13 @@
 		"test": "node --require ts-node/register --require tsconfig-paths/register node_modules/jasmine/bin/jasmine.js --config=jasmine.json",
 		"coverage": "nyc -e .ts -x \"**/*.spec.ts\" -x \"tst/*\" --reporter=text-summary --reporter=lcov npm run test",
 		"build": "npm run clean && tsc -p tsconfig.json"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/pcafstockf/async-injection.git"
+	},
+	"bugs": {
+		"url": "https://github.com/pcafstockf/async-injection/issues"
 	},
 	"dependencies": {
 		"reflect-metadata": "~0.1.13",
