@@ -1,1 +1,2 @@
+- [ ] Generate JDDoc and add link from the ReadMe
 - [ ] Publish
