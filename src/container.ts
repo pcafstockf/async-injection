@@ -70,6 +70,7 @@ export class Container implements Binder {
 		return Promise.resolve(state.fulfilled);
 	}
 
+	// noinspection JSUnusedGlobalSymbols
 	/**
 	 * This method is not part of the Binding interface, because it is highly unusual.
 	 * But that doesn't mean we can't imagine scenarios where you might require it.

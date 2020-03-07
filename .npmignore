@@ -1,2 +1,4 @@
-/.idea
+/.idea/
+/.nyc_output/
+/coverage/
 /ToDo.md
