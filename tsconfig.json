@@ -9,7 +9,7 @@
 		"declaration": true,
 		"outDir": "./lib",
 		"rootDir": "./src",
-		"removeComments": true,
+		"removeComments": false,
 		"importHelpers": true,
 		"strict": false,
 		"moduleResolution": "node",
