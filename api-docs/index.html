@@ -1,0 +1,248 @@
+<!doctype html>
+<html class="default no-js">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>async-injection - v1.0.1</title>
+	<meta name="description" content="">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="main.css">
+</head>
+<body>
+<header>
+	<div class="tsd-page-title">
+		<div class="container">
+			<ul class="tsd-breadcrumb">
+				<li>
+					<a href="globals.html">Globals</a>
+				</li>
+			</ul>
+			<h1>async-injection - v1.0.1</h1>
+		</div>
+	</div>
+</header>
+<div class="container container-main">
+	<div class="row">
+		<div class="col-8 col-content">
+			<div class="tsd-panel tsd-typography">
+				<a href="#async-injection" id="async-injection" style="color: inherit; text-decoration: none;">
+					<h1>Async-Injection</h1>
+				</a>
+				<p>A robust lightweight dependency injection library for TypeScript.</p>
+				<a href="#about" id="about" style="color: inherit; text-decoration: none;">
+					<h2>About</h2>
+				</a>
+				<p>Async-Injection is a small IoC container with support for both synchronous and asynchronous dependency injection, as well as isolated and/or hierarchical scopes.</p>
+				<a href="#installation" id="installation" style="color: inherit; text-decoration: none;">
+					<h2>Installation</h2>
+				</a>
+				<p>You can get the latest release using npm:</p>
+				<pre><code>$ npm <span class="hljs-keyword">install</span> aynch-injection <span class="hljs-comment">--save</span></code></pre>
+				<a href="#basic-usage-synchronous" id="basic-usage-synchronous" style="color: inherit; text-decoration: none;">
+					<h2>Basic Usage (synchronous)</h2>
+				</a>
+				<p>Here we &#39;get&#39; a new transaction handling object, that itself, relies on a shared service:</p>
+				<pre><code class="language-typescript"><span class="hljs-meta">@Injectable</span>()
+<span class="hljs-keyword">class</span> SharedService {
+    <span class="hljs-keyword">constructor</span>(<span class="hljs-params"><span class="hljs-meta">@Inject</span>(<span class="hljs-string">'LogLevel'</span>) <span class="hljs-meta">@Optional</span>(<span class="hljs-string">'warn'</span>) <span class="hljs-keyword">private</span> logLevel: <span class="hljs-built_in">string</span></span>) { }
+}
+
+<span class="hljs-meta">@Injectable</span>()
+<span class="hljs-keyword">class</span> TransactionHandler {
+    <span class="hljs-keyword">constructor</span>(<span class="hljs-params">svc: SharedService</span>) { }
+}
+
+<span class="hljs-comment">// Create a simple container (we will bind providers into it).</span>
+<span class="hljs-keyword">const</span> container = <span class="hljs-keyword">new</span> Container();
+
+<span class="hljs-comment">// A single instance will be created and shared by everyone.</span>
+container.bindClass(SharedService).asSingleton();
+
+<span class="hljs-comment">// A new instance will be created each time one is requested.</span>
+container.bindClass(TransactionHandler);
+
+<span class="hljs-comment">// If we omit this line, the logLevel of SharedService will be initialized to 'warn'</span>
+container.bindConstant(<span class="hljs-string">'LogLevel'</span>, <span class="hljs-string">'info'</span>);
+
+<span class="hljs-comment">// In our request processing code (which would be an anti-pattern)...</span>
+<span class="hljs-comment">// Instantiate a new transaction handler (it will be injected with the shared service).</span>
+<span class="hljs-keyword">const</span> tx = container.get(TransactionHandler);</code></pre>
+				<p><strong>NOTE:</strong><br>The examples in this ReadMe are contrived to quickly communicate concepts and usage.<br>Your real world project should of course follow best practices like <a href="https://medium.com/machine-words/separation-of-concerns-1d735b703a60">separation of concerns</a>, having a <a href="https://medium.com/@cfryerdev/dependency-injection-composition-root-418a1bb19130">composition root</a>, and should avoid anti-patterns like <a href="http://scotthannen.org/blog/2018/11/27/stop-worrying-love-service-locator.html">service locator</a>.</p>
+				<a href="#scopes" id="scopes" style="color: inherit; text-decoration: none;">
+					<h2>Scopes</h2>
+				</a>
+				<p>Scopes can be created using multiple Containers, and/or a hierarchy of Containers.</p>
+				<a href="#ioc-modules" id="ioc-modules" style="color: inherit; text-decoration: none;">
+					<h2>IoC Modules</h2>
+				</a>
+				<p>Why reinvent the wheel?  TypeScript is great!
+				Implement the &quot;module&quot; you want and just import it:</p>
+				<p><code>my-http-ioc-module.ts</code></p>
+				<pre><code class="language-typescript"><span class="hljs-keyword">import</span> {myContainer} <span class="hljs-keyword">from</span> <span class="hljs-string">'./app'</span>;
+<span class="hljs-keyword">import</span> {Logger, HttpClient} <span class="hljs-keyword">from</span> <span class="hljs-string">'./services'</span>;
+<span class="hljs-keyword">import</span> {HttpClientGotWrapper} <span class="hljs-keyword">from</span> <span class="hljs-string">'./impl'</span>;
+
+myContainer.bind(Logger).asSingleton();
+myContainer.bind(HttpClient, HttpClientGotWrapper);</code></pre>
+				<a href="#asynchronous-support" id="asynchronous-support" style="color: inherit; text-decoration: none;">
+					<h2>Asynchronous Support</h2>
+				</a>
+				<p>For simplicity, it is recommended that you use traditional synchronous injection for any class where that is possible.<br>But when that&#39;s just to much work, you can &quot;blend&quot; synchronous and asynchronous injection.
+				To support &quot;blending&quot;, we introduce three new methods on the <code>Container</code> which will be explained below.</p>
+				<a href="#asynchronous-usage" id="asynchronous-usage" style="color: inherit; text-decoration: none;">
+					<h2>Asynchronous Usage</h2>
+				</a>
+				<p>Perhaps in the example above, our <code>SharedService</code> is useless until it has established a database connection.<br>Of course such a simple scenario could easily be handled in user-land code, but as application complexity grows, this becomes more tedious and difficult to maintain.<br>Let&#39;s modify the example as follows:</p>
+				<pre><code class="language-typescript"><span class="hljs-meta">@Injectable</span>()
+<span class="hljs-keyword">class</span> SharedService {
+    <span class="hljs-keyword">constructor</span>(<span class="hljs-params"></span>) { }
+    connect(): <span class="hljs-built_in">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt; { ... }
+}
+
+<span class="hljs-keyword">const</span> container = <span class="hljs-keyword">new</span> Container();
+
+<span class="hljs-comment">// Bind a factory function that awaits until it can fully create a SharedService.</span>
+container.bindAsyncFactory(SharedService, <span class="hljs-keyword">async</span> () =&gt; {
+    <span class="hljs-keyword">let</span> svc = <span class="hljs-keyword">new</span> SharedService();
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">await</span> svc.connect();
+}).asSingleton();
+
+<span class="hljs-comment">// A new transient instance will be created each time one is requested.</span>
+container.bindClass(TransactionHandler);    
+
+<span class="hljs-comment">// Wait for all bound asynchronous factory functions to complete.</span>
+<span class="hljs-comment">// This step is optional.  You could omit and use Container.resolve instead (see alternative below).</span>
+<span class="hljs-keyword">await</span> container.resolveSingletons(<span class="hljs-literal">true</span>);
+<span class="hljs-comment">// We are now connected to the database</span>
+
+<span class="hljs-comment">// In our request processing code...</span>
+<span class="hljs-keyword">const</span> tx = container.get(TransactionHandler);</code></pre>
+				<p>As an alternative, we could <strong>remove</strong> the call to <code>Container.resolveSingletons</code>, and in our request processing code, simply call <code>Container.resolve</code>.</p>
+				<pre><code class="language-typescript"><span class="hljs-keyword">const</span> tx = <span class="hljs-keyword">await</span> container.resolve(TransactionHandler);</code></pre>
+				<a href="#important---containerresolve-vs-containerget" id="important---containerresolve-vs-containerget" style="color: inherit; text-decoration: none;">
+					<h2>Important - Container.resolve vs Container.get</h2>
+				</a>
+				<p>Blending synchronous and asynchronous injection adds complexity to your application.<br>The key to successful blending is to think of the object you are requesting, not as an object, but as a tree of objects with your object at the top.<br>Keep in mind that you may have <strong>transient</strong> objects which need to be created each time, as well as existing <strong>singleton</strong> objects in your dependency tree.<br>If you know ahead of time that every object which you depend on is immediately (synchronously) available, <strong>or</strong> if they are asynchronous <strong>singletons</strong> which have already been resolved (via <code>Container.resolveSingletons</code>, or a previous call to <code>Container.resolve</code>), then no need to wait, you can just <code>Container.get</code> the tree.<br>Otherwise you need to await the full resolution of the tree with <code>await Container.resolve</code>.  </p>
+				<a href="#postconstruct-support" id="postconstruct-support" style="color: inherit; text-decoration: none;">
+					<h2>@PostConstruct Support</h2>
+				</a>
+				<p>It is not always possible to fully initialize your object in the class constructor.
+				This (albeit contrived) demo shows that the <code>Employee</code> class is not yet initialized when the <code>Person</code> subclass tries to call the overridden <code>state</code> method.</p>
+				<pre><code class="language-typescript"><span class="hljs-keyword">class</span> Person {
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">constructor</span>(<span class="hljs-params"></span>) { <span class="hljs-keyword">this</span>.describe(); }
+    <span class="hljs-keyword">protected</span> state() { <span class="hljs-keyword">return</span> <span class="hljs-string">"relaxing"</span>; }
+    <span class="hljs-keyword">public</span> describe() { <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"Hi I'm '"</span> + <span class="hljs-keyword">this</span>.state() + <span class="hljs-string">"'"</span>); }
+}
+<span class="hljs-keyword">class</span> Employee <span class="hljs-keyword">extends</span> Person {
+    <span class="hljs-keyword">constructor</span>(<span class="hljs-params"><span class="hljs-keyword">private</span> manager: <span class="hljs-built_in">boolean</span></span>) {    <span class="hljs-keyword">super</span>(); }
+    <span class="hljs-keyword">protected</span> state() { <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.manager ? <span class="hljs-string">"busy"</span> : <span class="hljs-string">"producing"</span>; }
+}
+<span class="hljs-comment">// This will print: </span>
+<span class="hljs-comment">//  "Hi I'm 'producing", even though the author probably expected </span>
+<span class="hljs-comment">//  "Hi I'm busy", because they passed true for the 'manager' parameter.</span>
+<span class="hljs-keyword">new</span> Employee(<span class="hljs-literal">true</span>); </code></pre>
+				<p>Can we refactor code to work around this?  Sure.  You may have to submit a couple of PR&#39;s, re-write legacy code that has no unit tests, trash encapsulation, skip a few nights sleep, etc.  But why?<br>A PostConstruct annotation ensure&#39;s your initialization method is working on a fully constructed version of your object.
+				Even better, since constructors cannot be asynchronous, PostConstruct gives you an easy way to asynchronously prepare an object before it&#39;s put into service.</p>
+				<a href="#postconstruct-usage" id="postconstruct-usage" style="color: inherit; text-decoration: none;">
+					<h2>@PostConstruct Usage</h2>
+				</a>
+				<p>Post construction methods can be either synchronous or asynchronous.</p>
+				<pre><code class="language-typescript"><span class="hljs-keyword">class</span> A {
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">constructor</span>(<span class="hljs-params"></span>) { }
+
+    <span class="hljs-comment">// Called before the object is placed into the container (or is returned from get/resolve)</span>
+    <span class="hljs-meta">@PostConstruct</span>()
+    <span class="hljs-keyword">public</span> init(): <span class="hljs-built_in">void</span> { ... } 
+}
+<span class="hljs-keyword">class</span> D {
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">constructor</span>(<span class="hljs-params"></span>) { }
+
+    <span class="hljs-comment">// Will not be placed into the container (or returned) until the Promise has been resolved.</span>
+    <span class="hljs-meta">@PostConstruct</span>()
+    <span class="hljs-keyword">public</span> init(): <span class="hljs-built_in">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt; { ... }    
+}</code></pre>
+				<a href="#postconstruct-guidelines" id="postconstruct-guidelines" style="color: inherit; text-decoration: none;">
+					<h3>@PostConstruct Guidelines:</h3>
+				</a>
+				<ul>
+					<li>Ensure your post construction method signature properly <strong>declares</strong> it&#39;s return type.  </li>
+					<li><em>WARNING!*</em>  An unspecified return type signature where the type is implied by <code>return new Promise(...)</code> is not sufficient!  You must explicitly declare the return type.  </li>
+					<li><code>Container.get</code> will throw an exception if you try to retrieve a class with <code>@PostConstruct</code> on a method that returns a <code>Promise</code>, but which does not <strong>declare</strong> it&#39;s return type to be <code>Promise</code>.</li>
+					<li>The library will not invoke @PostConstruct on an object returned from a factory.  It is the factory&#39;s responsibility to construct and initialize before returning.</li>
+					<li>You will likely want a <code>Container.resolveSingletons(true)</code> call between your last <code>Container.bindXXX()</code> call and any <code>Container.get</code> call.</li>
+				</ul>
+				<a href="#api" id="api" style="color: inherit; text-decoration: none;">
+					<h2>API</h2>
+				</a>
+				<p>TODO: Add links to the JSDoc</p>
+				<a href="#acknowledgements" id="acknowledgements" style="color: inherit; text-decoration: none;">
+					<h2>Acknowledgements</h2>
+				</a>
+				<p>Thanks to all the contributors at <a href="https://github.com/inversify/InversifyJS">InversifyJS</a>.  It is a powerful, clean, flexible, inspiring design.</p>
+				<p>Thanks to everyone at <a href="https://docs.nestjs.com/fundamentals/async-providers">NestJS</a> for giving us Asynchronous providers.</p>
+				<p>Thanks to Darcy Rayner for describing a <a href="https://dev.to/darcyrayner/typescript-dependency-injection-in-200-loc-12j7">DI implementation</a> so simply and clearly.</p>
+				<p>Thanks to Carlos Delgado for the idea of a <a href="https://ourcodeworld.com/articles/read/317/how-to-check-if-a-javascript-promise-has-been-fulfilled-rejected-or-resolved">&quot;QuerablePromise&quot;</a> which allowed us to blend asynchronous DI with the simplicity of synchronous DI.</p>
+				<a href="#mit-license" id="mit-license" style="color: inherit; text-decoration: none;">
+					<h2>MIT License</h2>
+				</a>
+				<p>Copyright (c) 2020 Frank Stock</p>
+				<p>Permission is hereby granted, free of charge, to any person obtaining a copy
+					of this software and associated documentation files (the &quot;Software&quot;), to deal
+					in the Software without restriction, including without limitation the rights
+					to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+					copies of the Software, and to permit persons to whom the Software is
+				furnished to do so, subject to the following conditions:</p>
+				<p>The above copyright notice and this permission notice shall be included in all
+				copies or substantial portions of the Software.</p>
+				<p>THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+					IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+					FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+					AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+					LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+					OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+				SOFTWARE.</p>
+			</div>
+		</div>
+		<div class="col-4 col-menu menu-sticky-wrap menu-highlight">
+			<nav class="tsd-navigation primary">
+				<ul>
+					<li class="globals  ">
+						<a href="globals.html"><em>Globals</em></a>
+					</li>
+				</ul>
+			</nav>
+			<nav class="tsd-navigation secondary menu-sticky">
+				<ul class="before-current">
+					<li class=" tsd-kind-class">
+						<a href="container.html" class="tsd-kind-icon">Container</a>
+					</li>
+					<li class=" tsd-kind-interface">
+						<a href="binder.html" class="tsd-kind-icon">Binder</a>
+					</li>
+					<li class=" tsd-kind-interface">
+						<a href="injector.html" class="tsd-kind-icon">Injector</a>
+					</li>
+					<li class=" tsd-kind-function">
+						<a href="globals.html#inject" class="tsd-kind-icon">Inject</a>
+					</li>
+					<li class=" tsd-kind-function">
+						<a href="globals.html#injectable" class="tsd-kind-icon">Injectable</a>
+					</li>
+					<li class=" tsd-kind-function">
+						<a href="globals.html#optional" class="tsd-kind-icon">Optional</a>
+					</li>
+					<li class=" tsd-kind-function">
+						<a href="globals.html#postconstruct" class="tsd-kind-icon">Post<wbr>Construct</a>
+					</li>
+				</ul>
+			</nav>
+		</div>
+	</div>
+</div>
+<div class="container tsd-generator">
+	<p>Generated using <a href="https://typedoc.org/" target="_blank">TypeDoc</a></p>
+</div>
+<div class="overlay"></div>
+<script src="main.js"></script>
+</body>
+</html>

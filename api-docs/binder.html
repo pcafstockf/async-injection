@@ -1,0 +1,379 @@
+<!doctype html>
+<html class="default no-js">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>Binder | async-injection - v1.0.1</title>
+	<meta name="description" content="">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="main.css">
+</head>
+<body>
+<header>
+	<div class="tsd-page-title">
+		<div class="container">
+			<h1>Interface Binder</h1>
+			<p>Bind Ids to producers.</p>
+		</div>
+	</div>
+</header>
+<div class="container container-main">
+	<div class="row">
+		<div class="col-8 col-content">
+			<section class="tsd-panel tsd-hierarchy">
+				<h3>Hierarchy</h3>
+				<ul class="tsd-hierarchy">
+					<li>
+						<a href="injector.html" class="tsd-signature-type">Injector</a>
+						<ul class="tsd-hierarchy">
+							<li>
+								<span class="target">Binder</span>
+							</li>
+						</ul>
+					</li>
+				</ul>
+			</section>
+			<section class="tsd-panel">
+				<h3>Implemented by</h3>
+				<ul class="tsd-hierarchy">
+					<li><a href="container.html" class="tsd-signature-type">Container</a></li>
+				</ul>
+			</section>
+			<section class="tsd-panel-group tsd-member-group ">
+				<h2>Methods</h2>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-interface tsd-has-type-parameter">
+					<a name="bindasyncfactory" class="tsd-anchor"></a>
+					<h3>bind<wbr>Async<wbr>Factory</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface tsd-has-type-parameter">
+						<li class="tsd-signature tsd-kind-icon">bind<wbr>Async<wbr>Factory&lt;T&gt;<span class="tsd-signature-symbol">(</span>id<span class="tsd-signature-symbol">: </span><a href="globals.html#injectableid" class="tsd-signature-type">InjectableId</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">&gt;</span>, factory<span class="tsd-signature-symbol">: </span><a href="globals.html#asyncfactory" class="tsd-signature-type">AsyncFactory</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="bindas.html" class="tsd-signature-type">BindAs</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">, </span><a href="globals.html#asyncfactory" class="tsd-signature-type">AsyncFactory</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/pcafstockf/async-injection/blob/05e7710/src/binder.ts#L83">binder.ts:83</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Bind an InjectableId to an asynchronous factory that will be invoked on demand when the object is needed.
+										The factory should produce the needed value (asynchronously of course).
+										NOTE:  The container will not invoke any @PostConstruct present on the class, this is the responsibility of the factory.
+									WARNING!!! The factory may not throw and must return a valid Promise (which can be pending, resolved, rejected, etc.).</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>id: <a href="globals.html#injectableid" class="tsd-signature-type">InjectableId</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">&gt;</span></h5>
+								</li>
+								<li>
+									<h5>factory: <a href="globals.html#asyncfactory" class="tsd-signature-type">AsyncFactory</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">&gt;</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <a href="bindas.html" class="tsd-signature-type">BindAs</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">, </span><a href="globals.html#asyncfactory" class="tsd-signature-type">AsyncFactory</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-interface tsd-has-type-parameter">
+					<a name="bindclass" class="tsd-anchor"></a>
+					<h3>bind<wbr>Class</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface tsd-has-type-parameter">
+						<li class="tsd-signature tsd-kind-icon">bind<wbr>Class&lt;T&gt;<span class="tsd-signature-symbol">(</span>id<span class="tsd-signature-symbol">: </span><a href="globals.html#injectableid" class="tsd-signature-type">InjectableId</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> | </span><a href="globals.html#classconstructor" class="tsd-signature-type">ClassConstructor</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">&gt;</span>, constructor<span class="tsd-signature-symbol">?: </span><a href="globals.html#classconstructor" class="tsd-signature-type">ClassConstructor</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="bindas.html" class="tsd-signature-type">BindAs</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">, </span><a href="globals.html#classconstructor" class="tsd-signature-type">ClassConstructor</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/pcafstockf/async-injection/blob/05e7710/src/binder.ts#L68">binder.ts:68</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Bind an InjectableId to a class (actually it&#39;s constructor).
+										As a shortcut, you may use the class constructor as the &#39;id&#39; (e.g. container.bindClass(A); ).
+									The container will also invoke any @PostConstruct present on the class.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>id: <a href="globals.html#injectableid" class="tsd-signature-type">InjectableId</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> | </span><a href="globals.html#classconstructor" class="tsd-signature-type">ClassConstructor</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">&gt;</span></h5>
+								</li>
+								<li>
+									<h5><span class="tsd-flag ts-flagOptional">Optional</span> constructor: <a href="globals.html#classconstructor" class="tsd-signature-type">ClassConstructor</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">&gt;</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <a href="bindas.html" class="tsd-signature-type">BindAs</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">, </span><a href="globals.html#classconstructor" class="tsd-signature-type">ClassConstructor</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-interface tsd-has-type-parameter">
+					<a name="bindconstant" class="tsd-anchor"></a>
+					<h3>bind<wbr>Constant</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface tsd-has-type-parameter">
+						<li class="tsd-signature tsd-kind-icon">bind<wbr>Constant&lt;T&gt;<span class="tsd-signature-symbol">(</span>id<span class="tsd-signature-symbol">: </span><a href="globals.html#injectableid" class="tsd-signature-type">InjectableId</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">&gt;</span>, value<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/pcafstockf/async-injection/blob/05e7710/src/binder.ts#L61">binder.ts:61</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Bind an InjectableId to a constant value.
+									Constants are by their very nature singleton, and are assumed to be error proof.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>id: <a href="globals.html#injectableid" class="tsd-signature-type">InjectableId</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">&gt;</span></h5>
+								</li>
+								<li>
+									<h5>value: <span class="tsd-signature-type">T</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-interface tsd-has-type-parameter">
+					<a name="bindfactory" class="tsd-anchor"></a>
+					<h3>bind<wbr>Factory</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface tsd-has-type-parameter">
+						<li class="tsd-signature tsd-kind-icon">bind<wbr>Factory&lt;T&gt;<span class="tsd-signature-symbol">(</span>id<span class="tsd-signature-symbol">: </span><a href="globals.html#injectableid" class="tsd-signature-type">InjectableId</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">&gt;</span>, factory<span class="tsd-signature-symbol">: </span><a href="globals.html#syncfactory" class="tsd-signature-type">SyncFactory</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="bindas.html" class="tsd-signature-type">BindAs</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">, </span><a href="globals.html#syncfactory" class="tsd-signature-type">SyncFactory</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/pcafstockf/async-injection/blob/05e7710/src/binder.ts#L75">binder.ts:75</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Bind an InjectableId to a synchronous factory that will be invoked on demand when the object is needed.
+										The factory should produce the needed value
+									NOTE:  The container will not invoke any @PostConstruct present on the class, this is the responsibility of the factory.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>id: <a href="globals.html#injectableid" class="tsd-signature-type">InjectableId</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">&gt;</span></h5>
+								</li>
+								<li>
+									<h5>factory: <a href="globals.html#syncfactory" class="tsd-signature-type">SyncFactory</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">&gt;</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <a href="bindas.html" class="tsd-signature-type">BindAs</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">, </span><a href="globals.html#syncfactory" class="tsd-signature-type">SyncFactory</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-interface tsd-has-type-parameter tsd-is-inherited">
+					<a name="get" class="tsd-anchor"></a>
+					<h3>get</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface tsd-has-type-parameter tsd-is-inherited">
+						<li class="tsd-signature tsd-kind-icon">get&lt;T&gt;<span class="tsd-signature-symbol">(</span>id<span class="tsd-signature-symbol">: </span><a href="globals.html#injectableid" class="tsd-signature-type">InjectableId</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">T</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Inherited from <a href="injector.html">Injector</a>.<a href="injector.html#get">get</a></p>
+								<ul>
+									<li>Defined in <a href="https://github.com/pcafstockf/async-injection/blob/05e7710/src/injector.ts#L21">injector.ts:21</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Return an instance of &lt;T&gt; previously bound to &#39;id&#39;.</p>
+								</div>
+								<dl class="tsd-comment-tags">
+									<dt>throws</dt>
+									<dd><p>Error if the InjectableId was never registered, OR if there are unresolved asynchronous dependencies in the dependency tree for &#39;id&#39;.</p>
+									</dd>
+								</dl>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>id: <a href="globals.html#injectableid" class="tsd-signature-type">InjectableId</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">&gt;</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">T</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-interface tsd-has-type-parameter tsd-is-inherited">
+					<a name="isidknown" class="tsd-anchor"></a>
+					<h3>is<wbr>IdKnown</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface tsd-has-type-parameter tsd-is-inherited">
+						<li class="tsd-signature tsd-kind-icon">is<wbr>IdKnown&lt;T&gt;<span class="tsd-signature-symbol">(</span>id<span class="tsd-signature-symbol">: </span><a href="globals.html#injectableid" class="tsd-signature-type">InjectableId</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Inherited from <a href="injector.html">Injector</a>.<a href="injector.html#isidknown">isIdKnown</a></p>
+								<ul>
+									<li>Defined in <a href="https://github.com/pcafstockf/async-injection/blob/05e7710/src/injector.ts#L15">injector.ts:15</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Check to see if the existing InjectableId is known (aka has been bound).
+										Error callbacks may wish to know if a particular InjectableId is available.
+									Also the Binder&#39;s bindXXX calls always overwrite any previous bindings, so you may want to use this as a gate.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>id: <a href="globals.html#injectableid" class="tsd-signature-type">InjectableId</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">&gt;</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-interface tsd-has-type-parameter tsd-is-inherited">
+					<a name="resolve" class="tsd-anchor"></a>
+					<h3>resolve</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface tsd-has-type-parameter tsd-is-inherited">
+						<li class="tsd-signature tsd-kind-icon">resolve&lt;T&gt;<span class="tsd-signature-symbol">(</span>id<span class="tsd-signature-symbol">?: </span><a href="globals.html#injectableid" class="tsd-signature-type">InjectableId</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Inherited from <a href="injector.html">Injector</a>.<a href="injector.html#resolve">resolve</a></p>
+								<ul>
+									<li>Defined in <a href="https://github.com/pcafstockf/async-injection/blob/05e7710/src/injector.ts#L26">injector.ts:26</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>awaits the asynchronous resolution of all dependencies in the tree for &#39;id&#39;.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5><span class="tsd-flag ts-flagOptional">Optional</span> id: <a href="globals.html#injectableid" class="tsd-signature-type">InjectableId</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">&gt;</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-interface">
+					<a name="resolvesingletons" class="tsd-anchor"></a>
+					<h3>resolve<wbr>Singletons</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface">
+						<li class="tsd-signature tsd-kind-icon">resolve<wbr>Singletons<span class="tsd-signature-symbol">(</span>asyncOnly<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">boolean</span>, parentRecursion<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/pcafstockf/async-injection/blob/05e7710/src/binder.ts#L93">binder.ts:93</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>This essentially pre creates/loads all <em>singleton</em> InjectableIds currently known to the Binder.
+									This <em>may</em> be helpful if you wish to use Injector.get on a dependency tree that has asynchronous singletons within the tree.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5><span class="tsd-flag ts-flagOptional">Optional</span> asyncOnly: <span class="tsd-signature-type">boolean</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>Only resolve AsyncFactorys as well as any bound classes that have an asynchronous @PostConstruct decorator.  WARNING: If true, SyncFactorys will <em>not</em> be resolved even if they are Singletons.</p>
+									</div>
+								</li>
+								<li>
+									<h5><span class="tsd-flag ts-flagOptional">Optional</span> parentRecursion: <span class="tsd-signature-type">boolean</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>If true and the the container has a parent, resolveIfSingleton will first be called for the parent</p>
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4>
+							<p>A Promise that resolves when all Singleton&#39;s have been resolved, OR rejects if one or more of the Singleton&#39;s failed to resolve.  NOTE: Rejection does not occur until all Singleton resolutions have settled, and the rejection reason/err will be a Map&lt;InjectableId, Error&gt;</p>
+						</li>
+					</ul>
+				</section>
+			</section>
+		</div>
+		<div class="col-4 col-menu menu-sticky-wrap menu-highlight">
+			<nav class="tsd-navigation secondary menu-sticky">
+				<ul class="before-current">
+					<li class=" tsd-kind-interface">
+						<a href="injector.html" class="tsd-kind-icon">Injector</a>
+					</li>
+				</ul>
+				<ul class="current">
+					<li class="current tsd-kind-interface">
+						<a href="binder.html" class="tsd-kind-icon">Binder</a>
+						<ul>
+							<li class=" tsd-kind-method tsd-parent-kind-interface tsd-has-type-parameter">
+								<a href="binder.html#bindasyncfactory" class="tsd-kind-icon">bind<wbr>Async<wbr>Factory</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-interface tsd-has-type-parameter">
+								<a href="binder.html#bindclass" class="tsd-kind-icon">bind<wbr>Class</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-interface tsd-has-type-parameter">
+								<a href="binder.html#bindconstant" class="tsd-kind-icon">bind<wbr>Constant</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-interface tsd-has-type-parameter">
+								<a href="binder.html#bindfactory" class="tsd-kind-icon">bind<wbr>Factory</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-interface tsd-has-type-parameter tsd-is-inherited">
+								<a href="binder.html#get" class="tsd-kind-icon">get</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-interface tsd-has-type-parameter tsd-is-inherited">
+								<a href="binder.html#isidknown" class="tsd-kind-icon">is<wbr>IdKnown</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-interface tsd-has-type-parameter tsd-is-inherited">
+								<a href="binder.html#resolve" class="tsd-kind-icon">resolve</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-interface">
+								<a href="binder.html#resolvesingletons" class="tsd-kind-icon">resolve<wbr>Singletons</a>
+							</li>
+						</ul>
+					</li>
+				</ul>
+				<ul class="after-current">
+					<li class=" tsd-kind-class">
+						<a href="container.html" class="tsd-kind-icon">Container</a>
+					</li>
+					<li class=" tsd-kind-function">
+						<a href="globals.html#injectable" class="tsd-kind-icon">Injectable</a>
+					</li>
+					<li class=" tsd-kind-function">
+						<a href="globals.html#inject" class="tsd-kind-icon">Inject</a>
+					</li>
+					<li class=" tsd-kind-function">
+						<a href="globals.html#optional" class="tsd-kind-icon">Optional</a>
+					</li>
+					<li class=" tsd-kind-function">
+						<a href="globals.html#postconstruct" class="tsd-kind-icon">Post<wbr>Construct</a>
+					</li>
+					<li class="globals  ">
+						<a href="globals.html"><em>Globals</em></a>
+					</li>
+				</ul>
+			</nav>
+		</div>
+	</div>
+</div>
+<div class="container tsd-generator">
+	<p>Generated using <a href="https://typedoc.org/" target="_blank">TypeDoc</a></p>
+</div>
+<div class="overlay"></div>
+<script src="main.js"></script>
+</body>
+</html>
