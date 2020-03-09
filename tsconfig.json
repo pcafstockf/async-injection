@@ -17,13 +17,11 @@
 		"esModuleInterop": true,
 		"sourceMap": true,
 		"inlineSources": true,
-		/* Emit the source alongside the sourcemaps within a single file; requires '--inlineSourceMap' or '--sourceMap' to be set. */
 		"experimentalDecorators": true,
 		"emitDecoratorMetadata": true
 	},
 	"exclude": [
 		"node_modules",
-		"tst",
 		"**/*.spec.ts"
 	]
 }

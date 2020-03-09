@@ -160,8 +160,48 @@ class D {
 - The library will not invoke @PostConstruct on an object returned from a factory.  It is the factory's responsibility to construct and initialize before returning.
 - You will likely want a `Container.resolveSingletons(true)` call between your last `Container.bindXXX()` call and any `Container.get` call.
 
-## API
-TODO: Add links to the JSDoc
+## API Overview
+Async-Injection tries to follow the common API patterns found in most other DI implementations.  Please refer to the examples above or the linked elements below for specific syntax.
+- The 
+[Container](https://pcafstockf.github.io/async-injection/api-docs/container.html) class implements a 
+[Binder](https://pcafstockf.github.io/async-injection/api-docs/binder.html) interface, which allows you to bind a 
+[Constant](https://pcafstockf.github.io/async-injection/api-docs/container.html#bindconstant), 
+[Factory](https://pcafstockf.github.io/async-injection/api-docs/container.html#bindfactory), 
+[AsyncFactory](https://pcafstockf.github.io/async-injection/api-docs/container.html#bindasyncfactory), or 
+[Class](https://pcafstockf.github.io/async-injection/api-docs/container.html#bindclass) value to an 
+[InjectableId](https://pcafstockf.github.io/async-injection/api-docs/globals.html#injectableid) (aka key) within a 
+[Container](https://pcafstockf.github.io/async-injection/api-docs/container.html).
+- The 
+[Container](https://pcafstockf.github.io/async-injection/api-docs/container.html) also implements an 
+[Injector](https://pcafstockf.github.io/async-injection/api-docs/injector.html) interface which allows you to synchronously 
+[get](https://pcafstockf.github.io/async-injection/api-docs/container.html#get) or asynchronously 
+[resolve](https://pcafstockf.github.io/async-injection/api-docs/container.html#resolve) anything that has been bound.
+- When binding a 
+[Factory](https://pcafstockf.github.io/async-injection/api-docs/container.html#bindfactory), 
+[AsyncFactory](https://pcafstockf.github.io/async-injection/api-docs/container.html#bindasyncfactory) or 
+[Class](https://pcafstockf.github.io/async-injection/api-docs/container.html#bindclass) to an 
+[InjectableId](https://pcafstockf.github.io/async-injection/api-docs/globals.html#injectableid), you can chain the result of the call to specify the binding as a 
+[Singleton](https://pcafstockf.github.io/async-injection/api-docs/bindas.html#assingleton), and/or configure an 
+[Error Handler](https://pcafstockf.github.io/async-injection/api-docs/bindas.html#onerror).
+- Containers may be nested by passing a parent Container to the 
+[constructor](https://pcafstockf.github.io/async-injection/api-docs/container.html#constructor) of a child Container.
+- To bind a 
+[Class](https://pcafstockf.github.io/async-injection/api-docs/container.html#bindclass) into the 
+[Container](https://pcafstockf.github.io/async-injection/api-docs/container.html), you must add the 
+[@Injectable](https://pcafstockf.github.io/async-injection/api-docs/globals.html#injectable) decorator (aka annotation) to your class (see examples above).
+- You may optionally add a 
+[@PostConstruct](https://pcafstockf.github.io/async-injection/api-docs/globals.html#postconstruct) decorator to a method of your class to perform synchronous or asynchronous initialization of a new instance.
+- By default, Async-Inject will examine the parameters of a class constructor and do it's best to match those to bound 
+[InjectableIds](https://pcafstockf.github.io/async-injection/api-docs/globals.html#injectableid).  
+- You may use the 
+[@Inject](https://pcafstockf.github.io/async-injection/api-docs/globals.html#inject) decorator to explicitly declare which 
+[InjectableId](https://pcafstockf.github.io/async-injection/api-docs/globals.html#injectableid) should be used (generally required for a 
+[Constant](https://pcafstockf.github.io/async-injection/api-docs/container.html#bindconstant) binding as in the logLevel example above).
+- The 
+[@Optional](https://pcafstockf.github.io/async-injection/api-docs/globals.html#optional) decorator allows you to specify a default value for a class constructor parameter in the event that no matching 
+[InjectableId](https://pcafstockf.github.io/async-injection/api-docs/globals.html#injectableid) can be found.
+- The Container's 
+[resolveSingletons](https://pcafstockf.github.io/async-injection/api-docs/container.html#resolvesingletons) method may be used to wait for any bound asynchronous [Singletons](https://en.wikipedia.org/wiki/Singleton_pattern) to finish initialization before continuing execution of your application.
 
 ## Acknowledgements
 Thanks to all the contributors at [InversifyJS](https://github.com/inversify/InversifyJS).  It is a powerful, clean, flexible, inspiring design.
