@@ -20,9 +20,6 @@ jobs:
           registry-url: https://registry.npmjs.org
       - run: npm ci
       - run: npm run build
-      - run: printenv
-      - run: cat /home/runner/work/_temp/.npmrc
-      - run: npm whoami
       - run: npm publish --dry-run
         env:
           NODE_AUTH_TOKEN: ${{secrets.npm_token}}
