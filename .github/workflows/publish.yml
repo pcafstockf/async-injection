@@ -5,7 +5,7 @@ name: npmpub
 
 on:
   release:
-    types: [published]
+    types: [created,published,edited,deleted]
 
 jobs:
   pub-npm:
@@ -20,6 +20,6 @@ jobs:
       - run: npm run build
       - run: printenv
       - run: npm whoami
-      - run: npm publish
+      - run: npm publish --dry-run
         env:
           NODE_AUTH_TOKEN: ${{secrets.npm_token}}
