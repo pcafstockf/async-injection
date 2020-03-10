@@ -4,6 +4,8 @@
 name: npmpub
 
 on:
+  push:
+    branches: [ master ]
   release:
     types: [created,published,edited,deleted]
 
