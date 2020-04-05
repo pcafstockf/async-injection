@@ -1,9 +1,4 @@
-import {InjectableId, Injector} from './injector';
-
-/**
- * Standard definition of a constructor.
- */
-export type ClassConstructor<T> = { new(...args: any[]): T };
+import {ClassConstructor, InjectableId, Injector, AbstractConstructor} from './injector';
 
 /**
  * Type definition for functions that return a value.
@@ -65,7 +60,8 @@ export interface Binder extends Injector {
 	 * As a shortcut, you may use the class constructor as the 'id' (e.g. container.bindClass(A); ).
 	 * The container will also invoke any @PostConstruct present on the class.
 	 */
-	bindClass<T>(id: InjectableId<T> | ClassConstructor<T>, constructor?: ClassConstructor<T>): BindAs<T, ClassConstructor<T>>;
+	bindClass<T>(id: ClassConstructor<T>, constructor?: ClassConstructor<T>): BindAs<T, ClassConstructor<T>>;
+	bindClass<T>(id: string | symbol | AbstractConstructor<T>, constructor: ClassConstructor<T>): BindAs<T, ClassConstructor<T>>;
 
 	/**
 	 * Bind an InjectableId to a synchronous factory that will be invoked on demand when the object is needed.

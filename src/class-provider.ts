@@ -1,5 +1,4 @@
-import {InjectableId, Injector} from './injector';
-import {ClassConstructor} from './binder';
+import {InjectableId, Injector, ClassConstructor} from './injector';
 import {_getInjectedIdAt, _getOptionalDefaultAt} from './decorators';
 import {POSTCONSTRUCT_ASYNC_METADATA_KEY, POSTCONSTRUCT_SYNC_METADATA_KEY, REFLECT_PARAMS} from './constants';
 import {State} from './state';

@@ -1,5 +1,5 @@
-import {InjectableId, Injector} from './injector';
-import {AsyncFactory, BindAs, BindErrHandler, ClassConstructor, OnErrorCallback, SyncFactory} from './binder';
+import {InjectableId, Injector, ClassConstructor} from './injector';
+import {AsyncFactory, BindAs, BindErrHandler, OnErrorCallback, SyncFactory} from './binder';
 import {Provider} from './provider';
 
 /**

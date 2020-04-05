@@ -1,6 +1,6 @@
 import 'reflect-metadata';
-import {InjectableId, Injector} from './injector';
-import {AsyncFactory, BindAs, Binder, ClassConstructor, SyncFactory} from './binder';
+import {AbstractConstructor, InjectableId, Injector, ClassConstructor} from './injector';
+import {AsyncFactory, BindAs, Binder, SyncFactory} from './binder';
 import {INJECTABLE_METADATA_KEY} from './constants';
 import {State} from './state';
 import {Provider} from './provider';
@@ -89,8 +89,10 @@ export class Container implements Binder {
 	/**
 	 * @inheritDoc
 	 */
-	public bindClass<T>(id: InjectableId<T> | ClassConstructor<T>, constructor?: ClassConstructor<T>): BindAs<T, ClassConstructor<T>> {
-		if (typeof constructor === 'undefined' && typeof id === 'function') {
+	public bindClass<T>(id: ClassConstructor<T>, constructor?: ClassConstructor<T>): BindAs<T, ClassConstructor<T>>;
+	public bindClass<T>(id: string | symbol | AbstractConstructor<T>, constructor: ClassConstructor<T>): BindAs<T, ClassConstructor<T>>;
+	public bindClass<T>(id: string | symbol | AbstractConstructor<T> | ClassConstructor<T>, constructor: ClassConstructor<T>): BindAs<T, ClassConstructor<T>> {
+		if (typeof constructor === 'undefined') {
 			constructor = <{ new(...args: any[]): T }>id;
 		}
 		if (!Reflect.getMetadata(INJECTABLE_METADATA_KEY, constructor)) {
