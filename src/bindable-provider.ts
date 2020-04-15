@@ -2,6 +2,12 @@ import {InjectableId, Injector, ClassConstructor} from './injector';
 import {AsyncFactory, BindAs, BindErrHandler, OnErrorCallback, SyncFactory} from './binder';
 import {Provider} from './provider';
 
+function isErrorObj(err: any): boolean {
+	if (err instanceof Error)
+		return true;
+	return err && typeof err.message === 'string' && typeof err.stack === 'string';
+}
+
 /**
  * @inheritDoc
  * This abstraction is for Providers that can be additionally configured as Singletons and/or configured with an error handling callback.
@@ -45,13 +51,13 @@ export abstract class BindableProvider<T, M = ClassConstructor<T> | SyncFactory<
 		if (this.errorHandler) {
 			let handlerResult = this.errorHandler(this.injector, this.id, this.maker, err, obj);
 			// Error handler wants us to propagate an error.
-			if (handlerResult instanceof Error)
+			if (isErrorObj(handlerResult))
 				throw handlerResult;
 			// Error handler has no opinion, so provideAsState a state that reflects the error we just caught.
 			if (typeof handlerResult === 'undefined')
 				throw err;
 			// Error handler provided a valid (fully resolved) replacement.
-			return handlerResult;
+			return <T>handlerResult;
 		}
 		// No error handler, provideAsState a state that reflects the error we just caught.
 		throw err;
@@ -72,7 +78,7 @@ export abstract class BindableProvider<T, M = ClassConstructor<T> | SyncFactory<
 				if (this.errorHandler) {
 					let handlerResult = this.errorHandler(this.injector, this.id, this.maker, err);
 					// Error handler wants us to propagate an alternative error.
-					if (handlerResult instanceof Error)
+					if (isErrorObj(handlerResult))
 						err = handlerResult;   // Fall thru
 					else if (typeof handlerResult !== 'undefined') {
 						resolve(<T>handlerResult);    // Error handler provided a replacement, so change the State that we returned from pending to resolved.

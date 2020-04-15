@@ -46,9 +46,12 @@ export class ClassBasedProvider<T> extends BindableProvider<T, ClassConstructor<
 	protected makePostConstructState(obj: any) {
 		// Check to see if there is a @PostConstruct annotation on a method of the class.
 		if (typeof obj === 'object' && (!Array.isArray(obj)) && obj.constructor) {
+			let maybeAsync = false;
 			let postConstruct = Reflect.getMetadata(POSTCONSTRUCT_SYNC_METADATA_KEY, obj.constructor);
-			if (!postConstruct)
+			if (!postConstruct) {
+				maybeAsync = true;
 				postConstruct = Reflect.getMetadata(POSTCONSTRUCT_ASYNC_METADATA_KEY, obj.constructor);
+			}
 			if (postConstruct && obj.constructor.prototype[postConstruct] && typeof obj.constructor.prototype[postConstruct] === 'function') {
 				let result;
 				try {
@@ -66,7 +69,7 @@ export class ClassBasedProvider<T> extends BindableProvider<T, ClassConstructor<
 					}
 				}
 				// The post construction method says it will let us know when it's finished.
-				if (result instanceof Promise) {
+				if (result instanceof Promise || (maybeAsync && typeof result.then === 'function')) {
 					// Return a State that is pending (the other return statements in this method return a State which is resolved or rejected).
 					return State.MakeState<T>(this.makePromiseForObj<void>(result, () => obj));
 				}
