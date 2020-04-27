@@ -178,7 +178,7 @@ export class Container implements Binder {
 				if (this.parent instanceof Container) {
 					return this.parent.resolveState<T>(id);
 				}
-				//This code (below) will only ever execute if the creator of this container passes in their own implementation of an Injector.
+				// This code (below) will only ever execute if the creator of this container passes in their own implementation of an Injector.
 				try {
 					return State.MakeState<T>(this.parent.resolve<T>(id), undefined, undefined);
 				}

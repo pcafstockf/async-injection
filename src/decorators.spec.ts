@@ -160,7 +160,6 @@ describe('@Inject', () => {
 	});
 });
 
-
 describe('@Optional', () => {
 
 	@Injectable()

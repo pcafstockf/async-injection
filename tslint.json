@@ -1,0 +1,25 @@
+{
+	"extends": [
+		"tslint:recommended"
+	],
+	"jsRules": {},
+	"rules": {
+		"indent": false,
+		"curly": false,
+		"max-line-length": false,
+		"quotemark": false,
+		"ordered-imports": false,
+		"max-classes-per-file": false,
+		"member-ordering": false,
+		"interface-name": false,
+		"arrow-parens": false,
+		"only-arrow-functions": false,
+		"variable-name": false,
+		"member-access": false,
+		"whitespace": false,
+		"one-line": false,
+		"no-empty": false,
+		"trailing-comma": false
+	},
+	"rulesDirectory": []
+}

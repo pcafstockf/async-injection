@@ -41,4 +41,3 @@ export abstract class Provider<T = any> {
 		return undefined;
 	}
 }
-

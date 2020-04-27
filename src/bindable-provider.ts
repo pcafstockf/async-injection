@@ -98,9 +98,11 @@ export abstract class BindableProvider<T, M = ClassConstructor<T> | SyncFactory<
 						errHandlerFn(err);
 					}
 				}
-			).catch((err) => {
-				errHandlerFn(err);
-			});
+			).catch(
+				(err) => {
+					errHandlerFn(err);
+				}
+			);
 		});
 	}
 }
