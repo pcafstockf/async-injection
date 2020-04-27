@@ -35,6 +35,8 @@ export abstract class Provider<T = any> {
 			let s = this.provideAsState();
 			if (s.pending)
 				return s.promise;
+			else if (s.rejected)
+				return Promise.reject(s.rejected);
 		}
 		return undefined;
 	}
