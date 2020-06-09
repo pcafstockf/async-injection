@@ -28,14 +28,17 @@ export class Container implements Binder {
 	 */
 	public constructor(protected parent?: Injector) {
 	}
-
 	protected providers = new Map<InjectableId<any>, Provider>();
 
 	/**
 	 * @inheritDoc
 	 */
-	public isIdKnown<T>(id: InjectableId<T>): boolean {
-		return !!this.providers.get(id);
+	public isIdKnown<T>(id: InjectableId<T>, ascending?: boolean): boolean {
+		if (!!this.providers.get(id))
+			return true;
+		if (ascending && this.parent)
+			return this.parent.isIdKnown(id, true);
+		return false;
 	}
 
 	/**
@@ -74,9 +77,13 @@ export class Container implements Binder {
 	/**
 	 * This method is not part of the Binding interface, because it is highly unusual.
 	 * But that doesn't mean we can't imagine scenarios where you might require it.
+	 * @param id    The id to be removed.
+	 * @param ascending  If true, this will remove all bindings of the specified id all the way up the parent container chain (if it exists).
 	 */
-	public removeBinding<T>(id: InjectableId<T>): void {
+	public removeBinding<T>(id: InjectableId<T>, ascending?: boolean): void {
 		this.providers.delete(id);
+		if (ascending && this.parent && (<any>this.parent).removeBinding)
+			(<any>this.parent).removeBinding(id, true);
 	}
 
 	/**

@@ -20,8 +20,11 @@ export interface Injector {
 	 * Check to see if the existing InjectableId is known (aka has been bound).
 	 * Error callbacks may wish to know if a particular InjectableId is available.
 	 * Also the Binder's bindXXX calls always overwrite any previous bindings, so you may want to use this as a gate.
+	 *
+	 * @param id    The id to check for.
+	 * @param ascending If true, this will search up the chain of parent containers (if they exist).  Default is false (only checks if the id is bound within this container).
 	 */
-	isIdKnown<T>(id: InjectableId<T> | AbstractConstructor<T>): boolean;
+	isIdKnown<T>(id: InjectableId<T> | AbstractConstructor<T>, ascending?: boolean): boolean;
 
 	/**
 	 * Return an instance of <T> previously bound to 'id'.
