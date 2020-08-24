@@ -15,7 +15,7 @@ Async-Injection is a small IoC container with support for both synchronous and a
 You can get the latest release using npm:
 
 ```
-$ npm install aynch-injection --save
+$ npm install async-injection --save
 ```
 
 ## Basic Usage (synchronous)
