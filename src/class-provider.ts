@@ -44,18 +44,28 @@ export class ClassBasedProvider<T> extends BindableProvider<T, ClassConstructor<
 	 * Make a resolved or pending State that reflects any @PostConstruct annotations.
 	 */
 	protected makePostConstructState(obj: any) {
-		// Check to see if there is a @PostConstruct annotation on a method of the class.
 		if (typeof obj === 'object' && (!Array.isArray(obj)) && obj.constructor) {
 			let maybeAsync = false;
-			let postConstruct = Reflect.getMetadata(POSTCONSTRUCT_SYNC_METADATA_KEY, obj.constructor);
-			if (!postConstruct) {
+			let pcFn: Function;
+			if (typeof this.successHandler === 'function') {
 				maybeAsync = true;
-				postConstruct = Reflect.getMetadata(POSTCONSTRUCT_ASYNC_METADATA_KEY, obj.constructor);
+				pcFn = () => {
+					return this.successHandler(obj, this.injector, this.id, this.maker);
+				};
+			} else {
+				// Check to see if there is a @PostConstruct annotation on a method of the class.
+				let postConstruct = Reflect.getMetadata(POSTCONSTRUCT_SYNC_METADATA_KEY, obj.constructor);
+				if (!postConstruct) {
+					maybeAsync = true;
+					postConstruct = Reflect.getMetadata(POSTCONSTRUCT_ASYNC_METADATA_KEY, obj.constructor);
+				}
+				if (postConstruct && obj.constructor.prototype[postConstruct] && typeof obj.constructor.prototype[postConstruct] === 'function')
+					pcFn = obj[postConstruct].bind(obj);
 			}
-			if (postConstruct && obj.constructor.prototype[postConstruct] && typeof obj.constructor.prototype[postConstruct] === 'function') {
+			if (pcFn) {
 				let result;
 				try {
-					result = obj[postConstruct]();
+					result = pcFn();
 				}
 				catch (err) {
 					// The post construction method threw while executing, give the errorHandler (if any) a crack at recovery.
@@ -69,7 +79,7 @@ export class ClassBasedProvider<T> extends BindableProvider<T, ClassConstructor<
 					}
 				}
 				// The post construction method says it will let us know when it's finished.
-				if (result instanceof Promise || (maybeAsync && typeof result.then === 'function')) {
+				if (result && (result instanceof Promise || (maybeAsync && typeof result.then === 'function'))) {
 					// Return a State that is pending (the other return statements in this method return a State which is resolved or rejected).
 					return State.MakeState<T>(this.makePromiseForObj<void>(result, () => obj));
 				}

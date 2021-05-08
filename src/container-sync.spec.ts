@@ -192,12 +192,15 @@ describe('PostConstruct execution', () => {
 		@Injectable()
 		class A {
 			public constructor() {
+				this.i = 'PostConstruct'
 			}
-
+			public i: string;
 			public a: string;
 
 			@PostConstruct()
-			public init() {
+			public init(value?: string) {
+				if (value)
+					this.i = value;
 				this.a = 'A';
 			}
 		}
@@ -214,6 +217,40 @@ describe('PostConstruct execution', () => {
 
 		const b = container.get(B);
 		expect(b.a.a).toEqual('A');
+		expect(b.a.i).toEqual('PostConstruct');
+	});
+	it('Should support success handler with dependencies', () => {
+		@Injectable()
+		class A {
+			public constructor() {
+				this.i = 'PostConstruct'
+			}
+			public i: string;
+			public a: string;
+
+			@PostConstruct()
+			public init(value?: string) {
+				if (value)
+					this.i = value;
+				this.a = 'A';
+			}
+		}
+
+		@Injectable()
+		class B {
+			public constructor(public a: A) {
+			}
+		}
+
+		const container = new Container();
+		container.bindClass(A).onSuccess((value) => {
+			return value.init('onSuccess');
+		});
+		container.bindClass(B);
+
+		const b = container.get(B);
+		expect(b.a.a).toEqual('A');
+		expect(b.a.i).toEqual('onSuccess');
 	});
 });
 
@@ -289,6 +326,39 @@ describe('Synchronous error handling', () => {
 		const container = new Container();
 		let errorHandlerInvoked = false;
 		container.bindClass(A).onError((injector, id: any, maker, error, value) => {
+			expect(Object.is(injector, container)).toBeTruthy();
+			expect(id.name).toBe('A');
+			expect(error.message).toBe('Unable to initialize A');
+			expect(value).toBeInstanceOf(A);
+			expect(value.a).toBe('A');
+			errorHandlerInvoked = true;
+			return error;
+		});
+
+		try {
+			container.get(A);
+			fail('Should not be able to retrieve A');
+		}
+		catch (err) {
+			expect(errorHandlerInvoked).toBeTruthy();
+			expect(err.message).toBe('Unable to initialize A');
+		}
+	});
+	it("Success handler's failure should invoke ErrorHandler with constructed object", () => {
+		@Injectable()
+		class A {
+			public constructor() {
+				this.a = 'A';
+			}
+			public a: string;
+		}
+
+		const container = new Container();
+		let errorHandlerInvoked = false;
+		container.bindClass(A).onSuccess((value) => {
+			expect(value).toBeInstanceOf(A);
+			throw new Error('Unable to initialize A');
+		}).onError((injector, id: any, maker, error, value) => {
 			expect(Object.is(injector, container)).toBeTruthy();
 			expect(id.name).toBe('A');
 			expect(error.message).toBe('Unable to initialize A');

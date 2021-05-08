@@ -1,5 +1,6 @@
 # ignored files
 /.idea/workspace.xml
+/.idea/dataSources.local.xml
 /node_modules/
 .DS_Store
 /.nyc_output/

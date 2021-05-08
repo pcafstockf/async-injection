@@ -29,19 +29,45 @@ export type AsyncFactory<T> = (injector: Injector) => Promise<T>;
 export type OnErrorCallback<T, M> = (injector: Injector, id: InjectableId<T>, maker: M, error: Error, value?: T) => T | Error | void;
 
 /**
+ * You may bind a success handler which will be invoked just before the bound InjectableId is put into service.
+ * This is an alternative to the more preferred @PostConstruct decorator for scenarios when usage of that decorator is not feasible.
+ * WARNING:
+ *      By registering a success handler, you override and nullify any @PostConstruct decorator on the class.
+ *      In such a scenario, the success handler should perform whatever care and feeding the class expected from the @PostConstruct decorator.
+ * A success handler *must* not throw, but may return an Error that will be propagated back up the call chain.
+ *
+ * @param binder   The Binder that performed the construction.
+ * @param id   The identifier for what was made.
+ * @param maker   The thing that made.  Will be one of type ClassConstructor, SyncFactory, or AsyncFactory, depending on how you registered the binding.
+ * @param value   The thing that was made.
+ * @returns one of 3 results...
+ *      An Error which will be propagated back up the call chain.
+ *      Undefined, which means the object is ready to be placed into service.
+ *      A Promise that resolves to one of the above two values (undefined or Error).
+ */
+export type OnSuccessCallback<T, M> = (value: T, injector: Injector, id: InjectableId<T>, maker: M) => Promise<Error|void> | Error | void;
+
+/**
  * An interface allowing binding of an error handler.
  * @see OnErrorCallback
  */
 export interface BindErrHandler<T, M> {
 	onError(cb: OnErrorCallback<T, M>): void;
 }
+/**
+ * An interface allowing binding of a post construction handler.
+ * @see OnSuccessCallback
+ */
+export interface BindHandler<T, M> extends BindErrHandler<T, M> {
+	onSuccess(cb: OnSuccessCallback<T, M>): BindErrHandler<T, M>;
+}
 
 /**
  * @inheritDoc
  * This specialization also allows you to specify that the binding is 'Singleton' (e.g. only one in the system).
  */
-export interface BindAs<T, M> extends BindErrHandler<T, M> {
-	asSingleton(): BindErrHandler<T, M>;
+export interface BindAs<T, M> extends BindHandler<T, M> {
+	asSingleton(): BindHandler<T, M>;
 }
 
 /**

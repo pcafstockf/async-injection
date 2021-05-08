@@ -121,12 +121,15 @@ describe('Async factories', () => {
 		@Injectable()
 		class A {
 			public constructor() {
+				this.i = 'PostConstruct'
 			}
-
+			public i: string;
 			public a: string;
 
 			@PostConstruct()
-			public init(): Promise<void> {
+			public init(value?: string): Promise<void> {
+				if (value)
+					this.i = value;
 				return new Promise<void>((resolve) => {
 					setTimeout(() => {
 						this.a = 'A';
@@ -151,6 +154,48 @@ describe('Async factories', () => {
 
 		const b = container.get(B);
 		expect(b.a.a).toEqual('A');
+		expect(b.a.i).toEqual('PostConstruct');
+	});
+	it('Should support sync Factory with async success handler in the dependency chain as long as resolve is used', async () => {
+		@Injectable()
+		class A {
+			public constructor() {
+				this.i = 'PostConstruct'
+			}
+			public i: string;
+			public a: string;
+
+			@PostConstruct()
+			public init(value?: string): Promise<void> {
+				if (value)
+					this.i = value;
+				return new Promise<void>((resolve) => {
+					setTimeout(() => {
+						this.a = 'A';
+						resolve();
+					}, 25);
+				});
+			}
+		}
+
+		@Injectable()
+		class B {
+			public constructor(public a: A) {
+			}
+		}
+
+		const container = new Container();
+		container.bindClass(A).asSingleton().onSuccess((value) => {
+			return value.init('onSuccess');
+		});
+		container.bindFactory(B, (i) => {
+			return new B(i.get(A));
+		});
+		await container.resolveSingletons();   // This will resolve A which is an async singleton, so the factory will have immediate access to it.
+
+		const b = container.get(B);
+		expect(b.a.a).toEqual('A');
+		expect(b.a.i).toEqual('onSuccess');
 	});
 	it('Should fail with an sync Factory using an async PostConstruct, when get is used without an intervening resolveIfSingleton', async () => {
 		@Injectable()

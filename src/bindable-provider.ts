@@ -1,5 +1,5 @@
 import {InjectableId, Injector, ClassConstructor} from './injector';
-import {AsyncFactory, BindAs, BindErrHandler, OnErrorCallback, SyncFactory} from './binder';
+import {AsyncFactory, BindAs, OnErrorCallback, OnSuccessCallback, SyncFactory} from './binder';
 import {Provider} from './provider';
 
 function isErrorObj(err: any): boolean {
@@ -10,12 +10,18 @@ function isErrorObj(err: any): boolean {
 
 /**
  * @inheritDoc
- * This abstraction is for Providers that can be additionally configured as Singletons and/or configured with an error handling callback.
+ * This abstraction is for Providers that can be additionally configured as Singletons and/or configured with error and/or success handling callback(s).
  */
 export abstract class BindableProvider<T, M = ClassConstructor<T> | SyncFactory<T> | AsyncFactory<T>> extends Provider<T> {
 	protected constructor(protected injector: Injector, protected id: InjectableId<T>, protected maker: M) {
 		super();
 	}
+
+	/**
+	 * A user supplied success handling function.
+	 * Default value is undefined.
+	 */
+	protected successHandler?: OnSuccessCallback<T, any>;
 
 	/**
 	 * A user supplied error handling function.
@@ -28,16 +34,19 @@ export abstract class BindableProvider<T, M = ClassConstructor<T> | SyncFactory<
 	 * @see BindAs
 	 */
 	makeBindAs(): BindAs<T, M> {
-		// We do a little casting to make it look right to the editor of an intelligent IDE, but at the end of the day the BindErrHandler *is* the BindAs object.
-		let retVal = <BindErrHandler<T, M>>{};
+		let retVal = <BindAs<T, M>>{};
 		retVal.onError = (cb: OnErrorCallback<T, M>) => {
 			this.errorHandler = cb;
 		};
-		(<BindAs<T, M>>retVal).asSingleton = () => {
+		retVal.onSuccess = (cb: OnSuccessCallback<T, M>) => {
+			this.successHandler = cb;
+			return retVal;
+		};
+		retVal.asSingleton = () => {
 			this.singleton = null; // Flag state as no longer undefined.
 			return retVal;
 		};
-		return <BindAs<T, M>>retVal;
+		return retVal;
 	}
 
 	/**
