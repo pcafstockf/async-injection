@@ -18,6 +18,20 @@ You can get the latest release using npm:
 $ npm install async-injection --save
 ```
 
+Add a polyfill for the Reflect API (examples below use reflect-metadata). You can use:
+
+- [reflect-metadata](https://www.npmjs.com/package/reflect-metadata)
+- [core-js (core-js/es7/reflect)](https://www.npmjs.com/package/core-js)
+- [reflection](https://www.npmjs.com/package/@abraham/reflection)
+
+The Reflect polyfill import should only be added once, and before Async-Injection is used:
+
+```typescript
+// entry.ts
+import "reflect-metadata";
+// Your code here...
+```
+
 ## Basic Usage (synchronous)
 Here we 'get' a new transaction handling object, that itself, relies on a shared service:
 
