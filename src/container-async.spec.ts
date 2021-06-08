@@ -1,6 +1,7 @@
 import 'jasmine';
-import {Injectable, PostConstruct} from './decorators';
-import {Container} from './container';
+import "reflect-metadata";
+import { Container } from './container';
+import { Injectable, PostConstruct } from './decorators';
 
 describe('Async factories', () => {
 	it('Should support delayed retrieval', async () => {

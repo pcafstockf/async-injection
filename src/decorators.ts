@@ -1,9 +1,8 @@
 /**
  * These decorators all apply the information they collect (whether class, method, or parameter data) as tagged metadata on the class's constructor
  */
-import 'reflect-metadata';
-import {InjectableId} from './injector';
-import {INJECT_METADATA_KEY, INJECTABLE_METADATA_KEY, OPTIONAL_METADATA_KEY, POSTCONSTRUCT_ASYNC_METADATA_KEY, POSTCONSTRUCT_SYNC_METADATA_KEY, REFLECT_RETURN} from './constants';
+import { INJECTABLE_METADATA_KEY, INJECT_METADATA_KEY, OPTIONAL_METADATA_KEY, POSTCONSTRUCT_ASYNC_METADATA_KEY, POSTCONSTRUCT_SYNC_METADATA_KEY, REFLECT_RETURN } from './constants';
+import { InjectableId } from './injector';
 
 // Help user locate misapplied decorators.
 function targetHint(target: Function) {
@@ -45,6 +44,7 @@ function validateConstructorParam(decorator: string, target: Function, idx: numb
 // Validate the decorator was only applied once.
 function validateSingleConstructorParam(decorator: string, target: Function, idx: number): string {
 	let propKey = validateConstructorParam(decorator, target, idx);
+	// @ts-ignore
 	if (Reflect.hasOwnMetadata(decorator, target, propKey)) {
 		throw new Error('@' + decorator + ' applied multiple times [' + target.constructor.name + ']');
 	}
@@ -61,9 +61,11 @@ export function Injectable() {
 	 * @returns Undefined (nothing), as this decorator does not modify the constructor in any way.
 	 */
 	return function (target: Function) {
+		// @ts-ignore
 		if (Reflect.hasOwnMetadata(INJECTABLE_METADATA_KEY, target)) {
 			throw new Error('@Injectable applied multiple times [' + targetHint(target) + ']');
 		}
+		// @ts-ignore
 		Reflect.defineMetadata(INJECTABLE_METADATA_KEY, true, target);
 	};
 }
@@ -86,6 +88,7 @@ export function Inject(id: InjectableId<any>) {
 			throw new Error('Undefined id passed to @Inject [' + hint + ']');
 		}
 		let paramKey = validateSingleConstructorParam('Inject', target, parameterIndex);
+		// @ts-ignore
 		Reflect.defineMetadata(INJECT_METADATA_KEY, id, target, paramKey);
 	};
 }
@@ -97,6 +100,7 @@ export function Inject(id: InjectableId<any>) {
  * @see Inject
  */
 export function _getInjectedIdAt(target: any, parameterIndex: number): InjectableId<any> {
+	// @ts-ignore
 	return Reflect.getMetadata(INJECT_METADATA_KEY, target, makeParamIdxKey(parameterIndex));
 }
 
@@ -113,7 +117,8 @@ export function Optional(alt?: any) {
 	 */
 	return function (target: Function, parameterName: string | symbol, parameterIndex: number) {
 		let paramKey = validateSingleConstructorParam('Optional', target, parameterIndex);
-		Reflect.defineMetadata(OPTIONAL_METADATA_KEY, {value: alt}, target, paramKey);
+		// @ts-ignore
+		Reflect.defineMetadata(OPTIONAL_METADATA_KEY, { value: alt }, target, paramKey);
 	};
 }
 
@@ -125,6 +130,7 @@ export function Optional(alt?: any) {
  * @returns an object containing the value provided in the decorator, or undefined if no annotation was present.
  */
 export function _getOptionalDefaultAt(target: any, parameterIndex: number): { value: any } {
+	// @ts-ignore
 	return Reflect.getMetadata(OPTIONAL_METADATA_KEY, target, makeParamIdxKey(parameterIndex)); // See the @Optional decorator before making any changes here.
 }
 
@@ -145,14 +151,17 @@ export function PostConstruct() {
 		if (typeof target !== 'object' || typeof target.constructor !== 'function') {
 			throw new Error('@PostConstruct not applied to instance method [' + target + '/' + methodName + ']');
 		}
+		// @ts-ignore
 		if (Reflect.hasOwnMetadata(POSTCONSTRUCT_SYNC_METADATA_KEY, target.constructor) || Reflect.hasOwnMetadata(POSTCONSTRUCT_ASYNC_METADATA_KEY, target.constructor)) {
 			throw new Error('@PostConstruct applied multiple times [' + targetHint(target.constructor) + ']');
 		}
+		// @ts-ignore
 		let rt = Reflect.getMetadata(REFLECT_RETURN, target, methodName);
 		if (typeof rt === 'function') {
+			// @ts-ignore
 			Reflect.defineMetadata(POSTCONSTRUCT_ASYNC_METADATA_KEY, methodName, target.constructor);
-		}
-		else {
+		} else {
+			// @ts-ignore
 			Reflect.defineMetadata(POSTCONSTRUCT_SYNC_METADATA_KEY, methodName, target.constructor);
 		}
 	};
