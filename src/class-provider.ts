@@ -1,8 +1,8 @@
-import {InjectableId, Injector, ClassConstructor} from './injector';
-import {_getInjectedIdAt, _getOptionalDefaultAt} from './decorators';
-import {POSTCONSTRUCT_ASYNC_METADATA_KEY, POSTCONSTRUCT_SYNC_METADATA_KEY, REFLECT_PARAMS} from './constants';
-import {State} from './state';
-import {BindableProvider} from './bindable-provider';
+import { BindableProvider } from './bindable-provider';
+import { POSTCONSTRUCT_ASYNC_METADATA_KEY, POSTCONSTRUCT_SYNC_METADATA_KEY, REFLECT_PARAMS } from './constants';
+import { _getInjectedIdAt, _getOptionalDefaultAt } from './decorators';
+import { ClassConstructor, InjectableId, Injector } from './injector';
+import { State } from './state';
 
 export type ResolveStateCallback = (id: InjectableId<any>) => State;
 
@@ -35,6 +35,7 @@ export class ClassBasedProvider<T> extends BindableProvider<T, ClassConstructor<
 	 * This specialization returns undefined if 'asyncOnly' is true and there is no asynchronous PostConstruct annotation (since class constructors can never by asynchronous).
 	 */
 	resolveIfSingleton(asyncOnly: boolean): Promise<T> {
+		// @ts-ignore
 		if ((!asyncOnly) || Reflect.getMetadata(POSTCONSTRUCT_ASYNC_METADATA_KEY, this.maker))
 			return super.resolveIfSingleton(false);
 		return undefined;
@@ -54,9 +55,11 @@ export class ClassBasedProvider<T> extends BindableProvider<T, ClassConstructor<
 				};
 			} else {
 				// Check to see if there is a @PostConstruct annotation on a method of the class.
+				// @ts-ignore
 				let postConstruct = Reflect.getMetadata(POSTCONSTRUCT_SYNC_METADATA_KEY, obj.constructor);
 				if (!postConstruct) {
 					maybeAsync = true;
+					// @ts-ignore
 					postConstruct = Reflect.getMetadata(POSTCONSTRUCT_ASYNC_METADATA_KEY, obj.constructor);
 				}
 				if (postConstruct && obj.constructor.prototype[postConstruct] && typeof obj.constructor.prototype[postConstruct] === 'function')
@@ -93,6 +96,7 @@ export class ClassBasedProvider<T> extends BindableProvider<T, ClassConstructor<
 	 * This method collects the States of all the constructor parameters for our target class.
 	 */
 	protected getConstructorParameterStates<T>(): State[] {
+		// @ts-ignore
 		const argTypes = Reflect.getMetadata(REFLECT_PARAMS, this.maker);
 		if (argTypes === undefined) {
 			return [];

@@ -1,13 +1,12 @@
-import 'reflect-metadata';
-import {AbstractConstructor, InjectableId, Injector, ClassConstructor} from './injector';
-import {AsyncFactory, BindAs, Binder, SyncFactory} from './binder';
-import {INJECTABLE_METADATA_KEY} from './constants';
-import {State} from './state';
-import {Provider} from './provider';
-import {ConstantProvider} from './constant-provider';
-import {FactoryBasedProvider} from './sync-factory-provider';
-import {AsyncFactoryBasedProvider} from './async-factory-provider';
-import {ClassBasedProvider} from './class-provider';
+import { AsyncFactoryBasedProvider } from './async-factory-provider';
+import { AsyncFactory, BindAs, Binder, SyncFactory } from './binder';
+import { ClassBasedProvider } from './class-provider';
+import { ConstantProvider } from './constant-provider';
+import { INJECTABLE_METADATA_KEY } from './constants';
+import { AbstractConstructor, ClassConstructor, InjectableId, Injector } from './injector';
+import { Provider } from './provider';
+import { State } from './state';
+import { FactoryBasedProvider } from './sync-factory-provider';
 
 /**
  * Helper class to ensure we can distinguish between Error instances legitimately returned from Providers, and Errors thrown by Providers.

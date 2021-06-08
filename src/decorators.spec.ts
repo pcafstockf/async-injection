@@ -1,8 +1,9 @@
 import 'jasmine';
-import {_getInjectedIdAt, Inject, Injectable, Optional, PostConstruct} from './decorators';
-import {InjectableId} from './injector';
-import {Container} from './container';
-import {POSTCONSTRUCT_ASYNC_METADATA_KEY, POSTCONSTRUCT_SYNC_METADATA_KEY, REFLECT_PARAMS} from './constants';
+import "reflect-metadata";
+import { POSTCONSTRUCT_ASYNC_METADATA_KEY, POSTCONSTRUCT_SYNC_METADATA_KEY, REFLECT_PARAMS } from './constants';
+import { Container } from './container';
+import { Inject, Injectable, Optional, PostConstruct, _getInjectedIdAt } from './decorators';
+import { InjectableId } from './injector';
 
 describe('@Injectable', () => {
 	it('Should generate proper metadata', () => {
