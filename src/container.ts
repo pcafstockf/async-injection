@@ -101,6 +101,7 @@ export class Container implements Binder {
 		if (typeof constructor === 'undefined') {
 			constructor = <{ new(...args: any[]): T }>id;
 		}
+		// @ts-ignore
 		if (!Reflect.getMetadata(INJECTABLE_METADATA_KEY, constructor)) {
 			throw new Error('Class not decorated with @Injectable [' + constructor.toString() + ']');
 		}
