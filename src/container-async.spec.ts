@@ -60,7 +60,7 @@ describe('Async factories', () => {
 		expect(end.getTime() - requested.getTime()).toBeGreaterThanOrEqual(20);
 		expect(container.get(A).c).toEqual(1);
 	});
-	it('Should respect the resolveSingletons call contract', async (done) => {
+	it('Should respect the resolveSingletons call contract', (done) => {
 		// All the other code binds to objects, lets bind to a number (which is perfectly valid).
 		async function fetchA(n: number) {
 			return new Promise<number>((resolve, reject) => {
@@ -275,7 +275,7 @@ describe('Async factories', () => {
 
 		expect(b.a.a).toEqual('A');
 	});
-	it('Failure in async dependency tree should propagate', async (done) => {
+	it('Failure in async dependency tree should propagate', (done) => {
 		class A {
 			public constructor() {
 			}
@@ -318,7 +318,7 @@ describe('Async factories', () => {
 			done();
 		});
 	});
-	it('Failure in async dependency tree should invoke ErrorHandler', async (done) => {
+	it('Failure in async dependency tree should invoke ErrorHandler', (done) => {
 		class A {
 			public constructor() {
 			}
@@ -357,7 +357,7 @@ describe('Async factories', () => {
 			done();
 		});
 	});
-	it('Failure in async dependency tree should allow ErrorHandler to provide alternative', async (done) => {
+	it('Failure in async dependency tree should allow ErrorHandler to provide alternative', (done) => {
 		class A {
 			public constructor() {
 				this.a = 'A';
@@ -483,7 +483,7 @@ describe('Edge cases', () => {
 });
 
 describe('Asynchronous error handling', () => {
-	it('Async initialization followed by another Async PostConstruct which fails, should propagate the error', async (done) => {
+	it('Async initialization followed by another Async PostConstruct which fails, should propagate the error', (done) => {
 		@Injectable()
 		class A {
 			public constructor() {
@@ -529,7 +529,7 @@ describe('Asynchronous error handling', () => {
 			done();
 		});
 	});
-	it('Pending constructor parameters that subsequently fail, should propagate the error', async (done) => {
+	it('Pending constructor parameters that subsequently fail, should propagate the error', (done) => {
 		@Injectable()
 		class A {
 			public constructor() {
