@@ -16,9 +16,16 @@
 		"container",
 		"typescript"
 	],
-	"main": "./lib/index.js",
-	"types": "./lib/index.d.ts",
-	"typings": "./lib/index.d.ts",
+	"main": "lib/cjs/index.js",
+	"module": "lib/mjs/index.js",
+	"exports": {
+		".": {
+			"import": "./lib/mjs/index.js",
+			"require": "./lib/cjs/index.js"
+		}
+	},
+	"types": "lib/index.d.ts",
+	"typings": "lib/index.d.ts",
 	"directories": {
 		"lib": "lib"
 	},
@@ -30,10 +37,11 @@
 	],
 	"scripts": {
 		"clean": "rimraf ./lib",
-		"fullclean": "npm run clean && rimraf coverage && rimraf ./nyc_output && rimraf ./package-lock.json && rimraf ./node_modules",
-		"test": "node --require ts-node/register --require tsconfig-paths/register node_modules/jasmine/bin/jasmine.js --config=jasmine.json",
+		"fullclean": "npm run clean && rimraf ./.nyc_output && rimraf ./coverage && rimraf ./node_modules && rimraf ./package-lock.json",
+		"test": "TS_NODE_PROJECT=./tsconfig-cjs.json  node --require ts-node/register --require tsconfig-paths/register node_modules/jasmine/bin/jasmine.js --config=jasmine.json",
 		"coverage": "rimraf coverage && rimraf ./nyc_output && nyc -e .ts -x \"**/*.spec.ts\" -x \"tst/*\" --reporter=text-summary --reporter=lcov npm run test",
-		"build": "npm run clean && tsc -p tsconfig.json",
+		"build": "npm run clean && tsc -p tsconfig-esm.json && tsc -p tsconfig-cjs.json && npm run _postbuild",
+		"_postbuild": "cpy ./ReadMe.md ./lib/ && cpy ./package.json ./lib/ && cpy ./License.txt ./lib/ && echo $'{\"type\": \"module\"}' >lib/mjs/package.json && echo $'{\"type\": \"commonjs\"}' >lib/cjs/package.json",
 		"lint": "tslint -c tslint.json 'src/**/*.ts'"
 	},
 	"repository": {
@@ -43,26 +51,34 @@
 	"bugs": {
 		"url": "https://github.com/pcafstockf/async-injection/issues"
 	},
-	"dependencies": {
-		"tslib": "~1.14.1"
-	},
+	"dependencies": {},
 	"devDependencies": {
 		"@istanbuljs/nyc-config-typescript": "~1.0.1",
 		"@types/jasmine": "~3.7.7",
+		"cpy-cli": "~3.1.1",
 		"jasmine": "~3.7.0",
 		"jasmine-console-reporter": "~3.1.0",
 		"nyc": "~15.1.0",
 		"rimraf": "~3.0.2",
 		"source-map-support": "~0.5.19",
 		"ts-lint": "~4.5.1",
-		"ts-node": "~8.10.2",
+		"ts-node": "~10.0.0",
 		"tsconfig-paths": "~3.9.0",
-		"typescript": "~3.8.3",
+		"tslib": "~2.2.0",
+		"typescript": "~4.3.2",
 		"reflect-metadata": "~0.1.13"
 	},
 	"nyc": {
 		"extends": "@istanbuljs/nyc-config-typescript",
 		"all": true,
+		"include": [
+			"src/**"
+		],
+		"exclude": [
+			"node_modules/**",
+			"src/index.ts",
+			"**/*.spec.ts"
+		],
 		"check-coverage": true
 	}
 }

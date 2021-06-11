@@ -10,4 +10,4 @@
 .eslintignore
 jest.config.js
 jasmine.json
-tsconfig.json
+tsconfig*.json

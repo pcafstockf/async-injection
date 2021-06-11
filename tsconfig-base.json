@@ -1,7 +1,6 @@
 {
 	"compilerOptions": {
-		"target": "ES2015",
-		"module": "commonjs",
+		"target": "es2015",
 		"lib": [
 			"dom",
 			"es2015"
@@ -9,8 +8,8 @@
 		"declaration": true,
 		"outDir": "./lib",
 		"rootDir": "./src",
-		"removeComments": false,
-		"importHelpers": true,
+		"removeComments": true,
+		"importHelpers": false,
 		"strict": false,
 		"moduleResolution": "node",
 		"baseUrl": "./",
