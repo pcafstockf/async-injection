@@ -1,6 +1,6 @@
 {
 	"name": "async-injection",
-	"version": "1.2.0",
+	"version": "1.2.1",
 	"description": "A robust lightweight dependency injection library for TypeScript.",
 	"author": "Frank Stock",
 	"license": "MIT",
