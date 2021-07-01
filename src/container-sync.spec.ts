@@ -193,7 +193,7 @@ describe('PostConstruct execution', () => {
 		@Injectable()
 		class A {
 			public constructor() {
-				this.i = 'PostConstruct'
+				this.i = 'PostConstruct';
 			}
 			public i: string;
 			public a: string;
@@ -224,7 +224,7 @@ describe('PostConstruct execution', () => {
 		@Injectable()
 		class A {
 			public constructor() {
-				this.i = 'PostConstruct'
+				this.i = 'PostConstruct';
 			}
 			public i: string;
 			public a: string;

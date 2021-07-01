@@ -122,7 +122,7 @@ describe('Async factories', () => {
 		@Injectable()
 		class A {
 			public constructor() {
-				this.i = 'PostConstruct'
+				this.i = 'PostConstruct';
 			}
 			public i: string;
 			public a: string;
@@ -161,7 +161,7 @@ describe('Async factories', () => {
 		@Injectable()
 		class A {
 			public constructor() {
-				this.i = 'PostConstruct'
+				this.i = 'PostConstruct';
 			}
 			public i: string;
 			public a: string;

@@ -43,7 +43,7 @@ function validateConstructorParam(decorator: string, target: Function, idx: numb
 
 // Validate the decorator was only applied once.
 function validateSingleConstructorParam(decorator: string, target: Function, idx: number): string {
-	let propKey = validateConstructorParam(decorator, target, idx);
+	const propKey = validateConstructorParam(decorator, target, idx);
 	if (Reflect.hasOwnMetadata(decorator, target, propKey)) {
 		throw new Error('@' + decorator + ' applied multiple times [' + target.constructor.name + ']');
 	}
@@ -70,6 +70,7 @@ export function Injectable() {
 /**
  * Placed just before a constructor parameter, this parameter decorator allows for specificity and control over the type of the type of Object that will be injected into the parameter.
  * In the absence of this decorator the container will use whatever is bound to a parameter's type (or throw an error if it is unable to recognize the type).
+ *
  * @param id  The identifier of the bound type that should be injected.
  */
 export function Inject(id: InjectableId<any>) {
@@ -80,17 +81,18 @@ export function Inject(id: InjectableId<any>) {
 	 * @returns Undefined (nothing), as this decorator does not modify the parameter in any way.
 	 */
 	return function (target: Function, parameterName: string | symbol, parameterIndex: number) {
-		let hint = targetHint(target);
+		const hint = targetHint(target);
 		if (id === undefined) {
 			throw new Error('Undefined id passed to @Inject [' + hint + ']');
 		}
-		let paramKey = validateSingleConstructorParam('Inject', target, parameterIndex);
+		const paramKey = validateSingleConstructorParam('Inject', target, parameterIndex);
 		Reflect.defineMetadata(INJECT_METADATA_KEY, id, target, paramKey);
 	};
 }
 
 /**
  * This is a helper function used by the container to retrieve the @Inject metadata for a specifically indexed constructor parameter
+ *
  * @param target  The constructor function of the class (we don't allow @Inject on anything else).
  * @param parameterIndex    The ordinal index of the parameter in the constructor’s parameter list
  * @see Inject
@@ -111,13 +113,14 @@ export function Optional(alt?: any) {
 	 * @returns Undefined (nothing), as this decorator does not modify the parameter in any way.
 	 */
 	return function (target: Function, parameterName: string | symbol, parameterIndex: number) {
-		let paramKey = validateSingleConstructorParam('Optional', target, parameterIndex);
+		const paramKey = validateSingleConstructorParam('Optional', target, parameterIndex);
 		Reflect.defineMetadata(OPTIONAL_METADATA_KEY, { value: alt }, target, paramKey);
 	};
 }
 
 /**
  * This is a helper function used by the container to retrieve the @Optional metadata for a specifically indexed constructor parameter
+ *
  * @param target  The constructor function of the class (we don't allow @Optional on anything else).
  * @param parameterIndex    The ordinal index of the parameter in the constructor’s parameter list
  * @see Optional
@@ -147,7 +150,7 @@ export function PostConstruct() {
 		if (Reflect.hasOwnMetadata(POSTCONSTRUCT_SYNC_METADATA_KEY, target.constructor) || Reflect.hasOwnMetadata(POSTCONSTRUCT_ASYNC_METADATA_KEY, target.constructor)) {
 			throw new Error('@PostConstruct applied multiple times [' + targetHint(target.constructor) + ']');
 		}
-		let rt = Reflect.getMetadata(REFLECT_RETURN, target, methodName);
+		const rt = Reflect.getMetadata(REFLECT_RETURN, target, methodName);
 		if (typeof rt === 'function') {
 			Reflect.defineMetadata(POSTCONSTRUCT_ASYNC_METADATA_KEY, methodName, target.constructor);
 		} else {

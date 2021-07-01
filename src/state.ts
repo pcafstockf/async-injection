@@ -1,10 +1,12 @@
+import { isPromise } from "./utils";
+
 /**
  * Internal class that allows us to track the state of a promise (chain).
  */
 export class State<T = any> {
-	static MakeState<T = any>(promise: Promise<T>, rejected?: any, fulfilled?: T): State<T> {
-		let retVal = new State<T>();
-		if (promise) {
+	static MakeState<TState = any>(promise: Promise<TState>, rejected?: any, fulfilled?: TState): State<TState> {
+		const retVal = new State<TState>();
+		if (isPromise(promise)) {
 			retVal._pending = true;
 			retVal._promise = promise.then(
 				(v) => {
@@ -41,7 +43,7 @@ export class State<T = any> {
 		return this._promise;
 	}
 
-	protected _pending;
+	protected _pending: boolean;
 
 	get pending(): boolean {
 		return this._pending;
@@ -56,6 +58,7 @@ export class State<T = any> {
 	protected _rejected: any;
 
 	get rejected(): any {
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-return
 		return this._rejected;
 	}
 }

@@ -32,7 +32,7 @@ export abstract class Provider<T = any> {
 	 */
 	resolveIfSingleton(asyncOnly: boolean): Promise<T> {
 		if (this.singleton === null) {
-			let s = this.provideAsState();
+			const s = this.provideAsState();
 			if (s.pending)
 				return s.promise;
 			else if (s.rejected)
