@@ -58,7 +58,6 @@ export class State<T = any> {
 	protected _rejected: unknown;
 
 	get rejected(): unknown {
-		// eslint-disable-next-line @typescript-eslint/no-unsafe-return
 		return this._rejected;
 	}
 }
