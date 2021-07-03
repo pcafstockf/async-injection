@@ -1,5 +1,5 @@
-import {State} from './state';
-import {Provider} from './provider';
+import { Provider } from './provider';
+import { State } from './state';
 
 /**
  * @inheritDoc

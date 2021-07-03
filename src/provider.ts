@@ -1,4 +1,4 @@
-import {State} from './state';
+import { State } from './state';
 
 /**
  * Internally all InjectableIds are mapped to an abstract Provider<T>.

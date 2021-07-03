@@ -1,4 +1,5 @@
-export {Injectable, Inject, PostConstruct, Optional} from './decorators';
-export {InjectableId, ClassConstructor, Injector} from './injector';
-export {Binder} from './binder';
-export {Container} from './container';
+export { Binder } from './binder';
+export { Container } from './container';
+export { Inject, Injectable, Optional, PostConstruct } from './decorators';
+export { ClassConstructor, InjectableId, Injector } from './injector';
+

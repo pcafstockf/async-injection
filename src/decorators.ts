@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-types */
 /**
  * These decorators all apply the information they collect (whether class, method, or parameter data) as tagged metadata on the class's constructor
  */
@@ -6,7 +7,7 @@ import { InjectableId } from './injector';
 
 // Help user locate misapplied decorators.
 function targetHint(target: Function) {
-	let hint;
+	let hint: string | undefined;
 	if (target) {
 		hint = target.name;
 		if ((!hint) && target.constructor) {
@@ -18,12 +19,10 @@ function targetHint(target: Function) {
 
 // Validate that 'target' is a class constructor function.
 function isClassConstructor(target: any) {
-	if (typeof target === 'function') {
-		if (target.hasOwnProperty('prototype')) {
-			if (target.prototype.constructor === target) {
-				return true;
-			}
-		}
+	// eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+	if (typeof target === 'function' && target.hasOwnProperty('prototype')) {
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+		return target.prototype.constructor === target;
 	}
 	return false;
 }
@@ -54,12 +53,12 @@ function validateSingleConstructorParam(decorator: string, target: Function, idx
  * Placed just before the class declaration, this class decorator applies metadata to the class constructor indicating that the user intends to bind the class into the container.
  * This decorator will throw if not placed on a class declaration, or if placed more than once on a class declaration.
  */
-export function Injectable() {
+export function Injectable(): ClassDecorator {
 	/**
 	 * @param target   The constructor function of the class that is being decorated
 	 * @returns Undefined (nothing), as this decorator does not modify the constructor in any way.
 	 */
-	return function (target: Function) {
+	return function (target: Function): void {
 		if (Reflect.hasOwnMetadata(INJECTABLE_METADATA_KEY, target)) {
 			throw new Error('@Injectable applied multiple times [' + targetHint(target) + ']');
 		}
@@ -73,14 +72,14 @@ export function Injectable() {
  *
  * @param id  The identifier of the bound type that should be injected.
  */
-export function Inject(id: InjectableId<any>) {
+export function Inject(id: InjectableId<any>): ParameterDecorator {
 	/**
 	 * @param target  The constructor function of the class (we don't allow @Inject on anything else).
 	 * @param parameterName The name of the parameter
 	 * @param parameterIndex The ordinal index of the parameter in the function’s parameter list
 	 * @returns Undefined (nothing), as this decorator does not modify the parameter in any way.
 	 */
-	return function (target: Function, parameterName: string | symbol, parameterIndex: number) {
+	return function (target: Function, parameterName: string | symbol, parameterIndex: number): void {
 		const hint = targetHint(target);
 		if (id === undefined) {
 			throw new Error('Undefined id passed to @Inject [' + hint + ']');
@@ -98,21 +97,21 @@ export function Inject(id: InjectableId<any>) {
  * @see Inject
  */
 export function _getInjectedIdAt(target: any, parameterIndex: number): InjectableId<any> {
-	return Reflect.getMetadata(INJECT_METADATA_KEY, target, makeParamIdxKey(parameterIndex));
+	return Reflect.getMetadata(INJECT_METADATA_KEY, target, makeParamIdxKey(parameterIndex)) as InjectableId<any>;
 }
 
 /**
  * Placed just before a constructor parameter, this parameter decorator signals the container that it should supply the 'alt' constant value (undefined by default) if for *any* reason it is unable to otherwise resolve the type of the parameter.
  * WARNING!  It is your responsibility to ensure that alt is of the appropriate type/value.
  */
-export function Optional(alt?: any) {
+export function Optional(alt?: any): ParameterDecorator {
 	/**
 	 * @param target  The constructor function of the class (we don't allow @Optional on anything else).
 	 * @param parameterName The name of the parameter
 	 * @param parameterIndex The ordinal index of the parameter in the function’s parameter list
 	 * @returns Undefined (nothing), as this decorator does not modify the parameter in any way.
 	 */
-	return function (target: Function, parameterName: string | symbol, parameterIndex: number) {
+	return function (target: Function, parameterName: string | symbol, parameterIndex: number): void {
 		const paramKey = validateSingleConstructorParam('Optional', target, parameterIndex);
 		Reflect.defineMetadata(OPTIONAL_METADATA_KEY, { value: alt }, target, paramKey);
 	};
@@ -127,7 +126,7 @@ export function Optional(alt?: any) {
  * @returns an object containing the value provided in the decorator, or undefined if no annotation was present.
  */
 export function _getOptionalDefaultAt(target: any, parameterIndex: number): { value: any } {
-	return Reflect.getMetadata(OPTIONAL_METADATA_KEY, target, makeParamIdxKey(parameterIndex)); // See the @Optional decorator before making any changes here.
+	return Reflect.getMetadata(OPTIONAL_METADATA_KEY, target, makeParamIdxKey(parameterIndex)) as { value: any }; // See the @Optional decorator before making any changes here.
 }
 
 /**
@@ -135,7 +134,7 @@ export function _getOptionalDefaultAt(target: any, parameterIndex: number): { va
  * The method will be assumed to be synchronous unless the method signature explicitly declares it's return type to be ": Promise<something>"
  * This decorator will throw if placed on a non-method or a static method of a class, or if placed on a method more than once, or if placed on more than one method for a class.
  */
-export function PostConstruct() {
+export function PostConstruct(): MethodDecorator {
 	/**
 	 * @param prototypeOrConstructor   The prototype of the class (we don't allow @PostConstruct on anything other than a class instance method.
 	 * @param methodName   The name of the method.
@@ -143,9 +142,9 @@ export function PostConstruct() {
 	 * @returns Undefined (nothing), as this decorator does not modify the method in any way.
 	 */
 	// noinspection JSUnusedLocalSymbols
-	return function (target: any, methodName: string, descriptor: PropertyDescriptor) {
+	return function (target: Object, methodName: string | symbol, descriptor: PropertyDescriptor) {
 		if (typeof target !== 'object' || typeof target.constructor !== 'function') {
-			throw new Error('@PostConstruct not applied to instance method [' + target + '/' + methodName + ']');
+			throw new Error('@PostConstruct not applied to instance method [' + target.toString() + '/' + methodName.toString() + ']');
 		}
 		if (Reflect.hasOwnMetadata(POSTCONSTRUCT_SYNC_METADATA_KEY, target.constructor) || Reflect.hasOwnMetadata(POSTCONSTRUCT_ASYNC_METADATA_KEY, target.constructor)) {
 			throw new Error('@PostConstruct applied multiple times [' + targetHint(target.constructor) + ']');

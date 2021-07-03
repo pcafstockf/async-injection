@@ -1,7 +1,7 @@
-import {InjectableId, Injector} from './injector';
-import {SyncFactory} from './binder';
-import {State} from './state';
-import {BindableProvider} from './bindable-provider';
+import { BindableProvider } from './bindable-provider';
+import { SyncFactory } from './binder';
+import { InjectableId, Injector } from './injector';
+import { State } from './state';
 
 /**
  * @inheritDoc

@@ -96,9 +96,9 @@ export class ClassBasedProvider<T> extends BindableProvider<T, ClassConstructor<
 	/**
 	 * This method collects the States of all the constructor parameters for our target class.
 	 */
-	protected getConstructorParameterStates<T>(): State[] {
+	protected getConstructorParameterStates(): State[] {
 		const argTypes = Reflect.getMetadata(REFLECT_PARAMS, this.maker);
-		if (argTypes === undefined) {
+		if (argTypes === undefined || !Array.isArray(argTypes)) {
 			return [];
 		}
 		return argTypes.map((argType, index) => {
@@ -132,7 +132,7 @@ export class ClassBasedProvider<T> extends BindableProvider<T, ClassConstructor<
 			return (!p.pending) && p.rejected;
 		});
 		if (paramRejection) {
-			return paramRejection;
+			return paramRejection as State<T>;
 		}
 		// If any of the params are in a pending state, we will have to wait for them to be resolved before we can construct.
 		const pendingParams = params.filter((p) => {
@@ -145,7 +145,7 @@ export class ClassBasedProvider<T> extends BindableProvider<T, ClassConstructor<
 			const objPromise = this.makePromiseForObj<any[]>(Promise.all(pendingParams), () => {
 				// All the parameters are now available, instantiate the class.
 				// If this throws, it will be handled by our caller.
-				return Reflect.construct(this.maker, params.map((p) => p.fulfilled));
+				return Reflect.construct(this.maker, params.map((p) => p.fulfilled as unknown)) as T;
 			});
 			// Once the obj is resolved, then we need to check for PostConstruct and if it was async, wait for that too.
 			return State.MakeState<T>(objPromise.then((obj) => {
@@ -154,7 +154,8 @@ export class ClassBasedProvider<T> extends BindableProvider<T, ClassConstructor<
 					return state.promise;   // chain (aka wait some more).
 				}
 				else if (state.rejected) {
-					return state.rejected;  // error
+					// eslint-disable-next-line @typescript-eslint/no-unsafe-return
+					return state.rejected as any; // error
 				}
 				else {
 					return state.fulfilled; // value (aka obj).
@@ -164,7 +165,7 @@ export class ClassBasedProvider<T> extends BindableProvider<T, ClassConstructor<
 		else {
 			// All parameters needed for construction are available, instantiate the object.
 			try {
-				const newObj = Reflect.construct(this.maker, params.map((p) => p.fulfilled));
+				const newObj = Reflect.construct(this.maker, params.map((p) => p.fulfilled as unknown));
 				return this.makePostConstructState(newObj);
 			}
 			catch (err) {

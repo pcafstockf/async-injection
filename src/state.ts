@@ -4,7 +4,7 @@ import { isPromise } from "./utils";
  * Internal class that allows us to track the state of a promise (chain).
  */
 export class State<T = any> {
-	static MakeState<TState = any>(promise: Promise<TState>, rejected?: any, fulfilled?: TState): State<TState> {
+	static MakeState<TState = any>(promise: Promise<TState>, rejected?: unknown, fulfilled?: TState): State<TState> {
 		const retVal = new State<TState>();
 		if (isPromise(promise)) {
 			retVal._pending = true;
@@ -55,9 +55,9 @@ export class State<T = any> {
 		return this._fulfilled;
 	}
 
-	protected _rejected: any;
+	protected _rejected: unknown;
 
-	get rejected(): any {
+	get rejected(): unknown {
 		// eslint-disable-next-line @typescript-eslint/no-unsafe-return
 		return this._rejected;
 	}

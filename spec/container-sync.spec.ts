@@ -1,7 +1,9 @@
+/* eslint-disable */
+
 import 'jasmine';
 import "reflect-metadata";
-import { Container } from './container';
-import { Injectable, PostConstruct } from './decorators';
+import { Container } from '../src/container';
+import { Injectable, PostConstruct } from '../src/decorators';
 
 let counter = 1;
 

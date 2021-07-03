@@ -1,9 +1,11 @@
+/* eslint-disable */
+
 import 'jasmine';
 import "reflect-metadata";
-import { POSTCONSTRUCT_ASYNC_METADATA_KEY, POSTCONSTRUCT_SYNC_METADATA_KEY, REFLECT_PARAMS } from './constants';
-import { Container } from './container';
-import { Inject, Injectable, Optional, PostConstruct, _getInjectedIdAt } from './decorators';
-import { InjectableId } from './injector';
+import { POSTCONSTRUCT_ASYNC_METADATA_KEY, POSTCONSTRUCT_SYNC_METADATA_KEY, REFLECT_PARAMS } from '../src/constants';
+import { Container } from '../src/container';
+import { Inject, Injectable, Optional, PostConstruct, _getInjectedIdAt } from '../src/decorators';
+import { InjectableId } from '../src/injector';
 
 describe('@Injectable', () => {
 	it('Should generate proper metadata', () => {
