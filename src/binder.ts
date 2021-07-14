@@ -1,4 +1,4 @@
-import {ClassConstructor, InjectableId, Injector, AbstractConstructor} from './injector';
+import { AbstractConstructor, ClassConstructor, InjectableId, Injector } from './injector';
 
 /**
  * Type definition for functions that return a value.
@@ -22,18 +22,18 @@ export type AsyncFactory<T> = (injector: Injector) => Promise<T>;
  * @param error   Identifies the problem that occurred.
  * @param value   If the 'maker' was able to create the thing, but it had an error during post construction, the made thing will be passed here.
  * @returns one of 3 results...
- *      A substitute thing (kind of like a 'maker' do-over) which must be fully operational (e.g. any @PostConstruct will be ignored).
- *      An alternate Error which will be propagated back up the call chain.
- *      Undefined, which means the 'error' parameter will be propagated back up the call chain.
+ * A substitute thing (kind of like a 'maker' do-over) which must be fully operational (e.g. any `@PostConstruct` will be ignored).
+ * An alternate Error which will be propagated back up the call chain.
+ * Undefined, which means the 'error' parameter will be propagated back up the call chain.
  */
 export type OnErrorCallback<T, M> = (injector: Injector, id: InjectableId<T>, maker: M, error: Error, value?: T) => T | Error | void;
 
 /**
  * You may bind a success handler which will be invoked just before the bound InjectableId is put into service.
- * This is an alternative to the more preferred @PostConstruct decorator for scenarios when usage of that decorator is not feasible.
+ * This is an alternative to the more preferred `@PostConstruct` decorator for scenarios when usage of that decorator is not feasible.
  * WARNING:
- *      By registering a success handler, you override and nullify any @PostConstruct decorator on the class.
- *      In such a scenario, the success handler should perform whatever care and feeding the class expected from the @PostConstruct decorator.
+ * By registering a success handler, you override and nullify any `@PostConstruct` decorator on the class.
+ * In such a scenario, the success handler should perform whatever care and feeding the class expected from the `@PostConstruct` decorator.
  * A success handler *must* not throw, but may return an Error that will be propagated back up the call chain.
  *
  * @param binder   The Binder that performed the construction.
@@ -41,14 +41,15 @@ export type OnErrorCallback<T, M> = (injector: Injector, id: InjectableId<T>, ma
  * @param maker   The thing that made.  Will be one of type ClassConstructor, SyncFactory, or AsyncFactory, depending on how you registered the binding.
  * @param value   The thing that was made.
  * @returns one of 3 results...
- *      An Error which will be propagated back up the call chain.
- *      Undefined, which means the object is ready to be placed into service.
- *      A Promise that resolves to one of the above two values (undefined or Error).
+ * An Error which will be propagated back up the call chain.
+ * Undefined, which means the object is ready to be placed into service.
+ * A Promise that resolves to one of the above two values (undefined or Error).
  */
-export type OnSuccessCallback<T, M> = (value: T, injector: Injector, id: InjectableId<T>, maker: M) => Promise<Error|void> | Error | void;
+export type OnSuccessCallback<T, M> = (value: T, injector: Injector, id: InjectableId<T>, maker: M) => Promise<Error | void> | Error | void;
 
 /**
  * An interface allowing binding of an error handler.
+ *
  * @see OnErrorCallback
  */
 export interface BindErrHandler<T, M> {
@@ -56,6 +57,7 @@ export interface BindErrHandler<T, M> {
 }
 /**
  * An interface allowing binding of a post construction handler.
+ *
  * @see OnSuccessCallback
  */
 export interface BindHandler<T, M> extends BindErrHandler<T, M> {
@@ -84,7 +86,7 @@ export interface Binder extends Injector {
 	/**
 	 * Bind an InjectableId to a class (actually it's constructor).
 	 * As a shortcut, you may use the class constructor as the 'id' (e.g. container.bindClass(A); ).
-	 * The container will also invoke any @PostConstruct present on the class.
+	 * The container will also invoke any `@PostConstruct` present on the class.
 	 */
 	bindClass<T>(id: ClassConstructor<T>, constructor?: ClassConstructor<T>): BindAs<T, ClassConstructor<T>>;
 	bindClass<T>(id: string | symbol | AbstractConstructor<T>, constructor: ClassConstructor<T>): BindAs<T, ClassConstructor<T>>;
@@ -92,14 +94,14 @@ export interface Binder extends Injector {
 	/**
 	 * Bind an InjectableId to a synchronous factory that will be invoked on demand when the object is needed.
 	 * The factory should produce the needed value
-	 * NOTE:  The container will not invoke any @PostConstruct present on the class, this is the responsibility of the factory.
+	 * NOTE:  The container will not invoke any `@PostConstruct` present on the class, this is the responsibility of the factory.
 	 */
 	bindFactory<T>(id: InjectableId<T>, factory: SyncFactory<T>): BindAs<T, SyncFactory<T>>;
 
 	/**
 	 * Bind an InjectableId to an asynchronous factory that will be invoked on demand when the object is needed.
 	 * The factory should produce the needed value (asynchronously of course).
-	 * NOTE:  The container will not invoke any @PostConstruct present on the class, this is the responsibility of the factory.
+	 * NOTE:  The container will not invoke any `@PostConstruct` present on the class, this is the responsibility of the factory.
 	 * WARNING!!! The factory may not throw and must return a valid Promise (which can be pending, resolved, rejected, etc.).
 	 */
 	bindAsyncFactory<T>(id: InjectableId<T>, factory: AsyncFactory<T>): BindAs<T, AsyncFactory<T>>;
@@ -108,7 +110,7 @@ export interface Binder extends Injector {
 	 * This essentially pre creates/loads all *singleton* InjectableIds currently known to the Binder.
 	 * This *may* be helpful if you wish to use Injector.get on a dependency tree that has asynchronous singletons within the tree.
 	 *
-	 * @param asyncOnly     Only resolve AsyncFactorys as well as any bound classes that have an asynchronous @PostConstruct decorator.  WARNING: If true, SyncFactorys will *not* be resolved even if they are Singletons.
+	 * @param asyncOnly     Only resolve AsyncFactorys as well as any bound classes that have an asynchronous `@PostConstruct` decorator.  WARNING: If true, SyncFactorys will *not* be resolved even if they are Singletons.
 	 * @param parentRecursion   If true and the the container has a parent, resolveIfSingleton will first be called for the parent
 	 * @returns A Promise that resolves when all Singleton's have been resolved, OR rejects if one or more of the Singleton's failed to resolve.  NOTE: Rejection does not occur until all Singleton resolutions have settled, and the rejection reason/err will be a Map<InjectableId, Error>
 	 */

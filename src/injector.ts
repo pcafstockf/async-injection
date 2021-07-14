@@ -1,11 +1,11 @@
 /**
  * This is about as close as we can get in Typescript
  */
-export type AbstractConstructor<T> = Function & { prototype: T };
+export type AbstractConstructor<T> = () => void & { prototype: T };
 /**
  * Standard definition of a constructor.
  */
-export type ClassConstructor<T> = { new(...args: any[]): T };
+export type ClassConstructor<T> = new (...args: any[]) => T;
 
 /**
  * Universal id that can be bound to a constant, class, or factories.
@@ -28,6 +28,7 @@ export interface Injector {
 
 	/**
 	 * Return an instance of <T> previously bound to 'id'.
+	 *
 	 * @throws Error if the InjectableId was never registered, OR if there are unresolved asynchronous dependencies in the dependency tree for 'id'.
 	 */
 	get<T>(id: InjectableId<T> | AbstractConstructor<T>): T;

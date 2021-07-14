@@ -1,7 +1,9 @@
+/* eslint-disable */
+
 import 'jasmine';
 import "reflect-metadata";
-import { Container } from './container';
-import { Injectable, PostConstruct } from './decorators';
+import { Container } from '../src/container';
+import { Injectable, PostConstruct } from '../src/decorators';
 
 describe('Async factories', () => {
 	it('Should support delayed retrieval', async () => {
@@ -122,7 +124,7 @@ describe('Async factories', () => {
 		@Injectable()
 		class A {
 			public constructor() {
-				this.i = 'PostConstruct'
+				this.i = 'PostConstruct';
 			}
 			public i: string;
 			public a: string;
@@ -161,7 +163,7 @@ describe('Async factories', () => {
 		@Injectable()
 		class A {
 			public constructor() {
-				this.i = 'PostConstruct'
+				this.i = 'PostConstruct';
 			}
 			public i: string;
 			public a: string;

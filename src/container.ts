@@ -7,9 +7,11 @@ import { AbstractConstructor, ClassConstructor, InjectableId, Injector } from '.
 import { Provider } from './provider';
 import { State } from './state';
 import { FactoryBasedProvider } from './sync-factory-provider';
+import { isPromise } from './utils';
 
 /**
  * Helper class to ensure we can distinguish between Error instances legitimately returned from Providers, and Errors thrown by Providers.
+ *
  * @see resolveSingletons.
  */
 class ReasonWrapper {
@@ -44,31 +46,33 @@ export class Container implements Binder {
 	 * @inheritDoc
 	 */
 	public get<T>(id: InjectableId<T>): T {
-		let provider = this.providers.get(id);
+		const provider = this.providers.get(id);
 		if (!provider) {
 			if (this.parent)
 				return this.parent.get<T>(id);
 			throw new Error('Symbol not bound: ' + id.toString());
 		}
-		let state = provider.provideAsState();
+		const state = provider.provideAsState();
 		if (state.pending)
 			throw new Error('Synchronous request on unresolved asynchronous dependency tree: ' + id.toString());
 		if (state.rejected)
 			throw state.rejected;
-		return state.fulfilled;
+		return state.fulfilled as T;
 	}
 
 	/**
 	 * @inheritDoc
 	 */
 	public resolve<T>(id: InjectableId<T>): Promise<T> {
-		let state = this.resolveState(id);
-		if (state.promise) {
+		const state = this.resolveState(id);
+		if (isPromise(state.promise)) {
 			return state.promise;
 		}
+
 		if (state.rejected) {
 			return Promise.reject(state.rejected);
 		}
+
 		return Promise.resolve(state.fulfilled);
 	}
 
@@ -76,13 +80,17 @@ export class Container implements Binder {
 	/**
 	 * This method is not part of the Binding interface, because it is highly unusual.
 	 * But that doesn't mean we can't imagine scenarios where you might require it.
+	 *
 	 * @param id    The id to be removed.
 	 * @param ascending  If true, this will remove all bindings of the specified id all the way up the parent container chain (if it exists).
 	 */
 	public removeBinding<T>(id: InjectableId<T>, ascending?: boolean): void {
 		this.providers.delete(id);
-		if (ascending && this.parent && (<any>this.parent).removeBinding)
-			(<any>this.parent).removeBinding(id, true);
+
+		if (ascending && this.parent) {
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+			(this.parent as any)?.removeBinding(id, true);
+		}
 	}
 
 	/**
@@ -99,12 +107,12 @@ export class Container implements Binder {
 	public bindClass<T>(id: string | symbol | AbstractConstructor<T>, constructor: ClassConstructor<T>): BindAs<T, ClassConstructor<T>>;
 	public bindClass<T>(id: string | symbol | AbstractConstructor<T> | ClassConstructor<T>, constructor: ClassConstructor<T>): BindAs<T, ClassConstructor<T>> {
 		if (typeof constructor === 'undefined') {
-			constructor = <{ new(...args: any[]): T }>id;
+			constructor = id as new (...args: any[]) => T;
 		}
 		if (!Reflect.getMetadata(INJECTABLE_METADATA_KEY, constructor)) {
 			throw new Error('Class not decorated with @Injectable [' + constructor.toString() + ']');
 		}
-		let provider = new ClassBasedProvider(this, id, constructor, (i: InjectableId<any>) => {
+		const provider = new ClassBasedProvider(this, id, constructor, (i: InjectableId<any>) => {
 			return this.resolveState(i);
 		});
 		this.providers.set(id, provider);
@@ -115,7 +123,7 @@ export class Container implements Binder {
 	 * @inheritDoc
 	 */
 	public bindFactory<T>(id: InjectableId<T>, factory: SyncFactory<T>): BindAs<T, SyncFactory<T>> {
-		let provider = new FactoryBasedProvider(this, id, factory);
+		const provider = new FactoryBasedProvider(this, id, factory);
 		this.providers.set(id, provider);
 		return provider.makeBindAs();
 	}
@@ -124,7 +132,7 @@ export class Container implements Binder {
 	 * @inheritDoc
 	 */
 	public bindAsyncFactory<T>(id: InjectableId<T>, factory: AsyncFactory<T>): BindAs<T, AsyncFactory<T>> {
-		let provider = new AsyncFactoryBasedProvider(this, id, factory);
+		const provider = new AsyncFactoryBasedProvider(this, id, factory);
 		this.providers.set(id, provider);
 		return provider.makeBindAs();
 	}
@@ -133,39 +141,41 @@ export class Container implements Binder {
 	 * @inheritDoc
 	 */
 	public resolveSingletons(asyncOnly?: boolean, parentRecursion?: boolean): Promise<void> {
-		let makePromiseToResolve = () => {
+		const makePromiseToResolve = () => {
 			return new Promise<void>((resolve, reject) => {
-				let pending = new Map<InjectableId<any>, Promise<void>>();
+				const pending = new Map<InjectableId<any>, Promise<void>>();
 				// Ask each provider to resolve itself *IF* it is a singleton.
 				this.providers.forEach((value: Provider, key: InjectableId<any>) => {
 					// If the provider is a singleton *and* if resolution is being handled asynchronously, the provider will return a completion promise.
-					let p = value.resolveIfSingleton(asyncOnly);
-					if (p)
+					const p = value.resolveIfSingleton(asyncOnly);
+					if (p !== null && typeof p !== 'undefined')
 						pending.set(key, p);
 				});
 				// The contract for this method is that it behaves somewhat like Promise.allSettled (e.g. won't complete until all pending Singletons have settled).
 				// Further the contract states that if any of the asynchronous Singletons rejected, that we will also return a rejected Promise, and that the rejection reason will be a Map of the InjectableId's that did not resolve, and the Error they emitted.
-				let pp = Array.from(pending.values());
-				let keys = Array.from(pending.keys());
+				const pp = Array.from(pending.values());
+				const keys = Array.from(pending.keys());
 				// Mapping the catch is an alternate version of Promise.allSettled (e.g. keeps Promise.all from short-circuiting).
-				Promise.all(pp.map(p => p.catch(e => new ReasonWrapper(e)))).then((results) => {
-					let rejects = new Map<InjectableId<any>, Error>();
-					// Check the results.  Since we don't export ReasonWrapper, it is safe to assume that an instance of that was produced by our map => catch code above, so it's a rejected Singleton error.
-					results.forEach((result, idx) => {
-						if (result instanceof ReasonWrapper) {
-							rejects.set(keys[idx], result.reason);
-						}
+				Promise.all(pp
+					.map(p => p.catch(e => new ReasonWrapper(e))))
+					.then((results) => {
+						const rejects = new Map<InjectableId<any>, Error>();
+						// Check the results.  Since we don't export ReasonWrapper, it is safe to assume that an instance of that was produced by our map => catch code above, so it's a rejected Singleton error.
+						results.forEach((result, idx) => {
+							if (result instanceof ReasonWrapper) {
+								rejects.set(keys[idx], result.reason);
+							}
+						});
+						// If we had rejections, notify our caller what they were.
+						if (rejects.size > 0)
+							reject(rejects);
+						else
+							resolve();  // All good.
 					});
-					// If we had rejections, notify our caller what they were.
-					if (rejects.size > 0)
-						reject(rejects);
-					else
-						resolve();  // All good.
-				});
 			});
 		};
-		if (parentRecursion && this.parent && (<Binder>(<any>this.parent)).resolveSingletons) {
-			let pb: Binder = <any>this.parent;
+		if (parentRecursion && typeof (this.parent as Binder)?.resolveSingletons === "function") {
+			const pb: Binder = this.parent as Binder;
 			return pb.resolveSingletons(asyncOnly, parentRecursion).then(() => {
 				return makePromiseToResolve();
 			});
@@ -178,7 +188,7 @@ export class Container implements Binder {
 	 * It makes searching our parent (if it exists) easier (and quicker) IF our parent is a fellow instance of Container.
 	 */
 	protected resolveState<T>(id: InjectableId<T>): State<T> {
-		let provider = this.providers.get(id);
+		const provider = this.providers.get(id);
 		if (!provider) {
 			if (this.parent) {
 				if (this.parent instanceof Container) {
@@ -194,6 +204,6 @@ export class Container implements Binder {
 			}
 			return State.MakeState<T>(null, new Error('Symbol not bound: ' + id.toString()));
 		}
-		return provider.provideAsState();
+		return provider.provideAsState() as State<T>;
 	}
 }
