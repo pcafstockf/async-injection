@@ -30,7 +30,7 @@ export abstract class Provider<T = any> {
 	 * @param asyncOnly This default implementation ignores this parameter.
 	 * @returns A completion Promise if initialization requires asynchronicity, otherwise the return value is undefined.
 	 */
-	resolveIfSingleton(asyncOnly: boolean): Promise<T> {
+	resolveIfSingleton(asyncOnly: boolean): Promise<T> {   // eslint-disable-line @typescript-eslint/no-unused-vars
 		if (this.singleton === null) {
 			const s = this.provideAsState();
 			if (s.pending)

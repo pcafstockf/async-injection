@@ -96,7 +96,7 @@ export function Inject(id: InjectableId<any>): ParameterDecorator {
  * @param parameterIndex    The ordinal index of the parameter in the constructor’s parameter list
  * @see Inject
  */
-export function _getInjectedIdAt(target: any, parameterIndex: number): InjectableId<any> {
+export function _getInjectedIdAt(target: Function, parameterIndex: number): InjectableId<any> {
 	return Reflect.getMetadata(INJECT_METADATA_KEY, target, makeParamIdxKey(parameterIndex)) as InjectableId<any>;
 }
 
@@ -104,7 +104,7 @@ export function _getInjectedIdAt(target: any, parameterIndex: number): Injectabl
  * Placed just before a constructor parameter, this parameter decorator signals the container that it should supply the 'alt' constant value (undefined by default) if for *any* reason it is unable to otherwise resolve the type of the parameter.
  * WARNING!  It is your responsibility to ensure that alt is of the appropriate type/value.
  */
-export function Optional(alt?: any): ParameterDecorator {
+export function Optional(alt?: any): ParameterDecorator {   // eslint-disable-line @typescript-eslint/explicit-module-boundary-types
 	/**
 	 * @param target  The constructor function of the class (we don't allow @Optional on anything else).
 	 * @param parameterName The name of the parameter
@@ -125,7 +125,7 @@ export function Optional(alt?: any): ParameterDecorator {
  * @see Optional
  * @returns an object containing the value provided in the decorator, or undefined if no annotation was present.
  */
-export function _getOptionalDefaultAt(target: any, parameterIndex: number): { value: any } {
+export function _getOptionalDefaultAt(target: Function, parameterIndex: number): { value: any } {
 	return Reflect.getMetadata(OPTIONAL_METADATA_KEY, target, makeParamIdxKey(parameterIndex)) as { value: any }; // See the @Optional decorator before making any changes here.
 }
 
@@ -142,7 +142,7 @@ export function PostConstruct(): MethodDecorator {
 	 * @returns Undefined (nothing), as this decorator does not modify the method in any way.
 	 */
 	// noinspection JSUnusedLocalSymbols
-	return function (target: Object, methodName: string | symbol, descriptor: PropertyDescriptor) {
+	return function (target: Object, methodName: string | symbol, descriptor: PropertyDescriptor) {    // eslint-disable-line @typescript-eslint/no-unused-vars
 		if (typeof target !== 'object' || typeof target.constructor !== 'function') {
 			throw new Error('@PostConstruct not applied to instance method [' + target.toString() + '/' + methodName.toString() + ']');
 		}

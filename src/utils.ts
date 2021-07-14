@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access, @typescript-eslint/explicit-module-boundary-types */
 
 export function isErrorObj(err: any): err is Error {
-    if (!err)
+	if (!err)
         return false;
 
     if (err instanceof Error)
