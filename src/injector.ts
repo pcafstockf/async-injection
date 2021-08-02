@@ -1,7 +1,7 @@
 /**
  * This is about as close as we can get in Typescript
  */
-export type AbstractConstructor<T> = Function & { prototype: T };
+export type AbstractConstructor<T> = Function & { prototype: T };   // eslint-disable-line @typescript-eslint/ban-types
 /**
  * Standard definition of a constructor.
  */
