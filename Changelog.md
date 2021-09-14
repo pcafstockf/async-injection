@@ -42,12 +42,11 @@ Update tsc devDependency from 4.3.3 to 4.3.4.
 Update the ChangeLog to properly reflect recent GitHub releases.  
 
 **1.2.6 / 2021-07-14**  
-Merge PR [https://github.com/pcafstockf/async-injection/pull/9](ESLINT integration + Improvements).  
+Merge PR #9 [ESLINT integration + Improvements](https://github.com/pcafstockf/async-injection/pull/9).  
 Update devDependencies.  
 Resolved a couple of eslint warnings.  
 tsc no longer removes comments in generated code.  This can cause problems with post-processing tools such as istanbul. If file size is of concern to you, you should probably be minifying anyway.  
 
 **1.2.7 / 2021-08-02**  
-Revert type declaration for AbstractConstructor which was broken during eslint integration.
+Revert type declaration for AbstractConstructor which was broken during eslint integration.  
 Update eslint related dev-dependencies.
-
