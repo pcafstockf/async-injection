@@ -2,7 +2,7 @@
 /**
  * These decorators all apply the information they collect (whether class, method, or parameter data) as tagged metadata on the class's constructor
  */
-import { INJECTABLE_METADATA_KEY, INJECT_METADATA_KEY, OPTIONAL_METADATA_KEY, POSTCONSTRUCT_ASYNC_METADATA_KEY, POSTCONSTRUCT_SYNC_METADATA_KEY, REFLECT_RETURN } from './constants';
+import {INJECTABLE_METADATA_KEY, INJECT_METADATA_KEY, OPTIONAL_METADATA_KEY, POSTCONSTRUCT_ASYNC_METADATA_KEY, POSTCONSTRUCT_SYNC_METADATA_KEY, REFLECT_RETURN, RELEASE_METADATA_KEY} from './constants';
 import { InjectableId } from './injector';
 
 // Help user locate misapplied decorators.
@@ -155,5 +155,37 @@ export function PostConstruct(): MethodDecorator {
 		} else {
 			Reflect.defineMetadata(POSTCONSTRUCT_SYNC_METADATA_KEY, methodName, target.constructor);
 		}
+	};
+}
+
+// noinspection JSUnusedGlobalSymbols
+/**
+ * Placed just before a class method, this decorator identifies a method which should be called when an object is removed from service.
+ * If invoked by the container, the container will drop any references it has to the object when the method returns.
+ * Note that this decorator is *not* a guarantee (or even an implication) that the decorated method will be called (JavaScript has no mechanism to enforce such a contract).
+ * This decorator simply serves as a flag to indicate a method which is intended to clean up resources allocated by the object *which would not otherwise be garbage collected*.
+ * You should *not* use this decorator as a general "object finalization" method.  It has very limited scope and purpose.
+ * The decorated method must complete normally (no throwing), as "release" is not an abort-able process.
+ * This decorator will throw if placed on a non-method or a static method of a class, or if placed on a method more than once, or if placed on more than one method for a class.
+ * The @see InvokeReleaseMethod helper function can search for and invoke the @Release decorated method of an object.
+ * Also @see Container.releaseSingletons for the intended usage of this decorator.
+ * It is intended that after the @Release decorated method of an object is called, that object will not be used again, but this is of course not enforced).
+ */
+export function Release(): MethodDecorator {
+	/**
+	 * @param prototypeOrConstructor   The prototype of the class (we don't allow @Release on anything other than a class instance method.
+	 * @param methodName   The name of the method.
+	 * @param descriptor   The Property Descriptor for the method.
+	 * @returns Undefined (nothing), as this decorator does not modify the method in any way.
+	 */
+	// noinspection JSUnusedLocalSymbols
+	return function (target: Object, methodName: string | symbol, descriptor: PropertyDescriptor) {    // eslint-disable-line @typescript-eslint/no-unused-vars
+		if (typeof target !== 'object' || typeof target.constructor !== 'function') {
+			throw new Error('@Release not applied to instance method [' + target.toString() + '/' + methodName.toString() + ']');
+		}
+		if (Reflect.hasOwnMetadata(RELEASE_METADATA_KEY, target.constructor)) {
+			throw new Error('@Release applied multiple times [' + targetHint(target.constructor) + ']');
+		}
+		Reflect.defineMetadata(RELEASE_METADATA_KEY, methodName, target.constructor);
 	};
 }

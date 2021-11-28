@@ -18,7 +18,8 @@ You can get the latest release using npm:
 $ npm install async-injection --save
 ```
 
-Add a polyfill for the Reflect API (examples below use reflect-metadata). You can use:
+To enhance flexibility, Async-Injection does not dictate which Reflect API implementation you use.  However, you will need to explicitly choose and load one.  
+You can use:
 
 - [reflect-metadata](https://www.npmjs.com/package/reflect-metadata)
 - [core-js (core-js/es7/reflect)](https://www.npmjs.com/package/core-js)
@@ -31,6 +32,9 @@ The Reflect polyfill import should only be added once, and before Async-Injectio
 import "reflect-metadata";
 // Your code here...
 ```
+
+Please note that this library supports a wide variety of runtimes and is distributed as both esm and cjs modules, side by side.  
+Please see this [link](https://github.com/pcafstockf/async-injection/issues/10) if you experience module errors when compiling.
 
 ## Basic Usage (synchronous)
 Here we 'get' a new transaction handling object, that itself, relies on a shared service:
@@ -233,7 +237,7 @@ Thanks to Carlos Delgado for the idea of a ["QuerablePromise"](https://ourcodewo
 
 ## MIT License
 
-Copyright (c) 2020 Frank Stock
+Copyright (c) 2021 Frank Stock
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

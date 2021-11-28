@@ -2,8 +2,9 @@
 
 import 'jasmine';
 import "reflect-metadata";
+// noinspection ES6PreferShortImport
 import { Container } from '../src/container';
-import { Injectable, PostConstruct } from '../src/decorators';
+import {Injectable, PostConstruct, Release} from '../src/decorators';
 
 let counter = 1;
 
@@ -135,6 +136,30 @@ describe('Simple Singletons', () => {
 		expect(b2 instanceof B).toBeTruthy();
 		expect(b1.c === b2.c).toBeFalsy();
 		expect(b1.a.c === b2.a.c).toBeTruthy();
+	});
+	it('Should support resource cleanup', () => {
+		@Injectable()
+		class A {
+			public constructor() {
+				this.a = 'A';
+			}
+
+			@Release()
+			protected cleanup() {
+				delete this.a;
+			}
+
+			public a: string;
+		}
+
+		const container = new Container();
+		container.bindClass(A).asSingleton();
+
+		const a1 = container.get(A);
+		expect(a1 instanceof A).toBeTruthy();
+		expect(a1.a).toEqual('A');
+		container.releaseSingletons();
+		expect(a1.a).toBeUndefined();
 	});
 });
 describe('Constants', () => {

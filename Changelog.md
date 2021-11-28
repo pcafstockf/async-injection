@@ -50,3 +50,8 @@ tsc no longer removes comments in generated code.  This can cause problems with 
 **1.2.7 / 2021-08-02**  
 Revert type declaration for AbstractConstructor which was broken during eslint integration.  
 Update eslint related dev-dependencies.
+
+**1.3.0 / 2021-11-27**  
+Support Container driven release of Singleton allocated resources (see Container.releaseSingletons).  
+Update devDependencies.  
+Minor updates to ReadMe.

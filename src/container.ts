@@ -83,13 +83,19 @@ export class Container implements Binder {
 	 *
 	 * @param id    The id to be removed.
 	 * @param ascending  If true, this will remove all bindings of the specified id all the way up the parent container chain (if it exists).
+	 * @param releaseIfSingleton  If true, @Provider.releaseIfSingleton will be invoked before the binding is removed.
 	 */
-	public removeBinding<T>(id: InjectableId<T>, ascending?: boolean): void {
+	public removeBinding<T>(id: InjectableId<T>, ascending?: boolean, releaseIfSingleton?: boolean): void {
+		if (releaseIfSingleton) {
+			const p = this.providers.get(id);
+			if (p)
+				p.releaseIfSingleton();
+		}
 		this.providers.delete(id);
 
 		if (ascending && this.parent) {
 			// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
-			(this.parent as any)?.removeBinding(id, true);
+			(this.parent as any)?.removeBinding(id, true, releaseIfSingleton);
 		}
 	}
 
@@ -206,5 +212,22 @@ export class Container implements Binder {
 			return State.MakeState<T>(null, new Error('Symbol not bound: ' + id.toString()));
 		}
 		return provider.provideAsState() as State<T>;
+	}
+
+	// noinspection JSUnusedGlobalSymbols
+	/**
+	 * Convenience method to assist in releasing non-garbage-collectable resources that Singletons in this Container may have allocated.
+	 * It will walk through all registered Providers (of this Container only), and invoke their @see Provider.releaseIfSingleton method.
+	 * This method is not part of the Binding interface, because you normally only create (and release) Containers.
+	 * NOTE:
+	 * This *only* releases active/pending Singleton's that have already been created by this Container.
+	 * The most likely use of this method would be when you have created a new child Container for a limited duration transaction, and you want to easily cleanup temporary resources.
+	 * For example, your service object may need to know when it should unsubscribe from an RxJs stream (failure to do so can result in your Singleton not being garbage collected at the end of a transaction).
+	 * In theory, you could handle all unsubscription and cleanup yourself, but the @Release decorator and this method are meant to simply make that easier.
+	 */
+	public releaseSingletons(): void {
+		this.providers.forEach((value: Provider) => {
+			value.releaseIfSingleton();
+		});
 	}
 }

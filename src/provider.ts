@@ -1,4 +1,6 @@
 import { State } from './state';
+import { InvokeReleaseMethod } from './utils';
+
 
 /**
  * Internally all InjectableIds are mapped to an abstract Provider<T>.
@@ -39,5 +41,31 @@ export abstract class Provider<T = any> {
 				return Promise.reject(s.rejected);
 		}
 		return undefined;
+	}
+
+	/**
+	 * If (and only if) this Provider has been configured as a Singleton, and if it has been (or is being resolved), find and invoke the @Release decorated method (if there is one).
+	 * NOTE that if the singleton is actively being resolved when this method is called, this method waits for the resolution to complete and then invokes the @Release decorated method; But in any case this is a synchronous method and returns immediately to it's caller.
+	 * Also note that invoking this method does not release or invalidate the Provider;
+	 * Rather, it resets a Singleton Provider to a fresh (unresolved/unqueried) state (aka sets this.singleton to null).
+	 * It is assumed that the Singleton itself will no longer be used after this method returns.
+	 */
+	releaseIfSingleton(): void {
+		if (this.singleton) {
+			const s = this.provideAsState();
+			if (s.pending) {
+				s.promise.then((v) => {
+					this.singleton = null;
+					InvokeReleaseMethod(v);
+				}).catch(() => {
+					this.singleton = null;
+				});
+			}
+			else {
+				this.singleton = null;
+				if ((!s.rejected) && s.fulfilled)
+					InvokeReleaseMethod(s.fulfilled);
+			}
+		}
 	}
 }
