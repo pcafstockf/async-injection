@@ -2,6 +2,7 @@
 
 import 'jasmine';
 import "reflect-metadata";
+import {InjectionToken} from '../src';
 // noinspection ES6PreferShortImport
 import { Container } from '../src/container';
 import {Injectable, PostConstruct, Release} from '../src/decorators';
@@ -179,6 +180,21 @@ describe('Constants', () => {
 		expect(a.a).toEqual('hello');
 		const s = container.get(String);
 		expect(s).toEqual(a.a);
+	});
+	it('Should perform implicit typing when used with an InjectionToken', () => {
+		interface I {
+			a: string;
+		}
+		const token = new InjectionToken<I>('implicit');
+
+		const container = new Container();
+		container.bindConstant(token, {a: 'foo'});
+
+		// The test here is not really on the value of a, rather it is that this test compiles.
+		// obj.b for instance would be a compilation error
+		const obj = container.get(token);
+		expect(obj.a).toEqual('foo');
+		expect(token.toString()).toEqual('implicit');   // This helps know what the token is when debugging, not really something that needs tested.
 	});
 });
 describe('Synchronous Factory', () => {

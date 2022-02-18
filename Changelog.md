@@ -55,3 +55,8 @@ Update eslint related dev-dependencies.
 Support Container driven release of Singleton allocated resources (see Container.releaseSingletons).  
 Update devDependencies.  
 Minor updates to ReadMe.
+
+**1.4.0 / 2022-02-16**  
+Add Angular style InjectionToken class as a variant of InjectableId to support implicit typing of constants and interfaces.  
+Minor update to Binder.resolveSingletons to make it chainable (aka return the Container/Binder instance).  
+Minor updates to ReadMe.

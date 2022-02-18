@@ -214,8 +214,8 @@ Async-Injection tries to follow the common API patterns found in most other DI i
 [@Injectable](https://pcafstockf.github.io/async-injection/api-docs/globals.html#injectable) decorator (aka annotation) to your class (see examples above).
 - You may optionally add a 
 [@PostConstruct](https://pcafstockf.github.io/async-injection/api-docs/globals.html#postconstruct) decorator to a method of your class to perform synchronous or asynchronous initialization of a new instance.
-- By default, Async-Inject will examine the parameters of a class constructor and do it's best to match those to bound 
-[InjectableIds](https://pcafstockf.github.io/async-injection/api-docs/globals.html#injectableid).  
+- By default, Async-Injection will examine the parameters of a class constructor and do it's best to match those to a bound 
+[InjectableId](https://pcafstockf.github.io/async-injection/api-docs/globals.html#injectableid).  
 - You may use the 
 [@Inject](https://pcafstockf.github.io/async-injection/api-docs/globals.html#inject) decorator to explicitly declare which 
 [InjectableId](https://pcafstockf.github.io/async-injection/api-docs/globals.html#injectableid) should be used (generally required for a 
@@ -224,7 +224,7 @@ Async-Injection tries to follow the common API patterns found in most other DI i
 [@Optional](https://pcafstockf.github.io/async-injection/api-docs/globals.html#optional) decorator allows you to specify a default value for a class constructor parameter in the event that no matching 
 [InjectableId](https://pcafstockf.github.io/async-injection/api-docs/globals.html#injectableid) can be found.
 - The Container's 
-[resolveSingletons](https://pcafstockf.github.io/async-injection/api-docs/container.html#resolvesingletons) method may be used to wait for any bound asynchronous [Singletons](https://en.wikipedia.org/wiki/Singleton_pattern) to finish initialization before continuing execution of your application.
+[resolveSingletons](https://pcafstockf.github.io/async-injection/api-docs/container.html#resolvesingletons) method may be used to wait for any bound (a)synchronous [Singletons](https://en.wikipedia.org/wiki/Singleton_pattern) to finish initialization before continuing execution of your application.
 
 ## Acknowledgements
 Thanks to all the contributors at [InversifyJS](https://github.com/inversify/InversifyJS).  It is a powerful, clean, flexible, inspiring design.
@@ -237,7 +237,7 @@ Thanks to Carlos Delgado for the idea of a ["QuerablePromise"](https://ourcodewo
 
 ## MIT License
 
-Copyright (c) 2021 Frank Stock
+Copyright (c) 2020-2022 Frank Stock
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

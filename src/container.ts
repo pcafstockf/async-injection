@@ -146,7 +146,7 @@ export class Container implements Binder {
 	/**
 	 * @inheritDoc
 	 */
-	public resolveSingletons(asyncOnly?: boolean, parentRecursion?: boolean): Promise<void> {
+	public resolveSingletons(asyncOnly?: boolean, parentRecursion?: boolean): Promise<this> {
 		const makePromiseToResolve = () => {
 			return new Promise<void>((resolve, reject) => {
 				const pending = new Map<InjectableId<any>, Promise<void>>();
@@ -183,10 +183,10 @@ export class Container implements Binder {
 		if (parentRecursion && typeof (this.parent as Binder)?.resolveSingletons === "function") {
 			const pb: Binder = this.parent as Binder;
 			return pb.resolveSingletons(asyncOnly, parentRecursion).then(() => {
-				return makePromiseToResolve();
+				return makePromiseToResolve().then(() => this);
 			});
 		}
-		return makePromiseToResolve();
+		return makePromiseToResolve().then(() => this);
 	}
 
 	/**

@@ -114,5 +114,5 @@ export interface Binder extends Injector {
 	 * @param parentRecursion   If true and the the container has a parent, resolveIfSingleton will first be called for the parent
 	 * @returns A Promise that resolves when all Singleton's have been resolved, OR rejects if one or more of the Singleton's failed to resolve.  NOTE: Rejection does not occur until all Singleton resolutions have settled, and the rejection reason/err will be a Map<InjectableId, Error>
 	 */
-	resolveSingletons(asyncOnly?: boolean, parentRecursion?: boolean): Promise<void>;
+	resolveSingletons(asyncOnly?: boolean, parentRecursion?: boolean): Promise<this>;
 }

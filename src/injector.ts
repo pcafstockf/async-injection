@@ -8,9 +8,22 @@ export type AbstractConstructor<T> = Function & { prototype: T };   // eslint-di
 export type ClassConstructor<T> = new (...args: any[]) => T;
 
 /**
+ * Allow for implicit typing of constants and interfaces.
+ * Inspired by Angular and some colleges at work.
+ */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export class InjectionToken<T> {
+	constructor(private id: string | symbol) {
+	}
+	toString(): string {
+		return this.id.toString();
+	}
+}
+
+/**
  * Universal id that can be bound to a constant, class, or factories.
  */
-export type InjectableId<T> = string | symbol | AbstractConstructor<T> | ClassConstructor<T>;
+export type InjectableId<T> = string | symbol | AbstractConstructor<T> | ClassConstructor<T> | InjectionToken<T>;
 
 /**
  * Retrieve instances previously bound to the specified InjectableId.
