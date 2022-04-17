@@ -2,8 +2,8 @@
 /**
  * These decorators all apply the information they collect (whether class, method, or parameter data) as tagged metadata on the class's constructor
  */
-import {INJECTABLE_METADATA_KEY, INJECT_METADATA_KEY, OPTIONAL_METADATA_KEY, POSTCONSTRUCT_ASYNC_METADATA_KEY, POSTCONSTRUCT_SYNC_METADATA_KEY, REFLECT_RETURN, RELEASE_METADATA_KEY} from './constants';
-import { InjectableId } from './injector';
+import {INJECT_METADATA_KEY, INJECTABLE_METADATA_KEY, OPTIONAL_METADATA_KEY, POSTCONSTRUCT_ASYNC_METADATA_KEY, POSTCONSTRUCT_SYNC_METADATA_KEY, REFLECT_RETURN, RELEASE_METADATA_KEY} from './constants';
+import {InjectableId} from './injector';
 
 // Help user locate misapplied decorators.
 function targetHint(target: Function) {
@@ -113,7 +113,7 @@ export function Optional(alt?: any): ParameterDecorator {   // eslint-disable-li
 	 */
 	return function (target: Function, parameterName: string | symbol, parameterIndex: number): void {
 		const paramKey = validateSingleConstructorParam('Optional', target, parameterIndex);
-		Reflect.defineMetadata(OPTIONAL_METADATA_KEY, { value: alt }, target, paramKey);
+		Reflect.defineMetadata(OPTIONAL_METADATA_KEY, {value: alt}, target, paramKey);
 	};
 }
 
@@ -152,7 +152,8 @@ export function PostConstruct(): MethodDecorator {
 		const rt = Reflect.getMetadata(REFLECT_RETURN, target, methodName);
 		if (typeof rt === 'function') {
 			Reflect.defineMetadata(POSTCONSTRUCT_ASYNC_METADATA_KEY, methodName, target.constructor);
-		} else {
+		}
+		else {
 			Reflect.defineMetadata(POSTCONSTRUCT_SYNC_METADATA_KEY, methodName, target.constructor);
 		}
 	};

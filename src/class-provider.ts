@@ -1,9 +1,9 @@
-import { BindableProvider } from './bindable-provider';
-import { POSTCONSTRUCT_ASYNC_METADATA_KEY, POSTCONSTRUCT_SYNC_METADATA_KEY, REFLECT_PARAMS } from './constants';
-import { _getInjectedIdAt, _getOptionalDefaultAt } from './decorators';
-import { ClassConstructor, InjectableId, Injector } from './injector';
-import { State } from './state';
-import { isPromise } from './utils';
+import {BindableProvider} from './bindable-provider';
+import {POSTCONSTRUCT_ASYNC_METADATA_KEY, POSTCONSTRUCT_SYNC_METADATA_KEY, REFLECT_PARAMS} from './constants';
+import {_getInjectedIdAt, _getOptionalDefaultAt} from './decorators';
+import {ClassConstructor, InjectableId, Injector} from './injector';
+import {State} from './state';
+import {isPromise} from './utils';
 
 /*
  * This is a bit of a hack, but it avoids a ton of alternative hacks.
@@ -61,7 +61,8 @@ export class ClassBasedProvider<T> extends BindableProvider<T, ClassConstructor<
 				pcFn = () => {
 					return this.successHandler(obj, this.injector, this.id, this.maker);
 				};
-			} else {
+			}
+			else {
 				/* eslint-disable @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
 				// Check to see if there is a @PostConstruct annotation on a method of the class.
 				let postConstruct: string = Reflect.getMetadata(POSTCONSTRUCT_SYNC_METADATA_KEY, obj.constructor);

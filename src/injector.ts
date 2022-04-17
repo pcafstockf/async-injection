@@ -11,10 +11,11 @@ export type ClassConstructor<T> = new (...args: any[]) => T;
  * Allow for implicit typing of constants and interfaces.
  * Inspired by Angular and some colleges at work.
  */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export class InjectionToken<T> {
 	constructor(private id: string | symbol) {
 	}
+
 	toString(): string {
 		return this.id.toString();
 	}

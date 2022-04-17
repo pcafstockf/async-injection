@@ -1,1 +1,1 @@
-import "reflect-metadata/standalone";
+import 'reflect-metadata/standalone';

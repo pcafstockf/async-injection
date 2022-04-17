@@ -687,8 +687,8 @@ describe('Asynchronous error handling', () => {
 		expect(clone.get('const')).toBe(orig.get('const'));
 
 		// Since we resolved B in orig, it's singleton state carried over to clone, so we should be able to release.
-		expect(c.b.b).toEqual("B");
+		expect(c.b.b).toEqual('B');
 		clone.releaseSingletons();
-		expect(c.b.b).toEqual("released");
+		expect(c.b.b).toEqual('released');
 	});
 });

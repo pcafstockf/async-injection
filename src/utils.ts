@@ -6,25 +6,25 @@ import {RELEASE_METADATA_KEY} from './constants';
  */
 export function isErrorObj(err: any): err is Error {
 	if (!err)
-        return false;
+		return false;
 
-    if (err instanceof Error)
-        return true;
+	if (err instanceof Error)
+		return true;
 
-    return err && typeof err.message === 'string' && typeof err.stack === 'string';
+	return err && typeof err.message === 'string' && typeof err.stack === 'string';
 }
 
 /**
  * Returns true if the specified value is "thenable" (aka a Promise).
  */
 export function isPromise<T>(value: any): value is Promise<T> {
-    if (!value)
-        return false;
+	if (!value)
+		return false;
 
-    if (value instanceof Promise)
-        return true;
+	if (value instanceof Promise)
+		return true;
 
-    return value && typeof value.then === 'function';
+	return value && typeof value.then === 'function';
 }
 
 /**
@@ -32,7 +32,7 @@ export function isPromise<T>(value: any): value is Promise<T> {
  * This is primarily an internal method as you probably know the exact method, and should invoke it yourself.
  * async-injection uses this helper to allow Singletons to clean up any non-garbage-collectable resources they may have allocated.
  */
-export function InvokeReleaseMethod<T=unknown>(obj: T) : boolean {
+export function InvokeReleaseMethod<T = unknown>(obj: T): boolean {
 	const releaseMethod: string = Reflect.getMetadata(RELEASE_METADATA_KEY, obj.constructor);
 	/* eslint-disable @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
 	if (releaseMethod && obj.constructor.prototype[releaseMethod] && typeof obj.constructor.prototype[releaseMethod] === 'function') {

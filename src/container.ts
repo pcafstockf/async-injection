@@ -1,14 +1,14 @@
-import { AsyncFactoryBasedProvider } from './async-factory-provider';
+import {AsyncFactoryBasedProvider} from './async-factory-provider';
 import {BindableProvider} from './bindable-provider';
-import { AsyncFactory, BindAs, Binder, SyncFactory } from './binder';
-import { ClassBasedProvider } from './class-provider';
-import { ConstantProvider } from './constant-provider';
-import { INJECTABLE_METADATA_KEY } from './constants';
-import { AbstractConstructor, ClassConstructor, InjectableId, Injector } from './injector';
-import { Provider } from './provider';
-import { State } from './state';
-import { FactoryBasedProvider } from './sync-factory-provider';
-import { isPromise } from './utils';
+import {AsyncFactory, BindAs, Binder, SyncFactory} from './binder';
+import {ClassBasedProvider} from './class-provider';
+import {ConstantProvider} from './constant-provider';
+import {INJECTABLE_METADATA_KEY} from './constants';
+import {AbstractConstructor, ClassConstructor, InjectableId, Injector} from './injector';
+import {Provider} from './provider';
+import {State} from './state';
+import {FactoryBasedProvider} from './sync-factory-provider';
+import {isPromise} from './utils';
 
 /**
  * Helper class to ensure we can distinguish between Error instances legitimately returned from Providers, and Errors thrown by Providers.
@@ -30,6 +30,7 @@ export class Container implements Binder {
 	 */
 	public constructor(protected parent?: Injector) {
 	}
+
 	protected providers = new Map<InjectableId<any>, Provider>();
 
 	/**
@@ -179,7 +180,7 @@ export class Container implements Binder {
 					});
 			});
 		};
-		if (parentRecursion && typeof (this.parent as Binder)?.resolveSingletons === "function") {
+		if (parentRecursion && typeof (this.parent as Binder)?.resolveSingletons === 'function') {
 			const pb: Binder = this.parent as Binder;
 			return pb.resolveSingletons(asyncOnly, parentRecursion).then(() => {
 				return makePromiseToResolve().then(() => this);
@@ -246,10 +247,10 @@ export class Container implements Binder {
 	 *      The way to avoid this last effect is to @see resolveSingletons
 	 */
 	clone(clazz?: ClassConstructor<Container>): Container {
-		if (! clazz)
+		if (!clazz)
 			clazz = Container;
 		const retVal = new clazz(this.parent);
-		this.providers.forEach((v,k) => {
+		this.providers.forEach((v, k) => {
 			if (v instanceof BindableProvider) {
 				v = Object.assign(Object.create(Object.getPrototypeOf(v)), v);
 				// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access

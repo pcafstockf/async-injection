@@ -1,10 +1,10 @@
 /* eslint-disable */
 
 import 'jasmine';
-import "reflect-metadata";
+import 'reflect-metadata';
 import {InjectionToken} from '../src';
 // noinspection ES6PreferShortImport
-import { Container } from '../src/container';
+import {Container} from '../src/container';
 import {Injectable, PostConstruct, Release} from '../src/decorators';
 
 let counter = 1;
@@ -185,6 +185,7 @@ describe('Constants', () => {
 		interface I {
 			a: string;
 		}
+
 		const token = new InjectionToken<I>('implicit');
 
 		const container = new Container();
@@ -238,6 +239,7 @@ describe('PostConstruct execution', () => {
 			public constructor() {
 				this.i = 'PostConstruct';
 			}
+
 			public i: string;
 			public a: string;
 
@@ -269,6 +271,7 @@ describe('PostConstruct execution', () => {
 			public constructor() {
 				this.i = 'PostConstruct';
 			}
+
 			public i: string;
 			public a: string;
 
@@ -388,12 +391,13 @@ describe('Synchronous error handling', () => {
 			expect(err.message).toBe('Unable to initialize A');
 		}
 	});
-	it("Success handler's failure should invoke ErrorHandler with constructed object", () => {
+	it('Success handler\'s failure should invoke ErrorHandler with constructed object', () => {
 		@Injectable()
 		class A {
 			public constructor() {
 				this.a = 'A';
 			}
+
 			public a: string;
 		}
 

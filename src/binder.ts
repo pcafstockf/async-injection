@@ -1,4 +1,4 @@
-import { AbstractConstructor, ClassConstructor, InjectableId, Injector } from './injector';
+import {AbstractConstructor, ClassConstructor, InjectableId, Injector} from './injector';
 
 /**
  * Type definition for functions that return a value.
@@ -55,6 +55,7 @@ export type OnSuccessCallback<T, M> = (value: T, injector: Injector, id: Injecta
 export interface BindErrHandler<T, M> {
 	onError(cb: OnErrorCallback<T, M>): void;
 }
+
 /**
  * An interface allowing binding of a post construction handler.
  *
@@ -89,6 +90,7 @@ export interface Binder extends Injector {
 	 * The container will also invoke any `@PostConstruct` present on the class.
 	 */
 	bindClass<T>(id: ClassConstructor<T>, constructor?: ClassConstructor<T>): BindAs<T, ClassConstructor<T>>;
+
 	bindClass<T>(id: string | symbol | AbstractConstructor<T>, constructor: ClassConstructor<T>): BindAs<T, ClassConstructor<T>>;
 
 	/**
