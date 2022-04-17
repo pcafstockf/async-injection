@@ -5,14 +5,22 @@ import { ClassConstructor, InjectableId, Injector } from './injector';
 import { State } from './state';
 import { isPromise } from './utils';
 
-export type ResolveStateCallback = (id: InjectableId<any>) => State;
+/*
+ * This is a bit of a hack, but it avoids a ton of alternative hacks.
+ * Note that in the Container, resolveState is a protected method.
+ * Injector was never meant to publicly expose State.
+ * Gotta love JS!
+ */
+interface StateResolvingInjector extends Injector {
+	resolveState<T>(id: InjectableId<T>): State<T>;
+}
 
 /**
  * @inheritDoc
  * This specialization invokes it's configured class constructor synchronously and then scans for (and invokes) any @PostConstruct (which may be synchronous or asynchronous).
  */
 export class ClassBasedProvider<T> extends BindableProvider<T, ClassConstructor<T>> {
-	constructor(injector: Injector, id: InjectableId<T>, maker: ClassConstructor<T>, protected stateResolver: ResolveStateCallback) {
+	constructor(injector: StateResolvingInjector, id: InjectableId<T>, maker: ClassConstructor<T>) {
 		super(injector, id, maker);
 	}
 
@@ -109,8 +117,8 @@ export class ClassBasedProvider<T> extends BindableProvider<T, ClassConstructor<
 			// Check if an Inject annotation precedes the parameter.
 			const overrideToken = _getInjectedIdAt(this.maker, index);
 			const actualToken = overrideToken === undefined ? argType : overrideToken;
-			// Ask our configured container to resolve the parameter.
-			let param = this.stateResolver(actualToken);
+			// Ask our container to resolve the parameter.
+			let param = (this.injector as StateResolvingInjector).resolveState(actualToken);
 			// If the parameter could not be resolved, see if there is an @Optional annotation
 			if ((!param.pending) && param.rejected) {
 				const md = _getOptionalDefaultAt(this.maker, index);

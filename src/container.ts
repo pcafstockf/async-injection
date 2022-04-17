@@ -1,4 +1,5 @@
 import { AsyncFactoryBasedProvider } from './async-factory-provider';
+import {BindableProvider} from './bindable-provider';
 import { AsyncFactory, BindAs, Binder, SyncFactory } from './binder';
 import { ClassBasedProvider } from './class-provider';
 import { ConstantProvider } from './constant-provider';
@@ -118,9 +119,7 @@ export class Container implements Binder {
 		if (!Reflect.getMetadata(INJECTABLE_METADATA_KEY, constructor)) {
 			throw new Error('Class not decorated with @Injectable [' + constructor.toString() + ']');
 		}
-		const provider = new ClassBasedProvider(this, id, constructor, (i: InjectableId<any>) => {
-			return this.resolveState(i);
-		});
+		const provider = new ClassBasedProvider(this as any, id, constructor);
 		this.providers.set(id, provider);
 		return provider.makeBindAs();
 	}
@@ -229,5 +228,35 @@ export class Container implements Binder {
 		this.providers.forEach((value: Provider) => {
 			value.releaseIfSingleton();
 		});
+	}
+
+	/**
+	 * Make a copy of this @see Container.
+	 * This is an experimental feature!
+	 * I have not thought through all the dark corners, so use at your own peril!
+	 * Here are some notes:
+	 *  The injector parameter for SyncFactory and AsyncFactory callbacks will be the Container invoking the factory.
+	 *      So a factory that uses a parent closure instead of the supplied injector may get unexpected results.
+	 *  The injector parameter for OnSuccess and OnError callbacks will be the Container performing the resolution.
+	 *  Singletons are cloned at their *existing* state..
+	 *      If resolved in "this" container, they will not be re-resolved for the clone.
+	 *      If released by the clone, they will be considered released by "this" container.
+	 *      If a singleton is currently being asynchronously constructed any callbacks will reference "this" Container, however both Containers should have no problem awaiting resolution.
+	 *      If a singleton is not resolved when the container is cloned, then if both containers resolve, you will create *two* "singletons".
+	 *      The way to avoid this last effect is to @see resolveSingletons
+	 */
+	clone(clazz?: ClassConstructor<Container>): Container {
+		if (! clazz)
+			clazz = Container;
+		const retVal = new clazz(this.parent);
+		this.providers.forEach((v,k) => {
+			if (v instanceof BindableProvider) {
+				v = Object.assign(Object.create(Object.getPrototypeOf(v)), v);
+				// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+				(v as any).injector = retVal;
+			}
+			retVal.providers.set(k, v);
+		});
+		return retVal;
 	}
 }

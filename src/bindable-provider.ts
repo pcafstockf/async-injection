@@ -80,10 +80,10 @@ export abstract class BindableProvider<T, M = ClassConstructor<T> | SyncFactory<
 	 */
 	protected makePromiseForObj<R>(waitFor: Promise<R>, cb: (result: R) => T): Promise<T> {
 		return new Promise<T>((resolve, reject) => {
-			const errHandlerFn = (err: any) => {
+			const errHandlerFn = (err: any, objValue?: T) => {
 				// There was an error during async post construction, see if an error handler was provided, and if so, see what it wants to do.
 				if (this.errorHandler) {
-					const handlerResult = this.errorHandler(this.injector, this.id, this.maker, err);
+					const handlerResult = this.errorHandler(this.injector, this.id, this.maker, err, objValue);
 					// Error handler wants us to propagate an alternative error.
 					if (isErrorObj(handlerResult))
 						err = handlerResult;   // Fall thru
@@ -102,12 +102,12 @@ export abstract class BindableProvider<T, M = ClassConstructor<T> | SyncFactory<
 						resolve(cb(result));
 					}
 					catch (err) {
-						errHandlerFn(err);
+						errHandlerFn(err, cb(result));
 					}
 				}
 			).catch(
 				(err) => {
-					errHandlerFn(err);
+					errHandlerFn(err, cb(undefined));
 				}
 			);
 		});

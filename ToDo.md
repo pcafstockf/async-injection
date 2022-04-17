@@ -2,7 +2,7 @@ Someday / Maybes
 - [ ] Add tests that mis-apply decorators (see src/decorators.ts)
 - [ ] Add tests for removing container bindings
 - [ ] Add tests for checking if a binding is known by traversing up the Container hierarchy.
-- [ ] Add tests for releaseIfSingleton.
+- [ ] Add additional tests for releaseIfSingleton.
 - [ ] Add tests for throwing from resolveIfSingleton if one of the singleton's threw during creation.
 - [ ] Add second parameter to Container constructor that allows for initialization of constants (can we do factories to?).
 - [ ] Find and implement a more maintainable api doc strategy (currently run this command and hand edit a lot: typedoc --excludeExternals --excludeNotExported --excludePrivate --includeVersion --toc Injector,Binder,Container,Injectable,Inject,Optional,PostConstruct --mode file --out tmp-docs src)

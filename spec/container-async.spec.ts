@@ -1,9 +1,9 @@
 /* eslint-disable */
 
 import 'jasmine';
-import "reflect-metadata";
-import { Container } from '../src/container';
-import { Injectable, PostConstruct } from '../src/decorators';
+import 'reflect-metadata';
+import {Container, Inject, Injectable, Injector, Optional, PostConstruct} from '../src';
+import {Release} from '../src/decorators';
 
 describe('Async factories', () => {
 	it('Should support delayed retrieval', async () => {
@@ -126,6 +126,7 @@ describe('Async factories', () => {
 			public constructor() {
 				this.i = 'PostConstruct';
 			}
+
 			public i: string;
 			public a: string;
 
@@ -165,6 +166,7 @@ describe('Async factories', () => {
 			public constructor() {
 				this.i = 'PostConstruct';
 			}
+
 			public i: string;
 			public a: string;
 
@@ -567,5 +569,126 @@ describe('Asynchronous error handling', () => {
 			expect(err.message).toBe('Failed post construction of A');
 			done();
 		});
+	});
+	it('be able to clone a container', async () => {
+		@Injectable()
+		class A {
+			public constructor() {
+			}
+		}
+
+		@Injectable()
+		class B {
+			public constructor() {
+				this.b = 'B';
+			}
+
+			public b: string;
+
+			@PostConstruct()
+			public init(): Promise<void> {
+				return new Promise<void>((resolve) => {
+					setTimeout(() => {
+						resolve();
+					}, 25);
+				});
+			}
+
+			@Release()
+			autoRelease() {
+				this.b = 'released';
+			}
+		}
+
+		@Injectable()
+		class C {
+			public constructor(public b: B) {
+			}
+		}
+
+		@Injectable()
+		class E {
+			public constructor(@Inject('UnDef') @Optional('attempt') public e: string) {
+			}
+
+			@PostConstruct()
+			public init(): Promise<void> {
+				this.e = 'fail';
+				return new Promise<void>((resolve, reject) => {
+					setTimeout(() => {
+						reject(new Error('Failed post construction of E'));
+					}, 25);
+				});
+			}
+		}
+
+		const orig = new Container();
+		let clone: Container;
+		let acount = 0;
+		// test success callbacks *and* that we can retrieve something from the orig container, clone that container, and retrieve another instance of A from the cloned container.
+		orig.bindClass(A).onSuccess((value, injector, id, maker) => {
+			if (acount === 0) {
+				expect(injector).toBe(orig);
+			}
+			else {
+				expect(injector).toBe(clone);
+			}
+			expect(value).toBeInstanceOf(A);
+			expect(id).toBe(A);
+			expect(maker).toBe(A);
+			acount++;
+		});
+		// test singletons
+		orig.bindClass(B).asSingleton();
+		// test async factory
+		let ccount = 0;
+		orig.bindAsyncFactory(C, async (injector: Injector) => {
+			if (ccount === 0)
+				expect(injector).toBe(clone);
+			else
+				expect(injector).toBe(orig);
+			const b = await injector.resolve(B);
+			ccount++;
+			return new C(b);
+		});
+		orig.bindClass(E).onError((injector, id, maker, error, value) => {
+			// The construction will succeed, but postcontruction will throw, so this error handler should be invoked and will 'init' the e property as a "recovery"
+			expect(injector).toBe(clone);
+			expect(value).toBeInstanceOf(E);
+			expect(id).toBe(E);
+			expect(maker).toBe(E);
+			value.e = 'recovery';
+			return value;
+		});
+		orig.bindConstant('const', 42);
+
+		expect(acount).toBe(0);
+		const origA = orig.get(A);
+		expect(origA).toBeInstanceOf(A);
+		expect(acount).toBe(1);
+		orig.resolveSingletons();
+		clone = orig.clone();
+		expect(clone).toBeInstanceOf(Container);
+		expect(clone).not.toBe(orig);
+		const cloneA = clone.get(A);
+		expect(cloneA).toBeInstanceOf(A);
+		expect(acount).toBe(2);
+
+		const c = await clone.resolve(C);
+		expect(c.b).toBeInstanceOf(B);
+		const z = await orig.resolve(C);
+		expect(c).not.toBe(z);  // C is not a singleton, so regardless of container, we should always get a new one.
+		expect(z.b).toBe(c.b);  // B is a singleton, so regardless of container, it should always be the same.
+
+		const e = await clone.resolve(E);
+		expect(e.e).toEqual('recovery');
+
+		expect(clone.get('const')).toEqual(42);
+		expect(clone.get('const')).toBe(orig.get('const'));
+
+		// Since we resolved B in orig, it's singleton state carried over to clone, so we should be able to release.
+		expect(c.b.b).toEqual("B");
+		clone.releaseSingletons();
+		expect(c.b.b).toEqual("released");
 	});
 });
