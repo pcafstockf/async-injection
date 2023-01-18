@@ -14,11 +14,14 @@ of the `async-injection` `Container` interface.
 The `async-injection` decorators are *mostly* a super-set of the Inversify 
 decorators, but the case follows Angular decorators.
 
-By removing references in your code to Inversify, importing the index.ts file in this directory, 
-and adding these files to your project, you can continue 
-to use Inversify (under the hood), while gradually migrating your 
-application to an `async-injection` compatible API.  
-Once migrated, drop Inversify from your package.json, add `async-injection`, 
+By removing references in your code to Inversify, adding these files to your project,
+and importing `index.ts`, you can continue to use Inversify (under the hood), 
+while gradually migrating your application to an `async-injection` compatible API.  
+
+You can then gradually (or quickly :smile:) migrate your code to import the `Container` and Pascal case decorators,
+from `index.ts`.
+
+Once migrated, drop Inversify from your package.json, install `async-injection`, 
 and delete the migration files found in this directory.
 Finally, you will need to do a search and replace in your code on any imports 
-referencing this index.ts and substitute an import from `async-injection`.
+of `index.ts` and substitute that import for `async-injection`.
