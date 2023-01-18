@@ -26,7 +26,7 @@ export type AsyncFactory<T> = (injector: Injector) => Promise<T>;
  * An alternate Error which will be propagated back up the call chain.
  * Undefined, which means the 'error' parameter will be propagated back up the call chain.
  */
-export type OnErrorCallback<T, M> = (injector: Injector, id: InjectableId<T>, maker: M, error: Error, value?: T) => T | Error | void;
+export type OnErrorCallback<T, M> = (injector: Injector, id: InjectableId<T>, maker: M, error: unknown, value?: T) => T | Error | void;
 
 /**
  * You may bind a success handler which will be invoked just before the bound InjectableId is put into service.

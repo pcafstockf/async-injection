@@ -94,7 +94,8 @@ export class ClassBasedProvider<T> extends BindableProvider<T, ClassConstructor<
 				// The post construction method says it will let us know when it's finished.
 				if (result && (result instanceof Promise || (maybeAsync && isPromise<void>(result)))) {
 					// Return a State that is pending (the other return statements in this method return a State which is resolved or rejected).
-					return State.MakeState<T>(this.makePromiseForObj<void>(result, () => obj));
+					/* eslint-disable @typescript-eslint/no-unsafe-argument */
+					return State.MakeState<T>(this.makePromiseForObj<T>(result, () => obj));
 				}
 			}
 		}
@@ -119,6 +120,7 @@ export class ClassBasedProvider<T> extends BindableProvider<T, ClassConstructor<
 			const overrideToken = _getInjectedIdAt(this.maker, index);
 			const actualToken = overrideToken === undefined ? argType : overrideToken;
 			// Ask our container to resolve the parameter.
+			/* eslint-disable @typescript-eslint/no-unsafe-argument */
 			let param = (this.injector as StateResolvingInjector).resolveState(actualToken);
 			// If the parameter could not be resolved, see if there is an @Optional annotation
 			if ((!param.pending) && param.rejected) {
@@ -154,7 +156,7 @@ export class ClassBasedProvider<T> extends BindableProvider<T, ClassConstructor<
 			const objPromise = this.makePromiseForObj<any[]>(Promise.all(pendingParams), () => {
 				// All the parameters are now available, instantiate the class.
 				// If this throws, it will be handled by our caller.
-				return Reflect.construct(this.maker, params.map((p) => p.fulfilled as unknown)) as T;
+				return Reflect.construct(this.maker, params.map((p) => p.fulfilled as unknown));
 			});
 			// Once the obj is resolved, then we need to check for PostConstruct and if it was async, wait for that too.
 			return State.MakeState<T>(objPromise.then((obj) => {

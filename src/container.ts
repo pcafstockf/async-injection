@@ -120,6 +120,7 @@ export class Container implements Binder {
 		if (!Reflect.getMetadata(INJECTABLE_METADATA_KEY, constructor)) {
 			throw new Error('Class not decorated with @Injectable [' + constructor.toString() + ']');
 		}
+		/* eslint-disable @typescript-eslint/no-unsafe-argument */
 		const provider = new ClassBasedProvider(this as any, id, constructor);
 		this.providers.set(id, provider);
 		return provider.makeBindAs();

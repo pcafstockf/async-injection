@@ -60,3 +60,14 @@ Minor updates to ReadMe.
 Add Angular style InjectionToken class as a variant of InjectableId to support implicit typing of constants and interfaces.  
 Minor update to Binder.resolveSingletons to make it chainable (aka return the Container/Binder instance).  
 Minor updates to ReadMe.
+
+**1.5.0 / 2022-04-16**  
+Add experimental ability to clone a Container (see Container.clone JSDoc comments for details).
+Fix error handling callback to pass instantiated object when construction succeeds but post construction fails.
+Reformat code project wide (based on IntelliJ formatting options).
+
+**1.5.1 / 2022-04-16**  
+Update dev dependencies.
+Update github workflows.
+Update badges in main ReadMe.
+Add support directory.

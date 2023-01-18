@@ -53,7 +53,7 @@ export abstract class BindableProvider<T, M = ClassConstructor<T> | SyncFactory<
 	 *
 	 * @returns The object substituted by the callback (otherwise this method throws the appropriate error).
 	 */
-	protected queryErrorHandler(err: Error, obj?: T): T {
+	protected queryErrorHandler(err: unknown, obj?: T): T {
 		// There was an error during construction, see if an error handler was provided, and if so, see what it wants to do.
 		if (this.errorHandler) {
 			const handlerResult = this.errorHandler(this.injector, this.id, this.maker, err, obj);

@@ -1,9 +1,9 @@
 # Async-Injection
-[![Actions Status](https://github.com/pcafstockf/async-injection/workflows/CI/badge.svg)](https://github.com/pcafstockf/async-injection/actions)
-[![Actions Status](https://github.com/pcafstockf/async-injection/workflows/NPM%20Publish/badge.svg)](https://github.com/pcafstockf/async-injection/actions)
+[![CI Actions](https://github.com/pcafstockf/async-injection/workflows/CI/badge.svg)](https://github.com/pcafstockf/async-injection/actions)
+[![Publish Actions](https://github.com/pcafstockf/async-injection/workflows/NPM%20Publish/badge.svg)](https://github.com/pcafstockf/async-injection/actions)
 [![npm version](https://badge.fury.io/js/async-injection.svg)](https://badge.fury.io/js/async-injection)
-[![Actions Status](https://david-dm.org/pcafstockf/async-injection.svg)](https://github.com/pcafstockf/async-injection/package.json)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
+[![OSS Lifecycle](https://img.shields.io/osslifecycle/pcafstockf/async-injection.svg)]
 
 A robust lightweight dependency injection library for TypeScript.
 

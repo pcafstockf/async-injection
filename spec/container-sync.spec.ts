@@ -191,7 +191,7 @@ describe('Constants', () => {
 		const container = new Container();
 		container.bindConstant(token, {a: 'foo'});
 
-		// The test here is not really on the value of a, rather it is that this test compiles.
+		// The test here is not really on the value of 'a', rather it is that this test compiles.
 		// obj.b for instance would be a compilation error
 		const obj = container.get(token);
 		expect(obj.a).toEqual('foo');
@@ -346,7 +346,7 @@ describe('Synchronous error handling', () => {
 		container.bindClass('A', B).onError((injector, id, maker, error, value) => {
 			expect(id).toBe('A');
 			expect(value).toBeUndefined();
-			expect(error.message).toBe('Unable to construct B');
+			expect((error as Error).message).toBe('Unable to construct B');
 			return new C();
 		});
 
@@ -375,11 +375,11 @@ describe('Synchronous error handling', () => {
 		container.bindClass(A).onError((injector, id: any, maker, error, value) => {
 			expect(Object.is(injector, container)).toBeTruthy();
 			expect(id.name).toBe('A');
-			expect(error.message).toBe('Unable to initialize A');
+			expect((error as Error).message).toBe('Unable to initialize A');
 			expect(value).toBeInstanceOf(A);
 			expect(value.a).toBe('A');
 			errorHandlerInvoked = true;
-			return error;
+			return error as Error;
 		});
 
 		try {
@@ -409,11 +409,11 @@ describe('Synchronous error handling', () => {
 		}).onError((injector, id: any, maker, error, value) => {
 			expect(Object.is(injector, container)).toBeTruthy();
 			expect(id.name).toBe('A');
-			expect(error.message).toBe('Unable to initialize A');
+			expect((error as Error).message).toBe('Unable to initialize A');
 			expect(value).toBeInstanceOf(A);
 			expect(value.a).toBe('A');
 			errorHandlerInvoked = true;
-			return error;
+			return error as Error;
 		});
 
 		try {
