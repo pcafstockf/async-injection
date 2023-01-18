@@ -3,7 +3,7 @@
 [![Publish Actions](https://github.com/pcafstockf/async-injection/workflows/NPM%20Publish/badge.svg)](https://github.com/pcafstockf/async-injection/actions)
 [![npm version](https://badge.fury.io/js/async-injection.svg)](https://badge.fury.io/js/async-injection)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
-[![OSS Lifecycle](https://img.shields.io/osslifecycle/pcafstockf/async-injection.svg)]
+![OSS Lifecycle](https://img.shields.io/osslifecycle/pcafstockf/async-injection.svg)
 
 A robust lightweight dependency injection library for TypeScript.
 
@@ -237,7 +237,7 @@ Thanks to Carlos Delgado for the idea of a ["QuerablePromise"](https://ourcodewo
 
 ## MIT License
 
-Copyright (c) 2020-2022 Frank Stock
+Copyright (c) 2020-2023 Frank Stock
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
