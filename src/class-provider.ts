@@ -1,9 +1,9 @@
-import {BindableProvider} from './bindable-provider';
-import {POSTCONSTRUCT_ASYNC_METADATA_KEY, POSTCONSTRUCT_SYNC_METADATA_KEY, REFLECT_PARAMS} from './constants';
-import {_getInjectedIdAt, _getOptionalDefaultAt} from './decorators';
-import {ClassConstructor, InjectableId, Injector} from './injector';
-import {State} from './state';
-import {isPromise} from './utils';
+import {BindableProvider} from './bindable-provider.js';
+import {POSTCONSTRUCT_ASYNC_METADATA_KEY, POSTCONSTRUCT_SYNC_METADATA_KEY, REFLECT_PARAMS} from './constants.js';
+import {_getInjectedIdAt, _getOptionalDefaultAt} from './decorators.js';
+import {ClassConstructor, InjectableId, Injector} from './injector.js';
+import {State} from './state.js';
+import {isPromise} from './utils.js';
 
 /*
  * This is a bit of a hack, but it avoids a ton of alternative hacks.

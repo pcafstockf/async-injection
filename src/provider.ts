@@ -1,5 +1,5 @@
-import {State} from './state';
-import {InvokeReleaseMethod} from './utils';
+import {State} from './state.js';
+import {InvokeReleaseMethod} from './utils.js';
 
 
 /**

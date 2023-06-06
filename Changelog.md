@@ -1,3 +1,8 @@
+## 1.5.3 / 2023-06-05
+* Address esm issues [#10](https://github.com/pcafstockf/async-injection/issues/10) and [#15](https://github.com/pcafstockf/async-injection/issues/15)
+* Fix missing type overload on Binder interface.
+* Update dev dependencies.
+
 ## 1.5.2 / 2023-01-18
 * No code changes.
 * Updates to docs for consistency across projects.

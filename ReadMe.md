@@ -34,7 +34,6 @@ import "reflect-metadata";
 ```
 
 Please note that this library supports a wide variety of runtimes and is distributed as both esm and cjs modules, side by side.  
-Please see this [link](https://github.com/pcafstockf/async-injection/issues/10) if you experience module errors when compiling.
 
 ## Basic Usage (synchronous)
 Here we 'get' a new transaction handling object, that itself, relies on a shared service:

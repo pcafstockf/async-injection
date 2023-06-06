@@ -2,9 +2,10 @@
 
 import 'jasmine';
 import 'reflect-metadata';
-import {POSTCONSTRUCT_ASYNC_METADATA_KEY, POSTCONSTRUCT_SYNC_METADATA_KEY, REFLECT_PARAMS} from '../src/constants';
-import {Container, InjectableId} from '../src';
-import {_getInjectedIdAt, Inject, Injectable, Optional, PostConstruct} from '../src/decorators';
+// noinspection ES6PreferShortImport
+import {Container, InjectableId, Inject, Injectable, Optional, PostConstruct} from '../src/index.js';
+import {POSTCONSTRUCT_ASYNC_METADATA_KEY, POSTCONSTRUCT_SYNC_METADATA_KEY, REFLECT_PARAMS} from '../src/constants.js';
+import {_getInjectedIdAt} from '../src/decorators.js';
 
 describe('@Injectable', () => {
 	it('Should generate proper metadata', () => {

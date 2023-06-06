@@ -1,7 +1,7 @@
-import {BindableProvider} from './bindable-provider';
-import {SyncFactory} from './binder';
-import {InjectableId, Injector} from './injector';
-import {State} from './state';
+import {BindableProvider} from './bindable-provider.js';
+import {SyncFactory} from './binder.js';
+import {InjectableId, Injector} from './injector.js';
+import {State} from './state.js';
 
 /**
  * @inheritDoc

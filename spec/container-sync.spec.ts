@@ -2,10 +2,8 @@
 
 import 'jasmine';
 import 'reflect-metadata';
-import {InjectionToken} from '../src';
 // noinspection ES6PreferShortImport
-import {Container} from '../src/container';
-import {Injectable, PostConstruct, Release} from '../src/decorators';
+import {InjectionToken, Container, Injectable, PostConstruct, Release} from '../src/index.js';
 
 let counter = 1;
 

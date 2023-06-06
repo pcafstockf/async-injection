@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access, @typescript-eslint/explicit-module-boundary-types */
-import {RELEASE_METADATA_KEY} from './constants';
+import {RELEASE_METADATA_KEY} from './constants.js';
 
 /**
  * Returns true if the specified object looks like a JavaScript Error object.

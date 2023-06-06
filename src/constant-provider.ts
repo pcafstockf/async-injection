@@ -1,5 +1,5 @@
-import {Provider} from './provider';
-import {State} from './state';
+import {Provider} from './provider.js';
+import {State} from './state.js';
 
 /**
  * @inheritDoc

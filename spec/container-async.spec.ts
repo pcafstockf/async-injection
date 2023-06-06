@@ -2,8 +2,8 @@
 
 import 'jasmine';
 import 'reflect-metadata';
-import {Container, Inject, Injectable, Injector, Optional, PostConstruct} from '../src';
-import {Release} from '../src/decorators';
+// noinspection ES6PreferShortImport
+import {Container, Inject, Injectable, Injector, Optional, PostConstruct, Release} from '../src/index.js';
 
 describe('Async factories', () => {
 	it('Should support delayed retrieval', async () => {
@@ -652,7 +652,7 @@ describe('Asynchronous error handling', () => {
 			return new C(b);
 		});
 		orig.bindClass(E).onError((injector, id, maker, error, value) => {
-			// The construction will succeed, but postcontruction will throw, so this error handler should be invoked and will 'init' the e property as a "recovery"
+			// The construction will succeed, but post-construction will throw, so this error handler should be invoked and will 'init' the e property as a "recovery"
 			expect(injector).toBe(clone);
 			expect(value).toBeInstanceOf(E);
 			expect(id).toBe(E);
@@ -666,7 +666,7 @@ describe('Asynchronous error handling', () => {
 		const origA = orig.get(A);
 		expect(origA).toBeInstanceOf(A);
 		expect(acount).toBe(1);
-		orig.resolveSingletons();
+		await orig.resolveSingletons();
 		clone = orig.clone();
 		expect(clone).toBeInstanceOf(Container);
 		expect(clone).not.toBe(orig);

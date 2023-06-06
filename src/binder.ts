@@ -1,4 +1,4 @@
-import {AbstractConstructor, ClassConstructor, InjectableId, Injector} from './injector';
+import {AbstractConstructor, ClassConstructor, InjectableId, Injector} from './injector.js';
 
 /**
  * Type definition for functions that return a value.
@@ -91,7 +91,7 @@ export interface Binder extends Injector {
 	 */
 	bindClass<T>(id: ClassConstructor<T>, constructor?: ClassConstructor<T>): BindAs<T, ClassConstructor<T>>;
 
-	bindClass<T>(id: string | symbol | AbstractConstructor<T>, constructor: ClassConstructor<T>): BindAs<T, ClassConstructor<T>>;
+	bindClass<T>(id: string | symbol | AbstractConstructor<T> | InjectableId<T>, constructor: ClassConstructor<T>): BindAs<T, ClassConstructor<T>>;
 
 	/**
 	 * Bind an InjectableId to a synchronous factory that will be invoked on demand when the object is needed.

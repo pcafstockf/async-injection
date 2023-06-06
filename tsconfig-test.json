@@ -1,0 +1,21 @@
+{
+	"extends": "./tsconfig.cjs.json",
+	"compilerOptions": {
+		"paths": {
+			"@async-injection": [
+				"src/index.ts"
+			],
+			"@async-injection/*": [
+				"src/*"
+			]
+		}
+	},
+	"include": [
+		"./src/**/*",
+		"./tst/**/*"
+	],
+	"ts-node": {
+		"transpileOnly": true,
+		"experimentalResolver": true
+	}
+}

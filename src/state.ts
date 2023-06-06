@@ -1,4 +1,4 @@
-import {isPromise} from './utils';
+import {isPromise} from './utils.js';
 
 /**
  * Internal class that allows us to track the state of a promise (chain).

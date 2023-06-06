@@ -1,7 +1,7 @@
-import {AsyncFactory, BindAs, OnErrorCallback, OnSuccessCallback, SyncFactory} from './binder';
-import {ClassConstructor, InjectableId, Injector} from './injector';
-import {Provider} from './provider';
-import {isErrorObj} from './utils';
+import {AsyncFactory, BindAs, OnErrorCallback, OnSuccessCallback, SyncFactory} from './binder.js';
+import {ClassConstructor, InjectableId, Injector} from './injector.js';
+import {Provider} from './provider.js';
+import {isErrorObj} from './utils.js';
 
 /**
  * @inheritDoc
