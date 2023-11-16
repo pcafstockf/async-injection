@@ -112,13 +112,16 @@ export class ClassBasedProvider<T> extends BindableProvider<T, ClassConstructor<
 			return [];
 		}
 		return argTypes.map((argType, index) => {
-			// The reflect-metadata API fails on circular dependencies, and will return undefined for the argument instead.
-			if (argType === undefined) {
-				throw new Error(`Injection error. Recursive dependency in constructor for ${this.maker.toString()} at index ${index}`);
-			}
-			// Check if an Inject annotation precedes the parameter.
+			// The reflect-metadata API fails on circular dependencies returning undefined instead.
+			// Additionally, it cannot return generic types (no runtime type info).
+			// If an Inject annotation precedes the parameter, then that is what should get injected.
 			const overrideToken = _getInjectedIdAt(this.maker, index);
+			// If there was no Inject annotation, we might still be able to determine what to inject using the 'argType' (aka Reflect design:paramtypes).
 			const actualToken = overrideToken === undefined ? argType : overrideToken;
+			if (actualToken === undefined) {
+				// No Inject annotation, and the type is not known.
+				throw new Error(`Injection error. Unable to determine parameter ${index} type/value of ${this.maker.toString()} constructor`);
+			}
 			// Ask our container to resolve the parameter.
 			/* eslint-disable @typescript-eslint/no-unsafe-argument */
 			let param = (this.injector as StateResolvingInjector).resolveState(actualToken);

@@ -1,3 +1,7 @@
+## 1.5.4 / 2023-11-15
+* Improved handling of class constructor parameter type recognition.
+* Update dependencies.
+
 ## 1.5.3 / 2023-06-05
 * Address esm issues [#10](https://github.com/pcafstockf/async-injection/issues/10) and [#15](https://github.com/pcafstockf/async-injection/issues/15)
 * Fix missing type overload on Binder interface.

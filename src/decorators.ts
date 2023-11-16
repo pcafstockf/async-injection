@@ -80,9 +80,8 @@ export function Inject(id: InjectableId<any>): ParameterDecorator {
 	 * @returns Undefined (nothing), as this decorator does not modify the parameter in any way.
 	 */
 	return function (target: Function, parameterName: string | symbol, parameterIndex: number): void {
-		const hint = targetHint(target);
 		if (id === undefined) {
-			throw new Error('Undefined id passed to @Inject [' + hint + ']');
+			throw new Error('Undefined id passed to @Inject [' + targetHint(target) + ']');
 		}
 		const paramKey = validateSingleConstructorParam('Inject', target, parameterIndex);
 		Reflect.defineMetadata(INJECT_METADATA_KEY, id, target, paramKey);
