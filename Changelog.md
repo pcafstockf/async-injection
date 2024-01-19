@@ -1,3 +1,7 @@
+## 1.5.5 / 2024-01-18
+* Backwards compatibly binder api updates.
+* Update patch level dependencies.
+
 ## 1.5.4 / 2023-11-15
 * Improved handling of class constructor parameter type recognition.
 * Update dependencies.

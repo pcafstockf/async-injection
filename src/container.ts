@@ -104,8 +104,9 @@ export class Container implements Binder {
 	/**
 	 * @inheritDoc
 	 */
-	public bindConstant<T>(id: InjectableId<T>, value: T): void {
+	public bindConstant<T>(id: InjectableId<T>, value: T): T {
 		this.providers.set(id, new ConstantProvider(value));
+		return value;
 	}
 
 	/**

@@ -82,7 +82,7 @@ export interface Binder extends Injector {
 	 * Bind an InjectableId to a constant value.
 	 * Constants are by their very nature singleton, and are assumed to be error proof.
 	 */
-	bindConstant<T>(id: InjectableId<T>, value: T): void;
+	bindConstant<T>(id: InjectableId<T>, value: T): T;
 
 	/**
 	 * Bind an InjectableId to a class (actually it's constructor).
