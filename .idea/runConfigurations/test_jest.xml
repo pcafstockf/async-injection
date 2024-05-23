@@ -5,7 +5,9 @@
     <jest-package value="$PROJECT_DIR$/node_modules/jest" />
     <working-dir value="$PROJECT_DIR$" />
     <jest-options value="--coverage=false" />
-    <envs />
+    <envs>
+      <env name="TS_NODE_PROJECT" value="./tsconfig-test.json" />
+    </envs>
     <scope-kind value="ALL" />
     <method v="2" />
   </configuration>

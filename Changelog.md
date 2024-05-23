@@ -1,3 +1,10 @@
+## 1.6.0 / 2024-05-23
+* Change internal meta-data constants from symbols to namespaced strings.
+  This enables different compilation units to share a common Container. 
+  Thanks to [@dmtaub](https://github.com/pcafstockf/async-injection/issues/16) for finding this and proposing a solution.
+* Update github build matrix to drop node 14 and add node 20.
+  This does not impact the library or its targets (only the build matrix github uses to run tests).
+
 ## 1.5.5 / 2024-01-18
 * Backwards compatibly binder api updates.
 * Update patch level dependencies.
