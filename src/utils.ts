@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access, @typescript-eslint/explicit-module-boundary-types */
-import {RELEASE_METADATA_KEY} from './constants.js';
+import {RELEASE_METADATA_KEY, INJECTABLE_METADATA_KEY} from './constants.js';
+import type {ClassConstructor} from './injector.js';
 
 /**
  * Returns true if the specified object looks like a JavaScript Error object.
@@ -44,4 +45,14 @@ export function InvokeReleaseMethod<T = unknown>(obj: T): boolean {
 	}
 	/* eslint-enable @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
 	return false;
+}
+
+/**
+ * A simple utility method to determine if the specified class has been tagged as @Injectable already.
+ */
+export function hasDecoration(target: ClassConstructor<unknown>): boolean {
+	if (typeof target !== 'object' || target === null) {
+		throw new Error('target not an object:' + target.toString());
+	}
+	return Reflect.hasOwnMetadata(INJECTABLE_METADATA_KEY, target)
 }
