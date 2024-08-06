@@ -1,3 +1,7 @@
+## 2.0.0 / 2024-08-06
+* Move typedefs up from lib/{cjs|esm} to just lib.
+* Remove binder.ts exports from index.ts
+
 ## 1.6.0 / 2024-05-23
 * Change internal meta-data constants from symbols to namespaced strings.
   This enables different compilation units to share a common Container. 

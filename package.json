@@ -1,6 +1,6 @@
 {
 	"name": "async-injection",
-	"version": "1.6.0",
+	"version": "2.0.0",
 	"description": "A robust lightweight dependency injection library for TypeScript.",
 	"author": "Frank Stock",
 	"license": "MIT",
@@ -22,10 +22,13 @@
 		".": {
 			"import": "./lib/esm/index.js",
 			"require": "./lib/cjs/index.js"
+		},
+		"./*": {
+			"types": "./lib/*.d.ts"
 		}
 	},
-	"types": "lib/esm/index.d.ts",
-	"typings": "lib/esm/index.d.ts",
+	"types": "lib/index.d.ts",
+	"typings": "lib/index.d.ts",
 	"directories": {
 		"lib": "lib"
 	},
@@ -38,7 +41,7 @@
 		"pretest": "npm run lint",
 		"test": "TS_NODE_PROJECT=./tsconfig-test.json  node --require ts-node/register --require tsconfig-paths/register node_modules/jasmine/bin/jasmine.js --config=jasmine.json",
 		"coverage": "rimraf coverage && rimraf ./nyc_output && nyc -e .ts -x \"**/*.spec.ts\" -x \"tst/*\" --reporter=text-summary --reporter=lcov npm run test",
-		"build": "npm run clean && tsc -p tsconfig.esm.json && tsc -p tsconfig.cjs.json && npm run _postbuild",
+		"build": "npm run clean && tsc -p tsconfig.base.json && tsc -p tsconfig.esm.json && tsc -p tsconfig.cjs.json && npm run _postbuild",
 		"_postbuild": "echo '{\"type\": \"module\"}' >lib/esm/package.json && echo '{\"type\": \"commonjs\"}' >lib/cjs/package.json",
 		"lint": "eslint 'src/**/*.ts'"
 	},
@@ -62,11 +65,11 @@
 		"jasmine-console-reporter": "~3.1.0",
 		"nyc": "~15.1.0",
 		"reflect-metadata": "~0.1.14",
-		"rimraf": "~5.0.7",
+		"rimraf": "~5.0.10",
 		"source-map-support": "~0.5.21",
 		"ts-node": "~10.9.2",
 		"tsconfig-paths": "~4.2.0",
-		"tslib": "~2.6.2",
+		"tslib": "~2.6.3",
 		"typescript": "~4.9.5"
 	},
 	"nyc": {
