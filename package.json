@@ -1,6 +1,6 @@
 {
 	"name": "async-injection",
-	"version": "2.0.0",
+	"version": "2.0.1",
 	"description": "A robust lightweight dependency injection library for TypeScript.",
 	"author": "Frank Stock",
 	"license": "MIT",
@@ -21,9 +21,12 @@
 	"exports": {
 		".": {
 			"import": "./lib/esm/index.js",
-			"require": "./lib/cjs/index.js"
+			"require": "./lib/cjs/index.js",
+			"types": "./lib/index.d.ts"
 		},
 		"./*": {
+			"import": "./lib/esm/*.js",
+			"require": "./lib/cjs/*.js",
 			"types": "./lib/*.d.ts"
 		}
 	},

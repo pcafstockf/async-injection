@@ -1,3 +1,7 @@
+## 2.0.1 / 2024-09-11
+* Fix package.json exports [#18](https://github.com/pcafstockf/async-injection/issues/18).
+  * Thanks to [@IvanLi-CN](https://github.com/pcafstockf/async-injection/issues/18) for finding this, and the solution.
+
 ## 2.0.0 / 2024-08-06
 * Move typedefs up from lib/{cjs|esm} to just lib.
 * Remove binder.ts exports from index.ts
