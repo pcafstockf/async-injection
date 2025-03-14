@@ -142,24 +142,36 @@ export class ClassBasedProvider<T> extends BindableProvider<T, ClassConstructor<
 		const params = this.getConstructorParameterStates();
 
 		// If any of the params are in a rejected state, we cannot construct.
-		const paramRejection = params.find((p) => {
+		const firstRejectedParam = params.find((p) => {
 			return (!p.pending) && p.rejected;
 		});
-		if (paramRejection) {
-			return paramRejection as State<T>;
-		}
-		// If any of the params are in a pending state, we will have to wait for them to be resolved before we can construct.
-		const pendingParams = params.filter((p) => {
-			return p.pending;
-		}).map((p) => {
-			return p.promise;
-		});
-		if (pendingParams.length > 0) {
+		if (firstRejectedParam)
+			return firstRejectedParam as State<T>;
+		if (params.some(p => p.pending)) {
 			// Some of the parameters needed for construction are not yet available, wait for them and then attempt construction.
-			const objPromise = this.makePromiseForObj<any[]>(Promise.all(pendingParams), () => {
-				// All the parameters are now available, instantiate the class.
-				// If this throws, it will be handled by our caller.
-				return Reflect.construct(this.maker, params.map((p) => p.fulfilled as unknown));
+			// We do this by mapping each param to a Promise (pending or not), and then awaiting them all.
+			// This might create some unnecessary (but immediately resolved) Promise objects,
+			// BUT, it allows us to chain for failure *and* substitute the Optional (if one exists).
+			const objPromise = this.makePromiseForObj<any[]>(Promise.all(params.map((p, idx) => {
+				if (p.pending) {
+					return p.promise.catch(err => {
+						// This was a promised param that failed to resolve.
+						// If there is an Optional decorator, use that, otherwise, failure is failure.
+						const md = _getOptionalDefaultAt(this.maker, idx);
+						if (!md)
+							throw err;
+						return md.value as unknown;
+					});
+				}
+				if (p.rejected)
+					return Promise.reject(p.rejected);
+				return Promise.resolve(p.fulfilled);
+			})), (values) => {
+				if (values) {
+					// All the parameters are now available, instantiate the class.
+					// If this throws, it will be handled by our caller.
+					return Reflect.construct(this.maker, values);
+				}
 			});
 			// Once the obj is resolved, then we need to check for PostConstruct and if it was async, wait for that too.
 			return State.MakeState<T>(objPromise.then((obj) => {

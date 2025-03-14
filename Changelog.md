@@ -1,3 +1,7 @@
+## 2.0.2 / 2025-03-13
+* Fix failure to use `@Optional` when async object construction fails [#19](https://github.com/pcafstockf/async-injection/issues/19).  
+  Thanks to [@dmtaub](https://github.com/pcafstockf/async-injection/issues/19) for finding this and providing a reproducible unit test.
+
 ## 2.0.1 / 2024-09-11
 * Fix package.json exports [#18](https://github.com/pcafstockf/async-injection/issues/18).
   * Thanks to [@IvanLi-CN](https://github.com/pcafstockf/async-injection/issues/18) for finding this, and the solution.

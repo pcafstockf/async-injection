@@ -1,6 +1,6 @@
 {
 	"name": "async-injection",
-	"version": "2.0.1",
+	"version": "2.0.2",
 	"description": "A robust lightweight dependency injection library for TypeScript.",
 	"author": "Frank Stock",
 	"license": "MIT",
@@ -57,7 +57,7 @@
 	},
 	"devDependencies": {
 		"@istanbuljs/nyc-config-typescript": "~1.0.2",
-		"@types/jasmine": "~5.1.4",
+		"@types/jasmine": "~5.1.7",
 		"@typescript-eslint/eslint-plugin": "~5.62.0",
 		"@typescript-eslint/parser": "~5.62.0",
 		"eslint": "~8.57.0",

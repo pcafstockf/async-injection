@@ -691,4 +691,59 @@ describe('Asynchronous error handling', () => {
 		clone.releaseSingletons();
 		expect(c.b.b).toEqual('released');
 	});
+	it('Async initialization optionally depending on an Async dependency should succeed', async () => {
+		@Injectable()
+		class A {
+			public constructor() {
+				this.a = 'A';
+			}
+
+			public a: string;
+
+			@PostConstruct()
+			public init(): Promise<void> {
+				return new Promise<void>((resolve) => {
+					setTimeout(() => {
+						resolve();
+					}, 1);
+				});
+			}
+		}
+
+		@Injectable()
+		class B {
+			public constructor() {
+				this.b = 'B';
+			}
+
+			public b: string;
+
+			@PostConstruct()
+			public init(): Promise<void> {
+				return new Promise<void>((resolve, reject) => {
+					setTimeout(() => {
+						reject(new Error('Failed post construction of B'));
+					}, 1);
+				});
+			}
+		}
+
+		@Injectable()
+		class C {
+			public constructor(@Inject(B) @Optional({b: 'fallback'}) public b: { b: string }) {
+				this.c = 'C';
+				this.b = b;
+			}
+
+			public c: string;
+		}
+
+		const container = new Container();
+		container.bindClass(A);
+		container.bindClass(B);
+		container.bindClass(C);
+		let c = await container.resolve(C);
+		expect(c.b.b).toBe('fallback');
+
+	});
 });
