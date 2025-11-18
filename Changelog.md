@@ -1,3 +1,6 @@
+## 2.0.3 / 2025-11-18
+* Updated devDependencies (dependabot alerts about build toolchain).
+
 ## 2.0.2 / 2025-03-13
 * Fix failure to use `@Optional` when async object construction fails [#19](https://github.com/pcafstockf/async-injection/issues/19).  
   Thanks to [@dmtaub](https://github.com/pcafstockf/async-injection/issues/19) for finding this and providing a reproducible unit test.
