@@ -1,9 +1,9 @@
 # Async-Injection
 [![CI Actions](https://github.com/pcafstockf/async-injection/workflows/CI/badge.svg)](https://github.com/pcafstockf/async-injection/actions)
 [![Publish Actions](https://github.com/pcafstockf/async-injection/workflows/NPM%20Publish/badge.svg)](https://github.com/pcafstockf/async-injection/actions)
-[![npm version](https://badge.fury.io/js/async-injection.svg)](https://badge.fury.io/js/async-injection)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 ![OSS Lifecycle](https://img.shields.io/osslifecycle/pcafstockf/async-injection.svg)
+[![npm version](https://img.shields.io/npm/v/async-injection)](https://www.npmjs.com/package/async-injection)
 
 A robust lightweight dependency injection library for TypeScript.
 
@@ -12,7 +12,7 @@ Async-Injection is a small IoC container with support for both synchronous and a
 
 ## Installation
 
-You can get the latest release using npm:
+You can get the latest release from [npm](https://www.npmjs.com/package/async-injection):
 
 ```
 $ npm install async-injection --save

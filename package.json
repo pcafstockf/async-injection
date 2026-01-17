@@ -5,6 +5,7 @@
 	"author": "Frank Stock",
 	"license": "MIT",
 	"keywords": [
+		"async-injection",
 		"ioc",
 		"di",
 		"async",
