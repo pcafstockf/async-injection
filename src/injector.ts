@@ -17,6 +17,10 @@ export class InjectionToken<T> {
 	}
 
 	toString(): string {
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+		if (typeof this.id === 'symbol' && typeof (this.id as any).description !== 'undefined')
+			// eslint-disable-next-line
+			return (this.id as any).description.toString();
 		return this.id.toString();
 	}
 }
