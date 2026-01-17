@@ -16,6 +16,10 @@ export class InjectionToken<T> {
 	constructor(private id: string | symbol) {
 	}
 
+	get description(): string {
+		return this.toString();
+	}
+
 	toString(): string {
 		// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
 		if (typeof this.id === 'symbol' && typeof (this.id as any).description !== 'undefined')
@@ -28,7 +32,7 @@ export class InjectionToken<T> {
 /**
  * Universal id that can be bound to a constant, class, or factories.
  */
-export type InjectableId<T> = string | symbol | AbstractConstructor<T> | ClassConstructor<T> | InjectionToken<T>;
+export type InjectableId<T> = (string | symbol | AbstractConstructor<T> | ClassConstructor<T> | InjectionToken<T>) & { readonly description?: string };
 
 /**
  * Retrieve instances previously bound to the specified InjectableId.

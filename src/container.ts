@@ -124,6 +124,7 @@ export class Container implements Binder {
 		/* eslint-disable @typescript-eslint/no-unsafe-argument */
 		const provider = new ClassBasedProvider(this as any, id, constructor);
 		this.providers.set(id, provider);
+		/* eslint-disable @typescript-eslint/no-unsafe-return */
 		return provider.makeBindAs();
 	}
 

@@ -1,4 +1,4 @@
-## 2.0.4 / 2026-01-17
+## 2.0.4 & 2.0.5 / 2026-01-17
 * Improve recoverability of identifier used for creating injection token.
 * Add .nvmrc file which is set to lts/hydrogen (affects build, not runtime).
 * Updated devDependencies.
