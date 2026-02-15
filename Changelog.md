@@ -1,4 +1,4 @@
-## 2.1.0 / 2025-11-18
+## 2.1.0 / 2026-02-14
 * ESM build adds .js extensions for all relative imports (using `tsc-esm-fix`)
 * Use `tsx` for running tests
 
