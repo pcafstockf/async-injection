@@ -21,14 +21,15 @@
 	"module": "lib/esm/index.js",
 	"exports": {
 		".": {
+			"types": "./lib/index.d.ts",
 			"import": "./lib/esm/index.js",
 			"require": "./lib/cjs/index.js",
-			"types": "./lib/index.d.ts"
+			"default": "./lib/esm/index.js"
 		},
 		"./*": {
+			"types": "./lib/*.d.ts",
 			"import": "./lib/esm/*.js",
-			"require": "./lib/cjs/*.js",
-			"types": "./lib/*.d.ts"
+			"require": "./lib/cjs/*.js"
 		}
 	},
 	"types": "lib/index.d.ts",
