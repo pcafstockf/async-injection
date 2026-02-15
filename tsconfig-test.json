@@ -2,18 +2,17 @@
 	"extends": "./tsconfig.cjs.json",
 	"compilerOptions": {
 		"paths": {
-			"@async-injection": [
-				"src/index.ts"
+			"async-injection": [
+				"./src/index.ts"
 			],
-			"@async-injection/*": [
-				"src/*"
+			"async-injection/*": [
+				"./src/*"
 			]
-		},
-		"rootDir": "./"
+		}
 	},
 	"include": [
 		"./src/**/*",
-		"./tst/**/*"
+		"./spec/**/*"
 	],
 	"ts-node": {
 		"transpileOnly": true,

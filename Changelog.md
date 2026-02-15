@@ -1,3 +1,7 @@
+## 2.1.0 / 2025-11-18
+* ESM build adds .js extensions for all relative imports (using `tsc-esm-fix`)
+* Use `tsx` for running tests
+
 ## 2.0.4 & 2.0.5 / 2026-01-17
 * Improve recoverability of identifier used for creating injection token.
 * Add .nvmrc file which is set to lts/hydrogen (affects build, not runtime).
