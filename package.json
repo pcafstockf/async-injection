@@ -50,9 +50,6 @@
 		"_postbuild": "echo '{\"type\": \"module\"}' >lib/esm/package.json && echo '{\"type\": \"commonjs\"}' >lib/cjs/package.json",
 		"lint": "eslint 'src/**/*.ts'"
 	},
-	"engines": {
-		"node": ">=16.0.0"
-	},
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/pcafstockf/async-injection.git"
