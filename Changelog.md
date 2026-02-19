@@ -1,3 +1,7 @@
+## 2.2.0 / 2026-02-19
+* Ability to release a Singleton instance from the Container without destroying its binding.
+* Updated devDependencies.
+
 ## 2.1.0 / 2026-02-14
 * ESM build adds .js extensions for all relative imports (using `tsc-esm-fix`)
 

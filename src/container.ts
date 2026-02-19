@@ -235,6 +235,21 @@ export class Container implements Binder {
 	}
 
 	/**
+	 * Releases a Singleton instance if it exists.
+	 * However, it does **not** remove the binding, so if you call @get or @resolve (directly or indirectly) on the id, a new Singleton will be created.
+	 * If not a singleton, this method returns undefined.
+	 * If the singleton has been resolved, it is returned, otherwise null is returned.
+	 * If the singleton is pending resolution, a Promise for the singleton (or for null) is returned.
+	 * Note that if a singleton is returned, its Release method will already have been invoked.
+	 */
+	public releaseSingleton<T>(id: InjectableId<T>): T | undefined | null | Promise<T | null> {
+		const provider = this.providers.get(id);
+		if (provider)
+			return provider.releaseIfSingleton();
+		return undefined;
+	}
+
+	/**
 	 * Make a copy of this @see Container.
 	 * This is an experimental feature!
 	 * I have not thought through all the dark corners, so use at your own peril!

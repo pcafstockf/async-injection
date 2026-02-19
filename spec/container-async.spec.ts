@@ -430,7 +430,7 @@ describe('Container asynchronous hierarchy', () => {
 		expect(a instanceof A).toBeTruthy();
 		expect(a.c).toEqual(1);
 	});
-	it('Should be able to get services from parent container', async () => {
+	it('Should be able to resolve services from parent container', async () => {
 		class A {
 			public constructor(public c: number) {
 			}

@@ -49,23 +49,32 @@ export abstract class Provider<T = any> {
 	 * Also note that invoking this method does not release or invalidate the Provider;
 	 * Rather, it resets a Singleton Provider to a fresh (unresolved/unqueried) state (aka sets this.singleton to null).
 	 * It is assumed that the Singleton itself will no longer be used after this method returns.
+	 * If not a singleton, this method returns undefined.
+	 * If the singleton has been resolved, it is returned, otherwise null is returned.
+	 * If the singleton is pending resolution, a Promise for the singleton or for null is returned.
+	 * Note that if a singleton is returned, its Release method will already have been invoked.
 	 */
-	releaseIfSingleton(): void {
+	releaseIfSingleton(): T | undefined | null | Promise<T | null> {
 		if (this.singleton) {
 			const s = this.provideAsState();
 			if (s.pending) {
-				s.promise.then((v) => {
+				return s.promise.then((v) => {
 					this.singleton = null;
 					InvokeReleaseMethod(v);
 				}).catch(() => {
 					this.singleton = null;
+					return null;
 				});
 			}
 			else {
 				this.singleton = null;
-				if ((!s.rejected) && s.fulfilled)
+				if ((!s.rejected) && s.fulfilled) {
 					InvokeReleaseMethod(s.fulfilled);
+					return s.fulfilled;
+				}
+				return null;
 			}
 		}
+		return undefined
 	}
 }

@@ -160,6 +160,27 @@ describe('Simple Singletons', () => {
 		container.releaseSingletons();
 		expect(a1.a).toBeUndefined();
 	});
+	it('Should release a single singleton', () => {
+		@Injectable()
+		class A {
+			public a: string = 'A';
+			@Release()
+			protected cleanup() {
+				delete this.a;
+			}
+		}
+		const container = new Container();
+		container.bindClass(A).asSingleton();
+
+		const a1 = container.get(A);
+		const result = container.releaseSingleton(A);
+		expect(a1.a).toBeUndefined();
+		expect(result).toBe(a1);
+
+		const a2 = container.get(A);
+		expect(a2.a).toEqual('A');
+		expect(a2).not.toBe(a1);
+	});
 });
 describe('Constants', () => {
 	it('Should support reflection of and direct access to constants', () => {
