@@ -149,20 +149,21 @@ export class ClassBasedProvider<T> extends BindableProvider<T, ClassConstructor<
 			// We do this by mapping each param to a Promise (pending or not), and then awaiting them all.
 			// This might create some unnecessary (but immediately resolved) Promise objects,
 			// BUT, it allows us to chain for failure *and* substitute the Optional (if one exists).
-			const objPromise = this.makePromiseForObj<any[]>(Promise.all(params.map((p, idx) => {
+			const objPromise = this.makePromiseForObj<any[]>(Promise.all(params.map(async (p, idx) => {
 				if (p.pending) {
-					return p.promise!.catch(err => {
+					try {
+						return await p.promise!;
+					}
+					catch (err) {
 						// This was a promised param that failed to resolve.
 						// If there is an Optional decorator, use that, otherwise, failure is failure.
 						const md = _getOptionalDefaultAt(this.maker, idx);
 						if (!md)
 							throw err;
 						return md.value as unknown;
-					});
+					}
 				}
-				if (p.rejected)
-					return Promise.reject(p.rejected);
-				return Promise.resolve(p.fulfilled);
+				return p.fulfilled;
 			})), (values) => {
 				if (values) {
 					// All the parameters are now available, instantiate the class.

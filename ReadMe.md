@@ -1,6 +1,7 @@
 # Async-Injection
 [![CI Actions](https://github.com/pcafstockf/async-injection/workflows/CI/badge.svg)](https://github.com/pcafstockf/async-injection/actions)
 [![Publish Actions](https://github.com/pcafstockf/async-injection/workflows/NPM%20Publish/badge.svg)](https://github.com/pcafstockf/async-injection/actions)
+[![codecov](https://codecov.io/gh/pcafstockf/async-injection/graph/badge.svg)](https://codecov.io/gh/pcafstockf/async-injection)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 ![OSS Lifecycle](https://img.shields.io/osslifecycle/pcafstockf/async-injection.svg)
 [![npm version](https://img.shields.io/npm/v/async-injection)](https://www.npmjs.com/package/async-injection)

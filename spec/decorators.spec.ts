@@ -1,7 +1,7 @@
 import 'jasmine';
 import 'reflect-metadata';
 // noinspection ES6PreferShortImport
-import {Container, Inject, Injectable, Optional, PostConstruct} from '../src/index.js';
+import {Container, Inject, Injectable, Optional, PostConstruct, Release} from '../src/index.js';
 import {INJECT_METADATA_KEY, INJECTABLE_METADATA_KEY, OPTIONAL_METADATA_KEY, POSTCONSTRUCT_ASYNC_METADATA_KEY, POSTCONSTRUCT_SYNC_METADATA_KEY, REFLECT_PARAMS, REFLECT_RETURN, RELEASE_METADATA_KEY} from '../src/constants.js';
 
 // These string values are an interoperability contract: a class decorated in Bundle A must
@@ -124,6 +124,41 @@ describe('@PostConstruct', () => {
 		}
 
 		expect(setup).toThrowError(/^@PostConstruct not applied to instance method \[.+/);
+	});
+
+});
+
+describe('@Release', () => {
+	it('Should throw when applied multiple times', () => {
+		function setup() {
+			// noinspection JSUnusedLocalSymbols
+			@Injectable()
+			class A {
+				@Release()
+				public one() {
+				}
+
+				@Release()
+				public two() {
+				}
+			}
+		}
+
+		expect(setup).toThrowError(/^@Release applied multiple times \[.+/);
+	});
+
+	it('Should throw when applied to a static method', () => {
+		function setup() {
+			// noinspection JSUnusedLocalSymbols
+			@Injectable()
+			class A {
+				@Release()
+				public static cleanup() {
+				}
+			}
+		}
+
+		expect(setup).toThrowError(/^@Release not applied to instance method \[.+/);
 	});
 });
 

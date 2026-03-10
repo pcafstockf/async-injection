@@ -512,6 +512,53 @@ describe('Edge cases', () => {
 		const b2 = container.get(B);
 		expect(b2 instanceof B).toBeTruthy();
 	});
+	it('resolveSingletons should reject if a singleton threw during async creation', async () => {
+		@Injectable()
+		class BadService {
+			@PostConstruct()
+			async init(): Promise<void> {
+				throw new Error('creation failed');
+			}
+		}
+
+		const container = new Container();
+		container.bindClass(BadService).asSingleton();
+
+		// resolveSingletons itself triggers resolution; the async @PostConstruct throws, so it must reject
+		await expectAsync(container.resolveSingletons()).toBeRejected();
+	});
+	it('resolve() should reject when the sync singleton was already rejected via get()', async () => {
+		@Injectable()
+		class BadSync {
+			constructor() {
+				throw new Error('sync construction failed');
+			}
+		}
+
+		const container = new Container();
+		container.bindClass(BadSync).asSingleton();
+
+		// Drive the singleton into a rejected state via the sync API
+		expect(() => container.get(BadSync)).toThrow();
+
+		// The async API must surface the same pre-existing rejection
+		await expectAsync(container.resolve(BadSync)).toBeRejected();
+	});
+	it('resolveSingletons() should reject when a sync singleton constructor throws', async () => {
+		@Injectable()
+		class BadSync {
+			constructor() {
+				throw new Error('sync construction failed');
+			}
+		}
+
+		const container = new Container();
+		container.bindClass(BadSync).asSingleton();
+
+		// resolveSingletons triggers provideAsState() inside resolveIfSingleton; the throwing
+		// constructor produces a rejected State synchronously, which must be surfaced as a rejection
+		await expectAsync(container.resolveSingletons()).toBeRejected();
+	});
 });
 
 describe('Blending synchronous and asynchronous injection', () => {

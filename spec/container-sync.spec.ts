@@ -170,6 +170,27 @@ describe('Simple Singletons', () => {
 		expect(a2.a).toEqual('A');
 		expect(a2).not.toBe(a1);
 	});
+	it('Should complete silently when releaseSingleton targets a singleton with no @Release method', () => {
+		@Injectable()
+		class A {
+		}
+
+		const container = new Container();
+		container.bindClass(A).asSingleton();
+		container.get(A);
+
+		expect(() => container.releaseSingleton(A)).not.toThrow();
+	});
+	it('releaseSingleton on a transient binding should be a no-op', () => {
+		@Injectable()
+		class A {
+		}
+
+		const container = new Container();
+		container.bindClass(A);    // transient — no asSingleton()
+
+		expect(() => container.releaseSingleton(A)).not.toThrow();
+	});
 });
 describe('Constants', () => {
 	it('Should support reflection of and direct access to constants', () => {

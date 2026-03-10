@@ -6,7 +6,6 @@
       <excludeFolder url="file://$MODULE_DIR$/lib" />
       <excludeFolder url="file://$MODULE_DIR$/.nyc_output" />
       <excludeFolder url="file://$MODULE_DIR$/support/migrate-off-inversify" />
-      <excludeFolder url="file://$MODULE_DIR$/zcoverage" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

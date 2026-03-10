@@ -78,38 +78,34 @@ export abstract class BindableProvider<T, M = ClassConstructor<T> | SyncFactory<
 	 * @param waitFor   The supplied Promise.
 	 * @param cb    Callback to be invoked if the supplied Promise resolves.
 	 */
-	protected makePromiseForObj<R>(waitFor: Promise<R>, cb: (result: R) => T): Promise<T> {
-		return new Promise<T>((resolve, reject) => {
-			const errHandlerFn = (err: any, objValue?: T) => {
-				// There was an error during async post construction, see if an error handler was provided, and if so, see what it wants to do.
-				if (this.errorHandler) {
-					const handlerResult = this.errorHandler(this.injector, this.id, this.maker, err, objValue);
-					// Error handler wants us to propagate an alternative error.
-					if (isErrorObj(handlerResult))
-						err = handlerResult;   // Fall thru
-					else if (typeof handlerResult !== 'undefined') {
-						resolve(handlerResult);    // Error handler provided a replacement, so change the State that we returned from pending to resolved.
-						return;
-					}
-				}
-				// This will change the State that we returned from pending to rejected.
-				reject(err);
-			};
-			waitFor.then(
-				(result) => {
-					// This will change the State that we returned from pending to resolved.
-					try {
-						resolve(cb(result));
-					}
-					catch (err) {
-						errHandlerFn(err, cb(result));
-					}
-				}
-			).catch(
-				(err) => {
-					errHandlerFn(err, cb(undefined as unknown as R));
-				}
-			);
-		});
+	protected async makePromiseForObj<R>(waitFor: Promise<R>, cb: (result: R) => T): Promise<T> {
+		// Local helper: consults the errorHandler (if any) for recovery; returns a substitute or re-throws.
+		const handleError = (err: unknown, objValue?: T): T => {
+			if (this.errorHandler) {
+				const handlerResult = this.errorHandler(this.injector, this.id, this.maker, err, objValue);
+				// Error handler wants us to propagate an alternative error.
+				if (isErrorObj(handlerResult))
+					throw handlerResult;
+				// Error handler provided a valid (fully resolved) replacement.
+				else if (typeof handlerResult !== 'undefined')
+					return handlerResult;
+			}
+			throw err;
+		};
+		let result: R;
+		try {
+			result = await waitFor;
+		}
+		catch (err) {
+			// waitFor rejected — ask the error handler for recovery, passing cb(undefined) as the partial object value.
+			return handleError(err, cb(undefined as unknown as R));
+		}
+		try {
+			return cb(result);
+		}
+		catch (err) {
+			// cb threw after a successful resolution — ask the error handler for recovery.
+			return handleError(err, cb(result as R));
+		}
 	}
 }
