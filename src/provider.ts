@@ -15,7 +15,7 @@ export abstract class Provider<T = any> {
 	 * This value will be defined for resolved/resolving Singletons, null for Singletons that have not yet been queried, and will remain undefined for non-Singleton Providers.
 	 * Default value is undefined (e.g. not a Singleton).
 	 */
-	protected singleton?: State<T>;
+	protected singleton?: State<T> | null;
 
 	/**
 	 * This is the workhorse method of the Provider, and is invoked directly or indirectly by both Injector.get and Injector.resolve.
@@ -32,11 +32,11 @@ export abstract class Provider<T = any> {
 	 * @param asyncOnly This default implementation ignores this parameter.
 	 * @returns A completion Promise if initialization requires asynchronicity, otherwise the return value is undefined.
 	 */
-	resolveIfSingleton(asyncOnly: boolean): Promise<T> {   // eslint-disable-line @typescript-eslint/no-unused-vars
+	resolveIfSingleton(asyncOnly: boolean): Promise<T> | undefined {   // eslint-disable-line @typescript-eslint/no-unused-vars
 		if (this.singleton === null) {
 			const s = this.provideAsState();
 			if (s.pending)
-				return s.promise;
+				return s.promise!;
 			else if (s.rejected)
 				return Promise.reject(s.rejected);
 		}
@@ -58,9 +58,10 @@ export abstract class Provider<T = any> {
 		if (this.singleton) {
 			const s = this.provideAsState();
 			if (s.pending) {
-				return s.promise.then((v) => {
+				return s.promise!.then((v) => {
 					this.singleton = null;
 					InvokeReleaseMethod(v);
+					return v;
 				}).catch(() => {
 					this.singleton = null;
 					return null;

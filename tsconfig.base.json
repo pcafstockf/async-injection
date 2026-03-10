@@ -10,7 +10,7 @@
 		"rootDir": "./src",
 		"removeComments": false,
 		"importHelpers": false,
-		"strict": false,
+		"strict": true,
 		"moduleResolution": "node",
 		"baseUrl": "./",
 		"esModuleInterop": true,

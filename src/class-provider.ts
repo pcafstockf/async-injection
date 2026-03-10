@@ -43,7 +43,7 @@ export class ClassBasedProvider<T> extends BindableProvider<T, ClassConstructor<
 	 * @inheritDoc
 	 * This specialization returns undefined if 'asyncOnly' is true and there is no asynchronous PostConstruct annotation (since class constructors can never by asynchronous).
 	 */
-	resolveIfSingleton(asyncOnly: boolean): Promise<T> {
+	resolveIfSingleton(asyncOnly: boolean): Promise<T> | undefined {
 		if ((!asyncOnly) || Reflect.getMetadata(POSTCONSTRUCT_ASYNC_METADATA_KEY, this.maker))
 			return super.resolveIfSingleton(false);
 		return undefined;
@@ -53,27 +53,29 @@ export class ClassBasedProvider<T> extends BindableProvider<T, ClassConstructor<
 	 * Make a resolved or pending State that reflects any @PostConstruct annotations.
 	 */
 	protected makePostConstructState(obj: T): State<T> {
-		if (typeof obj === 'object' && (!Array.isArray(obj)) && obj.constructor) {
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+		if (obj !== null && typeof obj === 'object' && (!Array.isArray(obj)) && (obj as any).constructor) {
 			let maybeAsync = false;
-			let pcFn: () => void | Error | Promise<void | Error>;
+			let pcFn: (() => void | Error | Promise<void | Error>) | undefined;
 			if (typeof this.successHandler === 'function') {
 				maybeAsync = true;
 				pcFn = () => {
-					return this.successHandler(obj, this.injector, this.id, this.maker);
+					return this.successHandler!(obj, this.injector, this.id, this.maker);
 				};
 			}
 			else {
-				/* eslint-disable @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
+				/* eslint-disable @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-argument */
 				// Check to see if there is a @PostConstruct annotation on a method of the class.
-				let postConstruct: string = Reflect.getMetadata(POSTCONSTRUCT_SYNC_METADATA_KEY, obj.constructor);
+				const ctor = (obj as any).constructor;
+ 			let postConstruct: string = Reflect.getMetadata(POSTCONSTRUCT_SYNC_METADATA_KEY, ctor) as string;
 				if (!postConstruct) {
 					maybeAsync = true;
-					postConstruct = Reflect.getMetadata(POSTCONSTRUCT_ASYNC_METADATA_KEY, obj.constructor);
+ 				postConstruct = Reflect.getMetadata(POSTCONSTRUCT_ASYNC_METADATA_KEY, ctor) as string;
 				}
-				if (postConstruct && obj.constructor.prototype[postConstruct] && typeof obj.constructor.prototype[postConstruct] === 'function')
-					pcFn = obj[postConstruct].bind?.(obj);
+				if (postConstruct && ctor.prototype[postConstruct] && typeof ctor.prototype[postConstruct] === 'function')
+					pcFn = (obj as any)[postConstruct].bind?.(obj);
 
-				/* eslint-enable @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
+				/* eslint-enable @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-argument */
 			}
 			if (pcFn) {
 				let result: any;
@@ -153,8 +155,8 @@ export class ClassBasedProvider<T> extends BindableProvider<T, ClassConstructor<
 			// This might create some unnecessary (but immediately resolved) Promise objects,
 			// BUT, it allows us to chain for failure *and* substitute the Optional (if one exists).
 			const objPromise = this.makePromiseForObj<any[]>(Promise.all(params.map((p, idx) => {
-				if (p.pending) {
-					return p.promise.catch(err => {
+ 			if (p.pending) {
+					return p.promise!.catch(err => {
 						// This was a promised param that failed to resolve.
 						// If there is an Optional decorator, use that, otherwise, failure is failure.
 						const md = _getOptionalDefaultAt(this.maker, idx);
@@ -170,8 +172,10 @@ export class ClassBasedProvider<T> extends BindableProvider<T, ClassConstructor<
 				if (values) {
 					// All the parameters are now available, instantiate the class.
 					// If this throws, it will be handled by our caller.
+					// eslint-disable-next-line @typescript-eslint/no-unsafe-return
 					return Reflect.construct(this.maker, values);
 				}
+				return undefined as unknown as T;
 			});
 			// Once the obj is resolved, then we need to check for PostConstruct and if it was async, wait for that too.
 			return State.MakeState<T>(objPromise.then((obj) => {

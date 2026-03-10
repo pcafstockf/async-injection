@@ -11,7 +11,7 @@ export function isErrorObj(err: any): err is Error {
 	if (err instanceof Error)
 		return true;
 
-	return err && typeof err.message === 'string' && typeof err.stack === 'string';
+	return !!(err && typeof err.message === 'string' && typeof err.stack === 'string');
 }
 
 /**
@@ -24,7 +24,7 @@ export function isPromise<T>(value: any): value is Promise<T> {
 	if (value instanceof Promise)
 		return true;
 
-	return value && typeof value.then === 'function';
+	return !!(value && typeof value.then === 'function');
 }
 
 /**
@@ -33,10 +33,11 @@ export function isPromise<T>(value: any): value is Promise<T> {
  * async-injection uses this helper to allow Singletons to clean up any non-garbage-collectable resources they may have allocated.
  */
 export function InvokeReleaseMethod<T = unknown>(obj: T): boolean {
-	const releaseMethod: string = Reflect.getMetadata(RELEASE_METADATA_KEY, obj.constructor);
-	/* eslint-disable @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
-	if (releaseMethod && obj.constructor.prototype[releaseMethod] && typeof obj.constructor.prototype[releaseMethod] === 'function') {
-		const releaseFn = obj[releaseMethod].bind?.(obj);
+	const o = obj as any;
+	/* eslint-disable @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-argument */
+	const releaseMethod: string = Reflect.getMetadata(RELEASE_METADATA_KEY, o.constructor) as string;
+	if (releaseMethod && o.constructor.prototype[releaseMethod] && typeof o.constructor.prototype[releaseMethod] === 'function') {
+		const releaseFn = o[releaseMethod].bind?.(o);
 		if (releaseFn) {
 			releaseFn();
 			return true;

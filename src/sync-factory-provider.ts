@@ -43,7 +43,7 @@ export class FactoryBasedProvider<T> extends BindableProvider<T, SyncFactory<T>>
 	 * @inheritDoc
 	 * This specialization returns undefined anytime 'asyncOnly' is true (since this Provider is by definition synchronous).
 	 */
-	resolveIfSingleton(asyncOnly: boolean): Promise<T> {
+	resolveIfSingleton(asyncOnly: boolean): Promise<T> | undefined {
 		if (asyncOnly)
 			return undefined;
 		return super.resolveIfSingleton(false);

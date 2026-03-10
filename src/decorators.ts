@@ -6,7 +6,7 @@ import {INJECT_METADATA_KEY, INJECTABLE_METADATA_KEY, OPTIONAL_METADATA_KEY, POS
 import {InjectableId} from './injector.js';
 
 // Help user locate misapplied decorators.
-function targetHint(target: Function) {
+function targetHint(target: Function): string {
 	let hint: string | undefined;
 	if (target) {
 		hint = target.name;
@@ -14,7 +14,7 @@ function targetHint(target: Function) {
 			hint = target.constructor.name;
 		}
 	}
-	return hint;
+	return hint ?? '';
 }
 
 // Validate that 'target' is a class constructor function.
@@ -79,11 +79,11 @@ export function Inject(id: InjectableId<any>): ParameterDecorator {
 	 * @param parameterIndex The ordinal index of the parameter in the function’s parameter list
 	 * @returns Undefined (nothing), as this decorator does not modify the parameter in any way.
 	 */
-	return function (target: Function, parameterName: string | symbol, parameterIndex: number): void {
+	return function (target: object, parameterName: string | symbol | undefined, parameterIndex: number): void {
 		if (id === undefined) {
-			throw new Error('Undefined id passed to @Inject [' + targetHint(target) + ']');
+			throw new Error('Undefined id passed to @Inject [' + targetHint(target as Function) + ']');
 		}
-		const paramKey = validateSingleConstructorParam('Inject', target, parameterIndex);
+		const paramKey = validateSingleConstructorParam('Inject', target as Function, parameterIndex);
 		Reflect.defineMetadata(INJECT_METADATA_KEY, id, target, paramKey);
 	};
 }
@@ -110,8 +110,8 @@ export function Optional(alt?: any): ParameterDecorator {   // eslint-disable-li
 	 * @param parameterIndex The ordinal index of the parameter in the function’s parameter list
 	 * @returns Undefined (nothing), as this decorator does not modify the parameter in any way.
 	 */
-	return function (target: Function, parameterName: string | symbol, parameterIndex: number): void {
-		const paramKey = validateSingleConstructorParam('Optional', target, parameterIndex);
+	return function (target: object, parameterName: string | symbol | undefined, parameterIndex: number): void {
+		const paramKey = validateSingleConstructorParam('Optional', target as Function, parameterIndex);
 		Reflect.defineMetadata(OPTIONAL_METADATA_KEY, {value: alt}, target, paramKey);
 	};
 }

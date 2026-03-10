@@ -12,6 +12,6 @@ export class ConstantProvider<T> extends Provider<T> {
 	}
 
 	provideAsState(): State<T> {
-		return this.singleton;
+		return this.singleton!;
 	}
 }

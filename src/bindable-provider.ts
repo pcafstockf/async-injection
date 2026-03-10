@@ -107,7 +107,7 @@ export abstract class BindableProvider<T, M = ClassConstructor<T> | SyncFactory<
 				}
 			).catch(
 				(err) => {
-					errHandlerFn(err, cb(undefined));
+					errHandlerFn(err, cb(undefined as unknown as R));
 				}
 			);
 		});

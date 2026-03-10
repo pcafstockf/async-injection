@@ -156,7 +156,7 @@ export class Container implements Binder {
 				// Ask each provider to resolve itself *IF* it is a singleton.
 				this.providers.forEach((value: Provider, key: InjectableId<any>) => {
 					// If the provider is a singleton *and* if resolution is being handled asynchronously, the provider will return a completion promise.
-					const p = value.resolveIfSingleton(asyncOnly);
+					const p = value.resolveIfSingleton(asyncOnly ?? false);
 					if (p !== null && typeof p !== 'undefined')
 						pending.set(key, p);
 				});

@@ -4,7 +4,7 @@ import {isPromise} from './utils.js';
  * Internal class that allows us to track the state of a promise (chain).
  */
 export class State<T = any> {
-	static MakeState<TState = any>(promise: Promise<TState>, rejected?: unknown, fulfilled?: TState): State<TState> {
+	static MakeState<TState = any>(promise: Promise<TState> | null, rejected?: unknown, fulfilled?: TState): State<TState> {
 		const retVal = new State<TState>();
 		if (isPromise(promise)) {
 			retVal._pending = true;
@@ -27,7 +27,7 @@ export class State<T = any> {
 				retVal._rejected = rejected;
 			}
 			else {
-				retVal._fulfilled = fulfilled;
+				retVal._fulfilled = fulfilled as TState;
 			}
 			retVal._promise = null;
 		}
@@ -37,19 +37,19 @@ export class State<T = any> {
 	protected constructor() {
 	}
 
-	protected _promise: Promise<T>;
+	protected _promise!: Promise<T> | null;
 
-	get promise(): Promise<T> {
+	get promise(): Promise<T> | null {
 		return this._promise;
 	}
 
-	protected _pending: boolean;
+	protected _pending!: boolean;
 
 	get pending(): boolean {
 		return this._pending;
 	}
 
-	protected _fulfilled: T;
+	protected _fulfilled!: T;
 
 	get fulfilled(): T {
 		return this._fulfilled;
