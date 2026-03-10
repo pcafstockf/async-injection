@@ -96,7 +96,6 @@ export class Container implements Binder {
 		this.providers.delete(id);
 
 		if (ascending && this.parent) {
-			// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
 			(this.parent as any)?.removeBinding(id, true, releaseIfSingleton);
 		}
 	}
@@ -121,10 +120,8 @@ export class Container implements Binder {
 		if (!Reflect.getMetadata(INJECTABLE_METADATA_KEY, constructor)) {
 			throw new Error('Class not decorated with @Injectable [' + constructor.toString() + ']');
 		}
-		/* eslint-disable @typescript-eslint/no-unsafe-argument */
 		const provider = new ClassBasedProvider(this as any, id, constructor);
 		this.providers.set(id, provider);
-		/* eslint-disable @typescript-eslint/no-unsafe-return */
 		return provider.makeBindAs();
 	}
 
@@ -271,7 +268,6 @@ export class Container implements Binder {
 		this.providers.forEach((v, k) => {
 			if (v instanceof BindableProvider) {
 				v = Object.assign(Object.create(Object.getPrototypeOf(v)), v);
-				// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
 				(v as any).injector = retVal;
 			}
 			retVal.providers.set(k, v);

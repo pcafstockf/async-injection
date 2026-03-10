@@ -1,10 +1,8 @@
-/* eslint-disable */
-
 import 'jasmine';
 import 'reflect-metadata';
 // noinspection ES6PreferShortImport
 import {Container, Inject, Injectable, Optional, PostConstruct} from '../src/index.js';
-import {INJECTABLE_METADATA_KEY, INJECT_METADATA_KEY, OPTIONAL_METADATA_KEY, POSTCONSTRUCT_ASYNC_METADATA_KEY, POSTCONSTRUCT_SYNC_METADATA_KEY, REFLECT_PARAMS, REFLECT_RETURN, RELEASE_METADATA_KEY} from '../src/constants.js';
+import {INJECT_METADATA_KEY, INJECTABLE_METADATA_KEY, OPTIONAL_METADATA_KEY, POSTCONSTRUCT_ASYNC_METADATA_KEY, POSTCONSTRUCT_SYNC_METADATA_KEY, REFLECT_PARAMS, REFLECT_RETURN, RELEASE_METADATA_KEY} from '../src/constants.js';
 
 // These string values are an interoperability contract: a class decorated in Bundle A must
 // be recognized by a Container loaded in Bundle B. Changing any of these values is a
@@ -190,7 +188,7 @@ describe('@Inject', () => {
 		class A {
 		}
 
-		function setup(x) {
+		function setup(x: string) {
 			// noinspection JSUnusedLocalSymbols
 			class D {
 				public constructor(@Inject(x) private k: A) {

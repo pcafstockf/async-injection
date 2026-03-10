@@ -53,7 +53,6 @@ export class ClassBasedProvider<T> extends BindableProvider<T, ClassConstructor<
 	 * Make a resolved or pending State that reflects any @PostConstruct annotations.
 	 */
 	protected makePostConstructState(obj: T): State<T> {
-		// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
 		if (obj !== null && typeof obj === 'object' && (!Array.isArray(obj)) && (obj as any).constructor) {
 			let maybeAsync = false;
 			let pcFn: (() => void | Error | Promise<void | Error>) | undefined;
@@ -64,18 +63,16 @@ export class ClassBasedProvider<T> extends BindableProvider<T, ClassConstructor<
 				};
 			}
 			else {
-				/* eslint-disable @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-argument */
 				// Check to see if there is a @PostConstruct annotation on a method of the class.
 				const ctor = (obj as any).constructor;
- 			let postConstruct: string = Reflect.getMetadata(POSTCONSTRUCT_SYNC_METADATA_KEY, ctor) as string;
+				let postConstruct: string = Reflect.getMetadata(POSTCONSTRUCT_SYNC_METADATA_KEY, ctor) as string;
 				if (!postConstruct) {
 					maybeAsync = true;
- 				postConstruct = Reflect.getMetadata(POSTCONSTRUCT_ASYNC_METADATA_KEY, ctor) as string;
+					postConstruct = Reflect.getMetadata(POSTCONSTRUCT_ASYNC_METADATA_KEY, ctor) as string;
 				}
 				if (postConstruct && ctor.prototype[postConstruct] && typeof ctor.prototype[postConstruct] === 'function')
 					pcFn = (obj as any)[postConstruct].bind?.(obj);
 
-				/* eslint-enable @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-argument */
 			}
 			if (pcFn) {
 				let result: any;
@@ -96,7 +93,6 @@ export class ClassBasedProvider<T> extends BindableProvider<T, ClassConstructor<
 				// The post construction method says it will let us know when it's finished.
 				if (result && (result instanceof Promise || (maybeAsync && isPromise<void>(result)))) {
 					// Return a State that is pending (the other return statements in this method return a State which is resolved or rejected).
-					/* eslint-disable @typescript-eslint/no-unsafe-argument */
 					return State.MakeState<T>(this.makePromiseForObj<T>(result, () => obj));
 				}
 			}
@@ -125,7 +121,6 @@ export class ClassBasedProvider<T> extends BindableProvider<T, ClassConstructor<
 				throw new Error(`Injection error. Unable to determine parameter ${index} type/value of ${this.maker.toString()} constructor`);
 			}
 			// Ask our container to resolve the parameter.
-			/* eslint-disable @typescript-eslint/no-unsafe-argument */
 			let param = (this.injector as StateResolvingInjector).resolveState(actualToken);
 			// If the parameter could not be resolved, see if there is an @Optional annotation
 			if ((!param.pending) && param.rejected) {
@@ -155,7 +150,7 @@ export class ClassBasedProvider<T> extends BindableProvider<T, ClassConstructor<
 			// This might create some unnecessary (but immediately resolved) Promise objects,
 			// BUT, it allows us to chain for failure *and* substitute the Optional (if one exists).
 			const objPromise = this.makePromiseForObj<any[]>(Promise.all(params.map((p, idx) => {
- 			if (p.pending) {
+				if (p.pending) {
 					return p.promise!.catch(err => {
 						// This was a promised param that failed to resolve.
 						// If there is an Optional decorator, use that, otherwise, failure is failure.
@@ -172,7 +167,6 @@ export class ClassBasedProvider<T> extends BindableProvider<T, ClassConstructor<
 				if (values) {
 					// All the parameters are now available, instantiate the class.
 					// If this throws, it will be handled by our caller.
-					// eslint-disable-next-line @typescript-eslint/no-unsafe-return
 					return Reflect.construct(this.maker, values);
 				}
 				return undefined as unknown as T;
@@ -184,7 +178,6 @@ export class ClassBasedProvider<T> extends BindableProvider<T, ClassConstructor<
 					return state.promise;   // chain (aka wait some more).
 				}
 				else if (state.rejected) {
-					// eslint-disable-next-line @typescript-eslint/no-unsafe-return
 					return state.rejected as any; // error
 				}
 				else {

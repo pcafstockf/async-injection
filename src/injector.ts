@@ -1,7 +1,7 @@
 /**
  * This is about as close as we can get in Typescript
  */
-export type AbstractConstructor<T> = Function & { prototype: T };   // eslint-disable-line @typescript-eslint/ban-types
+export type AbstractConstructor<T> = Function & { prototype: T };
 /**
  * Standard definition of a constructor.
  */
@@ -11,7 +11,6 @@ export type ClassConstructor<T> = new (...args: any[]) => T;
  * Allow for implicit typing of constants and interfaces.
  * Inspired by Angular and some colleges at work.
  */
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export class InjectionToken<T> {
 	constructor(private id: string | symbol) {
 	}
@@ -21,9 +20,7 @@ export class InjectionToken<T> {
 	}
 
 	toString(): string {
-		// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
 		if (typeof this.id === 'symbol' && typeof (this.id as any).description !== 'undefined')
-			// eslint-disable-next-line
 			return (this.id as any).description.toString();
 		return this.id.toString();
 	}

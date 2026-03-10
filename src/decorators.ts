@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/ban-types */
 /**
  * These decorators all apply the information they collect (whether class, method, or parameter data) as tagged metadata on the class's constructor
  */
@@ -19,9 +18,7 @@ function targetHint(target: Function): string {
 
 // Validate that 'target' is a class constructor function.
 function isClassConstructor(target: any) {
-	// eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
 	if (typeof target === 'function' && target.hasOwnProperty('prototype')) {
-		// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
 		return target.prototype.constructor === target;
 	}
 	return false;
@@ -103,7 +100,7 @@ export function _getInjectedIdAt(target: Function, parameterIndex: number): Inje
  * Placed just before a constructor parameter, this parameter decorator signals the container that it should supply the 'alt' constant value (undefined by default) if for *any* reason it is unable to otherwise resolve the type of the parameter.
  * WARNING!  It is your responsibility to ensure that alt is of the appropriate type/value.
  */
-export function Optional(alt?: any): ParameterDecorator {   // eslint-disable-line @typescript-eslint/explicit-module-boundary-types
+export function Optional(alt?: any): ParameterDecorator {
 	/**
 	 * @param target  The constructor function of the class (we don't allow @Optional on anything else).
 	 * @param parameterName The name of the parameter
@@ -141,7 +138,7 @@ export function PostConstruct(): MethodDecorator {
 	 * @returns Undefined (nothing), as this decorator does not modify the method in any way.
 	 */
 	// noinspection JSUnusedLocalSymbols
-	return function (target: Object, methodName: string | symbol, descriptor: PropertyDescriptor) {    // eslint-disable-line @typescript-eslint/no-unused-vars
+	return function (target: Object, methodName: string | symbol, descriptor: PropertyDescriptor) {
 		if (typeof target !== 'object' || typeof target.constructor !== 'function') {
 			throw new Error('@PostConstruct not applied to instance method [' + target.toString() + '/' + methodName.toString() + ']');
 		}
@@ -179,7 +176,7 @@ export function Release(): MethodDecorator {
 	 * @returns Undefined (nothing), as this decorator does not modify the method in any way.
 	 */
 	// noinspection JSUnusedLocalSymbols
-	return function (target: Object, methodName: string | symbol, descriptor: PropertyDescriptor) {    // eslint-disable-line @typescript-eslint/no-unused-vars
+	return function (target: Object, methodName: string | symbol, descriptor: PropertyDescriptor) {
 		if (typeof target !== 'object' || typeof target.constructor !== 'function') {
 			throw new Error('@Release not applied to instance method [' + target.toString() + '/' + methodName.toString() + ']');
 		}

@@ -1,12 +1,22 @@
 {
-	"extends": "./tsconfig.base.json",
-	"compilerOptions": {
-		"module": "es2015",
-		"noEmit": true
-	},
-	"include": ["./src/**/*", "./spec/**/*"],
-	"references": [
-		{"path": "tsconfig.cjs.json"},
-		{"path": "tsconfig.esm.json"}
-	]
+		"extends": "./tsconfig.cjs.json",
+		"compilerOptions": {
+				"noEmit": true,
+				"rootDir": ".",
+				"paths": {
+						"async-injection": [
+								"./src/index.ts"
+						],
+						"async-injection/*": [
+								"./src/*"
+						]
+				}
+		},
+		"include": [
+				"./src/**/*",
+				"./spec/**/*"
+		],
+		"exclude": [
+				"node_modules"
+		]
 }

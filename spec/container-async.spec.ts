@@ -1,5 +1,3 @@
-/* eslint-disable */
-
 import 'jasmine';
 import 'reflect-metadata';
 // noinspection ES6PreferShortImport
@@ -75,11 +73,12 @@ describe('Async factories', () => {
 			fail('resolveSingletons should have rejected');
 		}
 		catch (reason) {
-			expect(reason).toBeInstanceOf(Map);
-			expect(reason.size).toBe(1);
-			let r = reason.get('B');
+			const reasonMap = reason as Map<string, Error>;
+			expect(reasonMap).toBeInstanceOf(Map);
+			expect(reasonMap.size).toBe(1);
+			const r = reasonMap.get('B');
 			expect(r).toBeDefined();
-			expect(r.message).toBe('Not a number');
+			expect(r!.message).toBe('Not a number');
 		}
 	});
 	it('Should throw if you request an unresolved dependency tree', async () => {
@@ -116,7 +115,7 @@ describe('Async factories', () => {
 			}
 
 			public i: string;
-			public a: string;
+			public a!: string;
 
 			@PostConstruct()
 			public init(value?: string): Promise<void> {
@@ -156,7 +155,7 @@ describe('Async factories', () => {
 			}
 
 			public i: string;
-			public a: string;
+			public a!: string;
 
 			@PostConstruct()
 			public init(value?: string): Promise<void> {
@@ -196,7 +195,7 @@ describe('Async factories', () => {
 			public constructor() {
 			}
 
-			public a: string;
+			public a!: string;
 
 			@PostConstruct()
 			public init(): Promise<void> {
@@ -272,7 +271,7 @@ describe('Async factories', () => {
 			public constructor() {
 			}
 
-			public a: string;
+			public a!: string;
 		}
 
 		async function fetchA() {
@@ -307,7 +306,7 @@ describe('Async factories', () => {
 			fail('Factory failures should not resolve');
 		}
 		catch (err) {
-			expect(err.message).toBe('Unable to create A');
+			expect((err as Error).message).toBe('Unable to create A');
 		}
 	});
 	it('Failure in async dependency tree should invoke ErrorHandler', async () => {
@@ -315,7 +314,7 @@ describe('Async factories', () => {
 			public constructor() {
 			}
 
-			public a: string;
+			public a!: string;
 		}
 
 		async function fetchA() {
@@ -346,7 +345,7 @@ describe('Async factories', () => {
 			fail('Factory failures should not resolve');
 		}
 		catch (err) {
-			expect(err.message).toBe('Unable to recover A');
+			expect((err as Error).message).toBe('Unable to recover A');
 		}
 	});
 	it('Failure in async dependency tree should allow ErrorHandler to provide alternative', async () => {
@@ -513,7 +512,7 @@ describe('Asynchronous error handling', () => {
 			fail('Rejected parameters should cause construction failure');
 		}
 		catch (err) {
-			expect(err.message).toBe('Failed post construction of B');
+			expect((err as Error).message).toBe('Failed post construction of B');
 		}
 	});
 	it('Pending constructor parameters that subsequently fail, should propagate the error', async () => {
@@ -550,7 +549,7 @@ describe('Asynchronous error handling', () => {
 			fail('Rejected parameters should cause construction failure');
 		}
 		catch (err) {
-			expect(err.message).toBe('Failed post construction of A');
+			expect((err as Error).message).toBe('Failed post construction of A');
 		}
 	});
 	it('Clone should share already-resolved singletons with the original', async () => {

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-member-access, @typescript-eslint/explicit-module-boundary-types */
 import {RELEASE_METADATA_KEY} from './constants.js';
 
 /**
@@ -34,7 +33,6 @@ export function isPromise<T>(value: any): value is Promise<T> {
  */
 export function InvokeReleaseMethod<T = unknown>(obj: T): boolean {
 	const o = obj as any;
-	/* eslint-disable @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-argument */
 	const releaseMethod: string = Reflect.getMetadata(RELEASE_METADATA_KEY, o.constructor) as string;
 	if (releaseMethod && o.constructor.prototype[releaseMethod] && typeof o.constructor.prototype[releaseMethod] === 'function') {
 		const releaseFn = o[releaseMethod].bind?.(o);
@@ -43,6 +41,5 @@ export function InvokeReleaseMethod<T = unknown>(obj: T): boolean {
 			return true;
 		}
 	}
-	/* eslint-enable @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
 	return false;
 }

@@ -6,6 +6,8 @@
 //   - @abraham/reflection        (https://www.npmjs.com/package/@abraham/reflection)
 declare namespace Reflect {
 	function getMetadata(metadataKey: unknown, target: object, propertyKey?: string | symbol): unknown;
+
 	function defineMetadata(metadataKey: unknown, metadataValue: unknown, target: object, propertyKey?: string | symbol): void;
+
 	function hasOwnMetadata(metadataKey: unknown, target: object, propertyKey?: string | symbol): boolean;
 }

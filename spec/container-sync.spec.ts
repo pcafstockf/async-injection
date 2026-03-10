@@ -1,9 +1,7 @@
-/* eslint-disable */
-
 import 'jasmine';
 import 'reflect-metadata';
 // noinspection ES6PreferShortImport
-import {InjectionToken, Container, Injectable, PostConstruct, Release} from '../src/index.js';
+import {Container, Injectable, InjectionToken, PostConstruct, Release} from '../src/index.js';
 
 describe('Simple Transient classes', () => {
 	it('Should support class binding and retrieval', () => {
@@ -137,7 +135,7 @@ describe('Simple Singletons', () => {
 				delete this.a;
 			}
 
-			public a: string;
+			public a?: string;
 		}
 
 		const container = new Container();
@@ -152,12 +150,14 @@ describe('Simple Singletons', () => {
 	it('Should release a single singleton', () => {
 		@Injectable()
 		class A {
-			public a: string = 'A';
+			public a?: string = 'A';
+
 			@Release()
 			protected cleanup() {
 				delete this.a;
 			}
 		}
+
 		const container = new Container();
 		container.bindClass(A).asSingleton();
 
@@ -249,7 +249,7 @@ describe('PostConstruct execution', () => {
 			}
 
 			public i: string;
-			public a: string;
+			public a!: string;
 
 			@PostConstruct()
 			public init(value?: string) {
@@ -361,7 +361,7 @@ describe('Synchronous error handling', () => {
 			expect(id.name).toBe('A');
 			expect((error as Error).message).toBe('Unable to initialize A');
 			expect(value).toBeInstanceOf(A);
-			expect(value.a).toBe('A');
+			expect(value!.a).toBe('A');
 			errorHandlerInvoked = true;
 			return error as Error;
 		});
@@ -372,7 +372,7 @@ describe('Synchronous error handling', () => {
 		}
 		catch (err) {
 			expect(errorHandlerInvoked).toBeTruthy();
-			expect(err.message).toBe('Unable to initialize A');
+			expect((err as Error).message).toBe('Unable to initialize A');
 		}
 	});
 	it('Success handler\'s failure should invoke ErrorHandler with constructed object', () => {
@@ -395,7 +395,7 @@ describe('Synchronous error handling', () => {
 			expect(id.name).toBe('A');
 			expect((error as Error).message).toBe('Unable to initialize A');
 			expect(value).toBeInstanceOf(A);
-			expect(value.a).toBe('A');
+			expect(value!.a).toBe('A');
 			errorHandlerInvoked = true;
 			return error as Error;
 		});
@@ -406,7 +406,7 @@ describe('Synchronous error handling', () => {
 		}
 		catch (err) {
 			expect(errorHandlerInvoked).toBeTruthy();
-			expect(err.message).toBe('Unable to initialize A');
+			expect((err as Error).message).toBe('Unable to initialize A');
 		}
 	});
 	it('PostConstruct failure should allow ErrorHandler to recover', () => {
@@ -428,9 +428,9 @@ describe('Synchronous error handling', () => {
 		let errorHandlerInvoked = false;
 		container.bindClass(A).onError((injector, id: any, maker, error, value) => {
 			expect(value).toBeInstanceOf(A);
-			expect(value.a).toBe('A');
+			expect(value!.a).toBe('A');
 			errorHandlerInvoked = true;
-			value.a = 'B';
+			value!.a = 'B';
 			return value;
 		});
 
