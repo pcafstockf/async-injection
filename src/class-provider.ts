@@ -172,18 +172,19 @@ export class ClassBasedProvider<T> extends BindableProvider<T, ClassConstructor<
 				return undefined as unknown as T;
 			});
 			// Once the obj is resolved, then we need to check for PostConstruct and if it was async, wait for that too.
-			return State.MakeState<T>(objPromise.then((obj) => {
+			return State.MakeState<T>((async () => {
+				const obj = await objPromise;
 				const state = this.makePostConstructState(obj);
 				if (state.pending) {
-					return state.promise;   // chain (aka wait some more).
+					return await state.promise!;   // chain (aka wait some more).
 				}
 				else if (state.rejected) {
 					return state.rejected as any; // error
 				}
 				else {
-					return state.fulfilled; // value (aka obj).
+					return state.fulfilled!; // value (aka obj).
 				}
-			}));
+			})());
 		}
 		else {
 			// All parameters needed for construction are available, instantiate the object.

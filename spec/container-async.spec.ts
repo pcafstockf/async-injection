@@ -383,6 +383,19 @@ describe('Async factories', () => {
 		const b = await container.resolve(B);
 		expect(b.a.a).toBe('A');
 	});
+	it('Async transient should produce a distinct instance on each resolve call', async () => {
+		class A {
+			public constructor() {
+			}
+		}
+
+		const container = new Container();
+		container.bindAsyncFactory(A, async () => new A());
+
+		const a1 = await container.resolve(A);
+		const a2 = await container.resolve(A);
+		expect(a1).not.toBe(a2);
+	});
 });
 
 describe('Container asynchronous hierarchy', () => {
@@ -440,6 +453,39 @@ describe('Container asynchronous hierarchy', () => {
 });
 
 describe('Edge cases', () => {
+	it('releaseSingleton on a still-pending async singleton should return a Promise', async () => {
+		@Injectable()
+		class A {
+			public a: string = 'A';
+
+			@Release()
+			cleanup() {
+				this.a = 'released';
+			}
+		}
+
+		const container = new Container();
+		container.bindAsyncFactory(A, () => {
+			return new Promise<A>((resolve) => {
+				setTimeout(() => resolve(new A()), 25);
+			});
+		}).asSingleton();
+
+		// Start resolution so the singleton enters the pending state
+		const resolvePromise = container.resolve(A);
+
+		// Release while still pending — must return a Promise (not the instance or null)
+		const releaseResult = container.releaseSingleton(A);
+		expect(releaseResult).toBeInstanceOf(Promise);
+
+		// Once settled, @Release will have been invoked on the instance
+		const released = await (releaseResult as Promise<A | null>);
+		expect(released).not.toBeNull();
+		expect((released as A).a).toBe('released');
+
+		// The original resolve promise also settles cleanly
+		await resolvePromise;
+	});
 	it('Should successfully invoke resolve even on a fully synchronous dependency tree', async () => {
 		@Injectable()
 		class A {
@@ -465,6 +511,62 @@ describe('Edge cases', () => {
 		expect(b1.a.a).toEqual('A');
 		const b2 = container.get(B);
 		expect(b2 instanceof B).toBeTruthy();
+	});
+});
+
+describe('Blending synchronous and asynchronous injection', () => {
+	it('Should support full blending scenario end-to-end', async () => {
+		@Injectable()
+		class SharedService {
+			public connected = false;
+
+			public constructor(@Inject('LogLevel') @Optional('warn') public logLevel: string) {
+			}
+
+			@PostConstruct()
+			connect(): Promise<void> {
+				return new Promise<void>((resolve) => {
+					setTimeout(() => {
+						this.connected = true;
+						resolve();
+					}, 25);
+				});
+			}
+		}
+
+		@Injectable()
+		class TransactionHandler {
+			public constructor(public svc: SharedService) {
+			}
+		}
+
+		// Case 1: LogLevel omitted — @Optional default 'warn' applies
+		const container1 = new Container();
+		container1.bindClass(SharedService).asSingleton();
+		container1.bindClass(TransactionHandler);
+		await container1.resolveSingletons();
+
+		const tx1 = container1.get(TransactionHandler);
+		expect(tx1).toBeInstanceOf(TransactionHandler);
+		expect(tx1.svc).toBeInstanceOf(SharedService);
+		expect(tx1.svc.connected).toBeTrue();
+		expect(tx1.svc.logLevel).toBe('warn');
+
+		// Transient: each get() returns a new handler sharing the same singleton svc
+		const tx2 = container1.get(TransactionHandler);
+		expect(tx2).not.toBe(tx1);
+		expect(tx2.svc).toBe(tx1.svc);
+
+		// Case 2: LogLevel explicitly bound — constant overrides the @Optional default
+		const container2 = new Container();
+		container2.bindClass(SharedService).asSingleton();
+		container2.bindClass(TransactionHandler);
+		container2.bindConstant('LogLevel', 'info');
+		await container2.resolveSingletons();
+
+		const tx3 = container2.get(TransactionHandler);
+		expect(tx3.svc.logLevel).toBe('info');
+		expect(tx3.svc.connected).toBeTrue();
 	});
 });
 

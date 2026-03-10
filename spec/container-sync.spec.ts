@@ -1,7 +1,7 @@
 import 'jasmine';
 import 'reflect-metadata';
 // noinspection ES6PreferShortImport
-import {Container, Injectable, InjectionToken, PostConstruct, Release} from '../src/index.js';
+import {Container, Inject, Injectable, InjectionToken, PostConstruct, Release} from '../src/index.js';
 
 describe('Simple Transient classes', () => {
 	it('Should support class binding and retrieval', () => {
@@ -297,6 +297,118 @@ describe('Container synchronous hierarchy', () => {
 		const grandChild = new Container(child);
 
 		expect(grandChild.get('A') instanceof A).toBeTruthy();
+	});
+	it('Should allow a child container binding to override a parent binding for the same id', () => {
+		@Injectable()
+		class A {
+			public type(): string {
+				return 'A';
+			}
+		}
+
+		@Injectable()
+		class B extends A {
+			public override type(): string {
+				return 'B';
+			}
+		}
+
+		const parent = new Container();
+		parent.bindClass('svc', A);
+
+		const child = new Container(parent);
+		child.bindClass('svc', B);
+
+		expect(child.get<A>('svc')).toBeInstanceOf(B);
+		expect(parent.get<A>('svc')).toBeInstanceOf(A);
+		expect(parent.get<A>('svc')).not.toBeInstanceOf(B);
+	});
+	it('Should report isIdKnown correctly when searching ascending through the hierarchy', () => {
+		@Injectable()
+		class A {
+		}
+
+		const root = new Container();
+		root.bindClass('A', A);
+		const child = new Container(root);
+
+		expect(child.isIdKnown('A')).toBeFalse();
+		expect(child.isIdKnown('A', true)).toBeTrue();
+		expect(root.isIdKnown('A')).toBeTrue();
+	});
+});
+
+describe('removeBinding', () => {
+	it('Should remove the binding so that get throws', () => {
+		@Injectable()
+		class A {
+		}
+
+		const container = new Container();
+		container.bindClass(A);
+		expect(container.get(A)).toBeInstanceOf(A);
+
+		container.removeBinding(A);
+		expect(() => container.get(A)).toThrowError(/Symbol not bound/);
+	});
+	it('Should invoke @Release on the singleton before removing when releaseIfSingleton is true', () => {
+		@Injectable()
+		class A {
+			public released = false;
+
+			@Release()
+			cleanup() {
+				this.released = true;
+			}
+		}
+
+		const container = new Container();
+		container.bindClass(A).asSingleton();
+
+		const a = container.get(A);
+		expect(a.released).toBeFalse();
+
+		container.removeBinding(A, false, true);
+		expect(a.released).toBeTrue();
+		expect(() => container.get(A)).toThrowError(/Symbol not bound/);
+	});
+	it('Should remove bindings from the parent hierarchy when ascending is true', () => {
+		@Injectable()
+		class A {
+		}
+
+		const parent = new Container();
+		parent.bindClass('A', A);
+		const child = new Container(parent);
+
+		expect(parent.isIdKnown('A')).toBeTrue();
+		child.removeBinding('A', true);
+		expect(parent.isIdKnown('A')).toBeFalse();
+	});
+});
+
+describe('Circular dependency (known limitation)', () => {
+	it('Should throw a RangeError due to infinite recursion (no built-in cycle detection)', () => {
+		// This library does not detect circular dependencies (a known and intentional limitation).
+		// When class A depends on class B and class B depends on class A, container.get will recurse until the JS engine throws maximum call stack size exceeded.
+		// Restructure your dependency graph or use lazy/factory injection to break the cycle.
+		@Injectable()
+		class A {
+			constructor(@Inject('B') public b: any) {
+			}
+		}
+
+		@Injectable()
+		class B {
+			constructor(@Inject('A') public a: any) {
+			}
+		}
+
+		const container = new Container();
+		container.bindClass('A', A);
+		container.bindClass('B', B);
+
+		expect(() => container.get('A')).toThrowError(RangeError);
 	});
 });
 

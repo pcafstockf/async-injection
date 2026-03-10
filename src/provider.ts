@@ -58,14 +58,18 @@ export abstract class Provider<T = any> {
 		if (this.singleton) {
 			const s = this.provideAsState();
 			if (s.pending) {
-				return s.promise!.then((v) => {
-					this.singleton = null;
-					InvokeReleaseMethod(v);
-					return v;
-				}).catch(() => {
-					this.singleton = null;
-					return null;
-				});
+				return (async () => {
+					try {
+						const v = await s.promise!;
+						this.singleton = null;
+						InvokeReleaseMethod(v);
+						return v;
+					}
+					catch {
+						this.singleton = null;
+						return null;
+					}
+				})();
 			}
 			else {
 				this.singleton = null;
