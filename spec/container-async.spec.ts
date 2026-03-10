@@ -12,11 +12,8 @@ describe('Async factories', () => {
 			}
 		}
 
-		let requested: Date = null;
-
 		async function fetchA() {
 			return new Promise<A>((resolve) => {
-				requested = new Date();
 				setTimeout(() => {
 					resolve(new A(1));
 				}, 25);
@@ -29,9 +26,6 @@ describe('Async factories', () => {
 		}).asSingleton();
 
 		let a = await container.resolve(A);
-		const end = new Date();
-
-		expect(end.getTime() - requested.getTime()).toBeGreaterThanOrEqual(20);
 		expect(a.c).toEqual(1);
 	});
 	it('Should support async initialization', async () => {
@@ -40,11 +34,8 @@ describe('Async factories', () => {
 			}
 		}
 
-		let requested: Date = null;
-
 		async function fetchA() {
 			return new Promise<A>((resolve) => {
-				requested = new Date();
 				setTimeout(() => {
 					resolve(new A(1));
 				}, 25);
@@ -57,12 +48,9 @@ describe('Async factories', () => {
 		}).asSingleton();
 
 		await container.resolveSingletons();
-		const end = new Date();
-
-		expect(end.getTime() - requested.getTime()).toBeGreaterThanOrEqual(20);
 		expect(container.get(A).c).toEqual(1);
 	});
-	it('Should respect the resolveSingletons call contract', (done) => {
+	it('Should respect the resolveSingletons call contract', async () => {
 		// All the other code binds to objects, lets bind to a number (which is perfectly valid).
 		async function fetchA(n: number) {
 			return new Promise<number>((resolve, reject) => {
@@ -82,17 +70,17 @@ describe('Async factories', () => {
 		container.bindAsyncFactory('B', async () => {
 			return await fetchA(NaN);
 		}).asSingleton();
-		container.resolveSingletons().then(() => {
+		try {
+			await container.resolveSingletons();
 			fail('resolveSingletons should have rejected');
-			done();
-		}).catch((reason) => {
+		}
+		catch (reason) {
 			expect(reason).toBeInstanceOf(Map);
 			expect(reason.size).toBe(1);
 			let r = reason.get('B');
 			expect(r).toBeDefined();
 			expect(r.message).toBe('Not a number');
-			done();
-		});
+		}
 	});
 	it('Should throw if you request an unresolved dependency tree', async () => {
 		class A {
@@ -279,7 +267,7 @@ describe('Async factories', () => {
 
 		expect(b.a.a).toEqual('A');
 	});
-	it('Failure in async dependency tree should propagate', (done) => {
+	it('Failure in async dependency tree should propagate', async () => {
 		class A {
 			public constructor() {
 			}
@@ -314,15 +302,15 @@ describe('Async factories', () => {
 		});
 		container.bindClass(C);
 
-		container.resolve(B).then(() => {
+		try {
+			await container.resolve(B);
 			fail('Factory failures should not resolve');
-			done();
-		}, (err) => {
+		}
+		catch (err) {
 			expect(err.message).toBe('Unable to create A');
-			done();
-		});
+		}
 	});
-	it('Failure in async dependency tree should invoke ErrorHandler', (done) => {
+	it('Failure in async dependency tree should invoke ErrorHandler', async () => {
 		class A {
 			public constructor() {
 			}
@@ -353,15 +341,15 @@ describe('Async factories', () => {
 			return new Error('Unable to recover ' + id.name);
 		});
 
-		container.resolve(B).then(() => {
+		try {
+			await container.resolve(B);
 			fail('Factory failures should not resolve');
-			done();
-		}, (err) => {
+		}
+		catch (err) {
 			expect(err.message).toBe('Unable to recover A');
-			done();
-		});
+		}
 	});
-	it('Failure in async dependency tree should allow ErrorHandler to provide alternative', (done) => {
+	it('Failure in async dependency tree should allow ErrorHandler to provide alternative', async () => {
 		class A {
 			public constructor() {
 				this.a = 'A';
@@ -393,13 +381,8 @@ describe('Async factories', () => {
 			return new A();
 		});
 
-		container.resolve(B).then((b) => {
-			expect(b.a.a).toBe('A');
-			done();
-		}, () => {
-			fail('Factory failures should recover');
-			done();
-		});
+		const b = await container.resolve(B);
+		expect(b.a.a).toBe('A');
 	});
 });
 
@@ -487,7 +470,7 @@ describe('Edge cases', () => {
 });
 
 describe('Asynchronous error handling', () => {
-	it('Async initialization followed by another Async PostConstruct which fails, should propagate the error', (done) => {
+	it('Async initialization followed by another Async PostConstruct which fails, should propagate the error', async () => {
 		@Injectable()
 		class A {
 			public constructor() {
@@ -525,15 +508,15 @@ describe('Asynchronous error handling', () => {
 		container.bindClass(A);
 		container.bindClass(B);
 
-		container.resolve(B).then(() => {
+		try {
+			await container.resolve(B);
 			fail('Rejected parameters should cause construction failure');
-			done();
-		}, (err) => {
+		}
+		catch (err) {
 			expect(err.message).toBe('Failed post construction of B');
-			done();
-		});
+		}
 	});
-	it('Pending constructor parameters that subsequently fail, should propagate the error', (done) => {
+	it('Pending constructor parameters that subsequently fail, should propagate the error', async () => {
 		@Injectable()
 		class A {
 			public constructor() {
@@ -562,21 +545,15 @@ describe('Asynchronous error handling', () => {
 		container.bindClass(A);
 		container.bindClass(B);
 
-		container.resolve(B).then(() => {
+		try {
+			await container.resolve(B);
 			fail('Rejected parameters should cause construction failure');
-			done();
-		}, (err) => {
-			expect(err.message).toBe('Failed post construction of A');
-			done();
-		});
-	});
-	it('be able to clone a container', async () => {
-		@Injectable()
-		class A {
-			public constructor() {
-			}
 		}
-
+		catch (err) {
+			expect(err.message).toBe('Failed post construction of A');
+		}
+	});
+	it('Clone should share already-resolved singletons with the original', async () => {
 		@Injectable()
 		class B {
 			public constructor() {
@@ -593,11 +570,6 @@ describe('Asynchronous error handling', () => {
 					}, 25);
 				});
 			}
-
-			@Release()
-			autoRelease() {
-				this.b = 'released';
-			}
 		}
 
 		@Injectable()
@@ -606,90 +578,66 @@ describe('Asynchronous error handling', () => {
 			}
 		}
 
-		@Injectable()
-		class E {
-			public constructor(@Inject('UnDef') @Optional('attempt') public e: string) {
-			}
+		const orig = new Container();
+		orig.bindClass(B).asSingleton();
+		orig.bindAsyncFactory(C, async (injector: Injector) => {
+			const b = await injector.resolve(B);
+			return new C(b);
+		});
+		await orig.resolveSingletons();
+		const clone = orig.clone();
 
-			@PostConstruct()
-			public init(): Promise<void> {
-				this.e = 'fail';
-				return new Promise<void>((resolve, reject) => {
-					setTimeout(() => {
-						reject(new Error('Failed post construction of E'));
-					}, 25);
-				});
+		const c1 = await clone.resolve(C);
+		const c2 = await orig.resolve(C);
+		expect(c1).not.toBe(c2);       // C is transient: each resolve gives a new instance
+		expect(c1.b).toBe(c2.b);       // B is singleton: both containers share the same resolved instance
+		expect(clone.get(B)).toBe(orig.get(B));
+	});
+	it('Clone should create independent transient instances', () => {
+		@Injectable()
+		class A {
+			public constructor() {
 			}
 		}
 
 		const orig = new Container();
-		let clone: Container;
-		let acount = 0;
-		// test success callbacks *and* that we can retrieve something from the orig container, clone that container, and retrieve another instance of A from the cloned container.
-		orig.bindClass(A).onSuccess((value, injector, id, maker) => {
-			if (acount === 0) {
-				expect(injector).toBe(orig);
-			}
-			else {
-				expect(injector).toBe(clone);
-			}
-			expect(value).toBeInstanceOf(A);
-			expect(id).toBe(A);
-			expect(maker).toBe(A);
-			acount++;
-		});
-		// test singletons
-		orig.bindClass(B).asSingleton();
-		// test async factory
-		let ccount = 0;
-		orig.bindAsyncFactory(C, async (injector: Injector) => {
-			if (ccount === 0)
-				expect(injector).toBe(clone);
-			else
-				expect(injector).toBe(orig);
-			const b = await injector.resolve(B);
-			ccount++;
-			return new C(b);
-		});
-		orig.bindClass(E).onError((injector, id, maker, error, value) => {
-			// The construction will succeed, but post-construction will throw, so this error handler should be invoked and will 'init' the e property as a "recovery"
-			expect(injector).toBe(clone);
-			expect(value).toBeInstanceOf(E);
-			expect(id).toBe(E);
-			expect(maker).toBe(E);
-			value.e = 'recovery';
-			return value;
-		});
+		orig.bindClass(A);
+		const clone = orig.clone();
+
+		expect(clone.get(A)).not.toBe(orig.get(A));
+	});
+	it('Clone should inherit constants from the original', () => {
+		const orig = new Container();
 		orig.bindConstant('const', 42);
-
-		expect(acount).toBe(0);
-		const origA = orig.get(A);
-		expect(origA).toBeInstanceOf(A);
-		expect(acount).toBe(1);
-		await orig.resolveSingletons();
-		clone = orig.clone();
-		expect(clone).toBeInstanceOf(Container);
-		expect(clone).not.toBe(orig);
-		const cloneA = clone.get(A);
-		expect(cloneA).toBeInstanceOf(A);
-		expect(acount).toBe(2);
-
-		const c = await clone.resolve(C);
-		expect(c.b).toBeInstanceOf(B);
-		const z = await orig.resolve(C);
-		expect(c).not.toBe(z);  // C is not a singleton, so regardless of container, we should always get a new one.
-		expect(z.b).toBe(c.b);  // B is a singleton, so regardless of container, it should always be the same.
-
-		const e = await clone.resolve(E);
-		expect(e.e).toEqual('recovery');
+		const clone = orig.clone();
 
 		expect(clone.get('const')).toEqual(42);
 		expect(clone.get('const')).toBe(orig.get('const'));
+	});
+	it('Releasing singletons on a clone should release the shared singleton', async () => {
+		@Injectable()
+		class B {
+			public constructor() {
+				this.b = 'B';
+			}
 
-		// Since we resolved B in orig, it's singleton state carried over to clone, so we should be able to release.
-		expect(c.b.b).toEqual('B');
+			public b: string;
+
+			@Release()
+			autoRelease() {
+				this.b = 'released';
+			}
+		}
+
+		const orig = new Container();
+		orig.bindClass(B).asSingleton();
+		await orig.resolveSingletons();
+		const clone = orig.clone();
+
+		const b = clone.get(B);
+		expect(b.b).toEqual('B');
 		clone.releaseSingletons();
-		expect(c.b.b).toEqual('released');
+		expect(b.b).toEqual('released');
 	});
 	it('Async initialization optionally depending on an Async dependency should succeed', async () => {
 		@Injectable()

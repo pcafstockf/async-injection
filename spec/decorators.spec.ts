@@ -3,29 +3,45 @@
 import 'jasmine';
 import 'reflect-metadata';
 // noinspection ES6PreferShortImport
-import {Container, InjectableId, Inject, Injectable, Optional, PostConstruct} from '../src/index.js';
-import {POSTCONSTRUCT_ASYNC_METADATA_KEY, POSTCONSTRUCT_SYNC_METADATA_KEY, REFLECT_PARAMS} from '../src/constants.js';
-import {_getInjectedIdAt} from '../src/decorators.js';
+import {Container, Inject, Injectable, Optional, PostConstruct} from '../src/index.js';
+import {INJECTABLE_METADATA_KEY, INJECT_METADATA_KEY, OPTIONAL_METADATA_KEY, POSTCONSTRUCT_ASYNC_METADATA_KEY, POSTCONSTRUCT_SYNC_METADATA_KEY, REFLECT_PARAMS, REFLECT_RETURN, RELEASE_METADATA_KEY} from '../src/constants.js';
+
+// These string values are an interoperability contract: a class decorated in Bundle A must
+// be recognized by a Container loaded in Bundle B. Changing any of these values is a
+// breaking change that requires a major version bump and migration guide.
+describe('Cross-bundle metadata key contract', () => {
+	it('should use stable string values for all metadata keys', () => {
+		expect(INJECTABLE_METADATA_KEY).toBe('async-injection:INJECTABLE');
+		expect(POSTCONSTRUCT_SYNC_METADATA_KEY).toBe('async-injection:POSTCONSTRUCT_SYNC');
+		expect(POSTCONSTRUCT_ASYNC_METADATA_KEY).toBe('async-injection:POSTCONSTRUCT_ASYNC');
+		expect(INJECT_METADATA_KEY).toBe('async-injection:INJECT');
+		expect(OPTIONAL_METADATA_KEY).toBe('async-injection:OPTIONAL');
+		expect(RELEASE_METADATA_KEY).toBe('async-injection:RELEASE');
+		expect(REFLECT_PARAMS).toBe('design:paramtypes');
+		expect(REFLECT_RETURN).toBe('design:returntype');
+	});
+});
 
 describe('@Injectable', () => {
-	it('Should generate proper metadata', () => {
+	it('Should enable constructor injection by recording parameter types', () => {
+		@Injectable()
 		class A {
-		}
-
-		interface B {
+			public a = 'A';
 		}
 
 		@Injectable()
 		class Target {
-			// noinspection JSUnusedLocalSymbols
-			public constructor(private a: A, private b: B) {
+			public constructor(public a: A) {
 			}
 		}
 
-		const metadata = Reflect.getMetadata(REFLECT_PARAMS, Target);
-		expect(Array.isArray(metadata)).toBeTruthy();
-		expect(metadata[0]).toBe(A);
-		expect(metadata[1]).toBe(Object);
+		const container = new Container();
+		container.bindClass(A);
+		container.bindClass(Target);
+
+		const t = container.get(Target);
+		expect(t.a).toBeInstanceOf(A);
+		expect(t.a.a).toEqual('A');
 	});
 
 	it('Should throw when applied multiple times', () => {
@@ -41,30 +57,45 @@ describe('@Injectable', () => {
 });
 
 describe('@PostConstruct', () => {
-	it('Should generate proper metadata', () => {
+	it('Should invoke a synchronous init method after construction', () => {
+		@Injectable()
 		class A {
+			public initialized = false;
+
 			@PostConstruct()
-			public initMethod() {
+			public init() {
+				this.initialized = true;
 			}
 		}
 
-		const smd = Reflect.getMetadata(POSTCONSTRUCT_SYNC_METADATA_KEY, A);
-		expect(smd).toBe('initMethod');
-		const amd = Reflect.getMetadata(POSTCONSTRUCT_ASYNC_METADATA_KEY, A);
-		expect(amd).toBeUndefined();
+		const container = new Container();
+		container.bindClass(A);
+
+		const a = container.get(A);
+		expect(a.initialized).toBeTruthy();
 	});
-	it('Should detect an asynchronous return', () => {
+
+	it('Should invoke and await an asynchronous init method after construction', async () => {
+		@Injectable()
 		class A {
+			public initialized = false;
+
 			@PostConstruct()
-			public initMethod(): Promise<void> {
-				return Promise.resolve();
+			public init(): Promise<void> {
+				return new Promise<void>((resolve) => {
+					setTimeout(() => {
+						this.initialized = true;
+						resolve();
+					}, 1);
+				});
 			}
 		}
 
-		const amd = Reflect.getMetadata(POSTCONSTRUCT_ASYNC_METADATA_KEY, A);
-		expect(amd).toBe('initMethod');
-		const smd = Reflect.getMetadata(POSTCONSTRUCT_SYNC_METADATA_KEY, A);
-		expect(smd).toBeUndefined();
+		const container = new Container();
+		container.bindClass(A).asSingleton();
+
+		await container.resolveSingletons();
+		expect(container.get(A).initialized).toBeTruthy();
 	});
 
 	it('Should throw when applied multiple times', () => {
@@ -99,58 +130,66 @@ describe('@PostConstruct', () => {
 });
 
 describe('@Inject', () => {
-	class A {
-	}
-
-	class B {
-	}
-
-	it('Should generate metadata for named parameters', () => {
-		// noinspection JSUnusedLocalSymbols
-		class C {
+	it('Should override the inferred type with a string id', () => {
+		@Injectable()
+		class A {
+			public a = 'A';
 		}
 
-		function makeDynamically(): InjectableId<symbol> {
-			// Make it impossible for the Typescript compiler to predict the value.
-			let d = new Date();
-			if (d.getMilliseconds() > 1000) {
-				return Symbol('C');
-			}
-			return Symbol('Error');
+		@Injectable()
+		class B {
+			public b = 'B';
 		}
 
-		const dynamicId = makeDynamically();
-
-		class D {
+		@Injectable()
+		class Target {
 			public constructor(
-				private primary: A,
-				@Inject('B') private secondary: B,
-				@Inject(dynamicId) private tertiary: any
+				public a: A,
+				@Inject('altB') public b: B
 			) {
 			}
 		}
 
-		const paramsMetadata = Reflect.getMetadata(REFLECT_PARAMS, D);
-		expect(Array.isArray(paramsMetadata) && paramsMetadata.length).toBeTruthy();
+		const container = new Container();
+		container.bindClass(A);
+		container.bindClass<B>('altB', B);
+		container.bindClass(Target);
 
-		// assert metadata for first argument
-		const inject0 = _getInjectedIdAt(D, 0);
-		expect(inject0).toBeUndefined();
-		expect(paramsMetadata[0].name).toBe('A');
-		// assert metadata for second argument
-		const inject1 = _getInjectedIdAt(D, 1);
-		expect(inject1.toString()).toBe(paramsMetadata[1].name);
+		const t = container.get(Target);
+		expect(t.a).toBeInstanceOf(A);
+		expect(t.b).toBeInstanceOf(B);
+		expect(t.b.b).toEqual('B');
+	});
 
-		// assert metadata for second argument
-		const inject2 = _getInjectedIdAt(D, 2);
-		expect(inject2).toBe(dynamicId);
-		expect(paramsMetadata[2].name).toBe('Object');
+	it('Should override the inferred type with a Symbol id', () => {
+		@Injectable()
+		class A {
+			public a = 'A';
+		}
 
-		const inject3 = _getInjectedIdAt(D, 3);
-		expect(inject3).toBeUndefined();
+		const symId = Symbol('A');
+
+		@Injectable()
+		class Target {
+			public constructor(
+				@Inject(symId) public a: A
+			) {
+			}
+		}
+
+		const container = new Container();
+		container.bindClass<A>(symId, A);
+		container.bindClass(Target);
+
+		const t = container.get(Target);
+		expect(t.a).toBeInstanceOf(A);
+		expect(t.a.a).toEqual('A');
 	});
 
 	it('Should throw when applied with undefined', () => {
+		class A {
+		}
+
 		function setup(x) {
 			// noinspection JSUnusedLocalSymbols
 			class D {

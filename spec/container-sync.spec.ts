@@ -5,30 +5,24 @@ import 'reflect-metadata';
 // noinspection ES6PreferShortImport
 import {InjectionToken, Container, Injectable, PostConstruct, Release} from '../src/index.js';
 
-let counter = 1;
-
 describe('Simple Transient classes', () => {
 	it('Should support class binding and retrieval', () => {
 		@Injectable()
 		class A {
 			public constructor() {
 				this.a = 'A';
-				this.c = counter++;
 			}
 
 			public a: string;
-			public c: number;
 		}
 
 		@Injectable()
 		class B {
 			public constructor() {
 				this.b = 'B';
-				this.c = counter++;
 			}
 
 			public b: string;
-			public c: number;
 		}
 
 		const bSym = Symbol('B');
@@ -44,7 +38,7 @@ describe('Simple Transient classes', () => {
 		const a2 = container.get<A>('A');
 		expect(a1 instanceof A).toBeTruthy();
 		expect(a1.a).toEqual(a2.a);
-		expect(a1.c === a2.c).toBeFalsy();
+		expect(a1).not.toBe(a2);
 		const b1 = container.get<B>(bSym);
 		expect(b1 instanceof B).toBeTruthy();
 		expect(b1.b).toEqual('B');
@@ -108,20 +102,15 @@ describe('Simple Singletons', () => {
 		class A {
 			public constructor() {
 				this.a = 'A';
-				this.c = counter++;
 			}
 
 			public a: string;
-			public c: number;
 		}
 
 		@Injectable()
 		class B {
 			public constructor(public a: A) {
-				this.c = counter++;
 			}
-
-			public c: number;
 		}
 
 		const container = new Container();
@@ -133,8 +122,8 @@ describe('Simple Singletons', () => {
 		expect(b1.a.a).toEqual('A');
 		const b2 = container.get(B);
 		expect(b2 instanceof B).toBeTruthy();
-		expect(b1.c === b2.c).toBeFalsy();
-		expect(b1.a.c === b2.a.c).toBeTruthy();
+		expect(b1).not.toBe(b2);
+		expect(b1.a).toBe(b2.a);
 	});
 	it('Should support resource cleanup', () => {
 		@Injectable()
@@ -220,39 +209,39 @@ describe('Constants', () => {
 describe('Synchronous Factory', () => {
 	it('Should support transient factories', () => {
 		class A {
-			public constructor(public c: number) {
+			public constructor() {
 			}
 		}
 
 		const aSym = Symbol('A');
 		const container = new Container();
 		container.bindFactory(aSym, () => {
-			return new A(counter++);
+			return new A();
 		});
 
 		const a1 = container.get<A>(aSym);
 		const a2 = container.get<A>(aSym);
-		expect(a1.c === a2.c).toBeFalsy();
+		expect(a1).not.toBe(a2);
 	});
 	it('Should support singleton factories', () => {
 		class A {
-			public constructor(public c: number) {
+			public constructor() {
 			}
 		}
 
 		const aSym = Symbol('A');
 		const container = new Container();
 		container.bindFactory(aSym, () => {
-			return new A(counter++);
+			return new A();
 		}).asSingleton();
 
 		const a1 = container.get<A>(aSym);
 		const a2 = container.get<A>(aSym);
-		expect(a1.c === a2.c).toBeTruthy();
+		expect(a1).toBe(a2);
 	});
 });
 describe('PostConstruct execution', () => {
-	it('Should support PostConstruct with dependencies', () => {
+	it('Should support PostConstruct and success handler with dependencies', () => {
 		@Injectable()
 		class A {
 			public constructor() {
@@ -276,47 +265,23 @@ describe('PostConstruct execution', () => {
 			}
 		}
 
-		const container = new Container();
-		container.bindClass(A);
-		container.bindClass(B);
+		// @PostConstruct path
+		const container1 = new Container();
+		container1.bindClass(A);
+		container1.bindClass(B);
+		const b1 = container1.get(B);
+		expect(b1.a.a).toEqual('A');
+		expect(b1.a.i).toEqual('PostConstruct');
 
-		const b = container.get(B);
-		expect(b.a.a).toEqual('A');
-		expect(b.a.i).toEqual('PostConstruct');
-	});
-	it('Should support success handler with dependencies', () => {
-		@Injectable()
-		class A {
-			public constructor() {
-				this.i = 'PostConstruct';
-			}
-
-			public i: string;
-			public a: string;
-
-			@PostConstruct()
-			public init(value?: string) {
-				if (value)
-					this.i = value;
-				this.a = 'A';
-			}
-		}
-
-		@Injectable()
-		class B {
-			public constructor(public a: A) {
-			}
-		}
-
-		const container = new Container();
-		container.bindClass(A).onSuccess((value) => {
+		// onSuccess path
+		const container2 = new Container();
+		container2.bindClass(A).onSuccess((value) => {
 			return value.init('onSuccess');
 		});
-		container.bindClass(B);
-
-		const b = container.get(B);
-		expect(b.a.a).toEqual('A');
-		expect(b.a.i).toEqual('onSuccess');
+		container2.bindClass(B);
+		const b2 = container2.get(B);
+		expect(b2.a.a).toEqual('A');
+		expect(b2.a.i).toEqual('onSuccess');
 	});
 });
 
