@@ -33,6 +33,9 @@ jobs:
       run: npm run coverage
       env:
         CI: true
+    - name: Inspect coverage paths
+      if: matrix.node-version == '20.x'
+      run: head -5 coverage/lcov.info
     - name: Upload coverage to Codecov
       if: matrix.node-version == '20.x'
       uses: codecov/codecov-action@v5
@@ -40,3 +43,4 @@ jobs:
         use_oidc: true
         files: ./coverage/lcov.info
         fail_ci_if_error: false
+        verbose: true
