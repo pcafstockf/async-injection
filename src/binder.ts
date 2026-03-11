@@ -13,7 +13,7 @@ export type SyncFactory<T> = (injector: Injector) => T;
 export type AsyncFactory<T> = (injector: Injector) => Promise<T>;
 
 /**
- * You may bind an error handler which will be invoked, if the bound InjectableId could not be put into service.
+ * You may bind an error handler which will be invoked if the bound InjectableId could not be put into service.
  * An error handler *must* not throw, but may return an Error that will be propagated back up the call chain.
  *
  * @param binder   The Binder that experienced the error.
@@ -75,6 +75,10 @@ export interface BindAs<T, M> extends BindHandler<T, M> {
 
 /**
  * Bind Ids to producers.
+ *
+ * @deprecated {@link Binder} was removed from index.ts long ago will be removed in a future release.
+ * Use {@link Container} to build a context root — it provides all binding methods directly.
+ * For type annotations, use {@link Injector}, which {@link Container} implements.
  */
 export interface Binder extends Injector {
 

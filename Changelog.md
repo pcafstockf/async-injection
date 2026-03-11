@@ -1,3 +1,11 @@
+## 2.3.0 / 2026-03-10
+* Upgrade to TypeScript 5.9 `strict`, downleveling to `es2017`.
+  * Effectively obsoleting eslint for this project; removed.
+* `.then/.catch` chains converted to `async/await` for better stack traces.
+* More tests.
+* `Binder` interface deprecated.
+* Updated devDependencies.
+
 ## 2.2.0 / 2026-02-19
 * Ability to release a Singleton instance from the Container without destroying its binding.
 * Updated devDependencies.
