@@ -12,6 +12,9 @@ coverage:
         target: auto
         threshold: 1%
 
+fixes:
+  - "src/::src/"
+
 ignore:
   - "spec/**"
   - "tst/**"
