@@ -1,7 +1,7 @@
-import {BindableProvider} from './bindable-provider.js';
-import {AsyncFactory} from './binder.js';
-import {InjectableId, Injector} from './injector.js';
-import {State} from './state.js';
+import {BindableProvider} from './bindable-provider';
+import {AsyncFactory} from './binder';
+import {InjectableId, Injector} from './injector';
+import {State} from './state';
 
 /**
  * @inheritDoc
@@ -20,7 +20,7 @@ export class AsyncFactoryBasedProvider<T> extends BindableProvider<T, AsyncFacto
 		let retVal = this.singleton;
 		if (!retVal) {
 			// Wrap the async factory's Promise in an errorHandler aware Promise.
-			// Our contract is that an AsyncFactory may not throw and must return a valid Promise (e.g. pending, resolved, rejected, etc).
+			// Our contract is that an AsyncFactory may not throw and must return a valid Promise (e.g., pending, resolved, rejected, etc).
 			retVal = State.MakeState<T>(this.makePromiseForObj<T>(this.maker(this.injector), obj => obj));
 		}
 		if (this.singleton === null)

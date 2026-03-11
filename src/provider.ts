@@ -1,5 +1,5 @@
-import {State} from './state.js';
-import {InvokeReleaseMethod} from './utils.js';
+import {State} from './state';
+import {InvokeReleaseMethod} from './utils';
 
 
 /**
@@ -29,10 +29,10 @@ export abstract class Provider<T = any> {
 	 * Base method to initialize the state of this Provider *if* (and only if) it has been configured as a Singleton.
 	 * If this Provider has not been configured as a singleton, this method is essentially a noop that returns undefined.
 	 *
-	 * @param asyncOnly This default implementation ignores this parameter.
+	 * @param _asyncOnly This default implementation ignores this parameter.
 	 * @returns A completion Promise if initialization requires asynchronicity, otherwise the return value is undefined.
 	 */
-	resolveIfSingleton(asyncOnly: boolean): Promise<T> | undefined {
+	resolveIfSingleton(_asyncOnly: boolean): Promise<T> | undefined {
 		if (this.singleton === null) {
 			const s = this.provideAsState();
 			if (s.pending)

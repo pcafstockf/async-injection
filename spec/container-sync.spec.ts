@@ -1,7 +1,9 @@
+// noinspection SuspiciousTypeOfGuard
+
 import 'jasmine';
 import 'reflect-metadata';
 // noinspection ES6PreferShortImport
-import {Container, Inject, Injectable, InjectionToken, PostConstruct, Release} from '../src/index.js';
+import {Container, Inject, Injectable, InjectionToken, PostConstruct, Release} from '../src/index';
 
 describe('Simple Transient classes', () => {
 	it('Should support class binding and retrieval', () => {

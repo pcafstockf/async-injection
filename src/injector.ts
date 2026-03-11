@@ -20,8 +20,11 @@ export class InjectionToken<T> {
 	}
 
 	toString(): string {
-		if (typeof this.id === 'symbol' && typeof (this.id as any).description !== 'undefined')
-			return (this.id as any).description.toString();
+		// noinspection SuspiciousTypeOfGuard
+		if (typeof this.id === 'symbol') {
+			const desc = (this.id as unknown as { description?: string }).description;
+			return desc !== undefined ? desc : this.id.toString();
+		}
 		return this.id.toString();
 	}
 }

@@ -1,7 +1,7 @@
-import {BindableProvider} from './bindable-provider.js';
-import {SyncFactory} from './binder.js';
-import {InjectableId, Injector} from './injector.js';
-import {State} from './state.js';
+import {BindableProvider} from './bindable-provider';
+import {SyncFactory} from './binder';
+import {InjectableId, Injector} from './injector';
+import {State} from './state';
 
 /**
  * @inheritDoc
@@ -25,7 +25,7 @@ export class FactoryBasedProvider<T> extends BindableProvider<T, SyncFactory<T>>
 			catch (err) {
 				// There was an error, give the errorHandler (if any) a crack at recovery.
 				try {
-					// queryErrorHandler will throw if it could not obtain a substitute object.
+					// queryErrorHandler will throw if it could not get a substitute object.
 					retVal = State.MakeState<T>(null, undefined, this.queryErrorHandler(err));
 				}
 				catch (e) {

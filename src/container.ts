@@ -1,14 +1,14 @@
-import {AsyncFactoryBasedProvider} from './async-factory-provider.js';
-import {BindableProvider} from './bindable-provider.js';
-import {AsyncFactory, BindAs, Binder, SyncFactory} from './binder.js';
-import {ClassBasedProvider} from './class-provider.js';
-import {ConstantProvider} from './constant-provider.js';
-import {INJECTABLE_METADATA_KEY} from './constants.js';
-import {AbstractConstructor, ClassConstructor, InjectableId, Injector} from './injector.js';
-import {Provider} from './provider.js';
-import {State} from './state.js';
-import {FactoryBasedProvider} from './sync-factory-provider.js';
-import {isPromise} from './utils.js';
+import {AsyncFactoryBasedProvider} from './async-factory-provider';
+import {BindableProvider} from './bindable-provider';
+import {AsyncFactory, BindAs, Binder, SyncFactory} from './binder';
+import {ClassBasedProvider} from './class-provider';
+import {ConstantProvider} from './constant-provider';
+import {INJECTABLE_METADATA_KEY} from './constants';
+import {AbstractConstructor, ClassConstructor, InjectableId, Injector} from './injector';
+import {Provider} from './provider';
+import {State} from './state';
+import {FactoryBasedProvider} from './sync-factory-provider';
+import {isPromise} from './utils';
 
 /**
  * Helper class to ensure we can distinguish between Error instances legitimately returned from Providers, and Errors thrown by Providers.

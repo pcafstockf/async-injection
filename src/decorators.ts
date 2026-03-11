@@ -1,8 +1,8 @@
 /**
  * These decorators all apply the information they collect (whether class, method, or parameter data) as tagged metadata on the class's constructor
  */
-import {INJECT_METADATA_KEY, INJECTABLE_METADATA_KEY, OPTIONAL_METADATA_KEY, POSTCONSTRUCT_ASYNC_METADATA_KEY, POSTCONSTRUCT_SYNC_METADATA_KEY, REFLECT_RETURN, RELEASE_METADATA_KEY} from './constants.js';
-import {InjectableId} from './injector.js';
+import {INJECT_METADATA_KEY, INJECTABLE_METADATA_KEY, OPTIONAL_METADATA_KEY, POSTCONSTRUCT_ASYNC_METADATA_KEY, POSTCONSTRUCT_SYNC_METADATA_KEY, REFLECT_RETURN, RELEASE_METADATA_KEY} from './constants';
+import {InjectableId} from './injector';
 
 // Help user locate misapplied decorators.
 function targetHint(target: Function): string {

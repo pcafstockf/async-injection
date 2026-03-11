@@ -1,4 +1,4 @@
-import {AbstractConstructor, ClassConstructor, InjectableId, Injector} from './injector.js';
+import {AbstractConstructor, ClassConstructor, InjectableId, Injector} from './injector';
 
 /**
  * Type definition for functions that return a value.

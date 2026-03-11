@@ -2,6 +2,7 @@
 * Upgrade to TypeScript 5.9 `strict`, downleveling to `es2017`.
   * Effectively obsoleting eslint for this project; removed.
 * `.then/.catch` chains converted to `async/await` for better stack traces.
+* Remove .js extensions from all TypeScript relative imports (crept in long ago).
 * More tests.
 * `Binder` interface deprecated.
 * Updated devDependencies.

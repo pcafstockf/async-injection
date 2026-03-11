@@ -1,4 +1,4 @@
-import {RELEASE_METADATA_KEY} from './constants.js';
+import {RELEASE_METADATA_KEY} from './constants';
 
 /**
  * Returns true if the specified object looks like a JavaScript Error object.

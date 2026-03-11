@@ -1,7 +1,9 @@
+// noinspection SuspiciousTypeOfGuard
+
 import 'jasmine';
 import 'reflect-metadata';
 // noinspection ES6PreferShortImport
-import {Container, Inject, Injectable, Injector, Optional, PostConstruct, Release} from '../src/index.js';
+import {Container, Inject, Injectable, Injector, Optional, PostConstruct, Release} from '../src/index';
 
 describe('Async factories', () => {
 	it('Should support delayed retrieval', async () => {
