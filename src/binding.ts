@@ -26,7 +26,7 @@ export type AsyncFactory<T> = (injector: Injector) => Promise<T>;
  * An alternate Error which will be propagated back up the call chain.
  * Undefined, which means the 'error' parameter will be propagated back up the call chain.
  */
-export type OnErrorCallback<T, M> = (injector: Injector, id: InjectableId<T>, maker: M, error: unknown, value?: T) => T | Error | void;
+export type OnErrorCallback<T, M = unknown> = (injector: Injector, id: InjectableId<T>, maker: M, error: unknown, value?: T) => T | Error | void;
 
 /**
  * You may bind a success handler which will be invoked just before the bound InjectableId is put into service.
@@ -45,14 +45,14 @@ export type OnErrorCallback<T, M> = (injector: Injector, id: InjectableId<T>, ma
  * Undefined, which means the object is ready to be placed into service.
  * A Promise that resolves to one of the above two values (undefined or Error).
  */
-export type OnSuccessCallback<T, M> = (value: T, injector: Injector, id: InjectableId<T>, maker: M) => Promise<Error | void> | Error | void;
+export type OnSuccessCallback<T, M = unknown> = (value: T, injector: Injector, id: InjectableId<T>, maker: M) => Promise<Error | void> | Error | void;
 
 /**
  * An interface allowing binding of an error handler.
  *
  * @see OnErrorCallback
  */
-export interface BindErrHandler<T, M> {
+export interface BindErrHandler<T, M = unknown> {
 	onError(cb: OnErrorCallback<T, M>): void;
 }
 
@@ -61,7 +61,7 @@ export interface BindErrHandler<T, M> {
  *
  * @see OnSuccessCallback
  */
-export interface BindHandler<T, M> extends BindErrHandler<T, M> {
+export interface BindHandler<T, M = unknown> extends BindErrHandler<T, M> {
 	onSuccess(cb: OnSuccessCallback<T, M>): BindErrHandler<T, M>;
 }
 
@@ -69,7 +69,7 @@ export interface BindHandler<T, M> extends BindErrHandler<T, M> {
  * @inheritDoc
  * This specialization also allows you to specify that the binding is 'Singleton' (e.g. only one in the system).
  */
-export interface BindAs<T, M> extends BindHandler<T, M> {
+export interface BindAs<T, M = unknown> extends BindHandler<T, M> {
 	asSingleton(): BindHandler<T, M>;
 }
 
