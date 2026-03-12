@@ -103,11 +103,11 @@ export function _getInjectedIdAt(target: Function, parameterIndex: number): Inje
 export function Optional(alt?: any): ParameterDecorator {
 	/**
 	 * @param target  The constructor function of the class (we don't allow @Optional on anything else).
-	 * @param parameterName The name of the parameter
+	 * @param _parameterName The name of the parameter
 	 * @param parameterIndex The ordinal index of the parameter in the function’s parameter list
 	 * @returns Undefined (nothing), as this decorator does not modify the parameter in any way.
 	 */
-	return function (target: object, parameterName: string | symbol | undefined, parameterIndex: number): void {
+	return function (target: object, _parameterName: string | symbol | undefined, parameterIndex: number): void {
 		const paramKey = validateSingleConstructorParam('Optional', target as Function, parameterIndex);
 		Reflect.defineMetadata(OPTIONAL_METADATA_KEY, {value: alt}, target, paramKey);
 	};
@@ -134,11 +134,11 @@ export function PostConstruct(): MethodDecorator {
 	/**
 	 * @param prototypeOrConstructor   The prototype of the class (we don't allow @PostConstruct on anything other than a class instance method.
 	 * @param methodName   The name of the method.
-	 * @param descriptor   The Property Descriptor for the method.
+	 * @param _descriptor   The Property Descriptor for the method.
 	 * @returns Undefined (nothing), as this decorator does not modify the method in any way.
 	 */
 	// noinspection JSUnusedLocalSymbols
-	return function (target: Object, methodName: string | symbol, descriptor: PropertyDescriptor) {
+	return function (target: Object, methodName: string | symbol, _descriptor: PropertyDescriptor) {
 		if (typeof target !== 'object' || typeof target.constructor !== 'function') {
 			throw new Error('@PostConstruct not applied to instance method [' + target.toString() + '/' + methodName.toString() + ']');
 		}
@@ -172,11 +172,11 @@ export function Release(): MethodDecorator {
 	/**
 	 * @param prototypeOrConstructor   The prototype of the class (we don't allow @Release on anything other than a class instance method.
 	 * @param methodName   The name of the method.
-	 * @param descriptor   The Property Descriptor for the method.
+	 * @param _descriptor   The Property Descriptor for the method.
 	 * @returns Undefined (nothing), as this decorator does not modify the method in any way.
 	 */
 	// noinspection JSUnusedLocalSymbols
-	return function (target: Object, methodName: string | symbol, descriptor: PropertyDescriptor) {
+	return function (target: Object, methodName: string | symbol, _descriptor: PropertyDescriptor) {
 		if (typeof target !== 'object' || typeof target.constructor !== 'function') {
 			throw new Error('@Release not applied to instance method [' + target.toString() + '/' + methodName.toString() + ']');
 		}

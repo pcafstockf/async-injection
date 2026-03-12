@@ -180,7 +180,7 @@ export class ClassBasedProvider<T> extends BindableProvider<T, ClassConstructor<
 					return await state.promise!;   // chain (aka wait some more).
 				}
 				else if (state.rejected) {
-					return state.rejected as any; // error
+					throw state.rejected; // error
 				}
 				else {
 					return state.fulfilled!; // value (aka obj).

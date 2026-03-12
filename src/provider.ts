@@ -80,6 +80,6 @@ export abstract class Provider<T = any> {
 				return null;
 			}
 		}
-		return undefined
+		return undefined;
 	}
 }

@@ -37,7 +37,7 @@ export class Container implements Injector {
 	 * @inheritDoc
 	 */
 	public isIdKnown<T>(id: InjectableId<T>, ascending?: boolean): boolean {
-		if (!!this.providers.get(id))
+		if (this.providers.has(id))
 			return true;
 		if (ascending && this.parent)
 			return this.parent.isIdKnown(id, true);
@@ -95,8 +95,8 @@ export class Container implements Injector {
 		}
 		this.providers.delete(id);
 
-		if (ascending && this.parent) {
-			(this.parent as any)?.removeBinding(id, true, releaseIfSingleton);
+		if (ascending && this.parent instanceof Container) {
+			this.parent.removeBinding(id, true, releaseIfSingleton);
 		}
 	}
 

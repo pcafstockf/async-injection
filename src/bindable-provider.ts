@@ -79,33 +79,20 @@ export abstract class BindableProvider<T, M = ClassConstructor<T> | SyncFactory<
 	 * @param cb    Callback to be invoked if the supplied Promise resolves.
 	 */
 	protected async makePromiseForObj<R>(waitFor: Promise<R>, cb: (result: R) => T): Promise<T> {
-		// Local helper: consults the errorHandler (if any) for recovery; returns a substitute or re-throws.
-		const handleError = (err: unknown, objValue?: T): T => {
-			if (this.errorHandler) {
-				const handlerResult = this.errorHandler(this.injector, this.id, this.maker, err, objValue);
-				// Error handler wants us to propagate an alternative error.
-				if (isErrorObj(handlerResult))
-					throw handlerResult;
-				// Error handler provided a valid (fully resolved) replacement.
-				else if (typeof handlerResult !== 'undefined')
-					return handlerResult;
-			}
-			throw err;
-		};
 		let result: R;
 		try {
 			result = await waitFor;
 		}
 		catch (err) {
 			// waitFor rejected — ask the error handler for recovery, passing cb(undefined) as the partial object value.
-			return handleError(err, cb(undefined as unknown as R));
+			return this.queryErrorHandler(err, cb(undefined as unknown as R));
 		}
 		try {
 			return cb(result);
 		}
 		catch (err) {
 			// cb threw after a successful resolution — ask the error handler for recovery.
-			return handleError(err, cb(result as R));
+			return this.queryErrorHandler(err, cb(result as R));
 		}
 	}
 }
