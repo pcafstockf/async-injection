@@ -1,6 +1,6 @@
 import {AsyncFactoryBasedProvider} from './async-factory-provider';
 import {BindableProvider} from './bindable-provider';
-import {AsyncFactory, BindAs, Binder, SyncFactory} from './binder';
+import {AsyncFactory, BindAs, SyncFactory} from './binding';
 import {ClassBasedProvider} from './class-provider';
 import {ConstantProvider} from './constant-provider';
 import {INJECTABLE_METADATA_KEY} from './constants';
@@ -21,9 +21,9 @@ class ReasonWrapper {
 }
 
 /**
- * Binder and Injector (aka Container) to handle (a)synchronous dependency management.
+ * Injector (aka Container) to handle (a)synchronous dependency management.
  */
-export class Container implements Binder {
+export class Container implements Injector {
 
 	/**
 	 * Create a new Container, with an optional parent Injector which will be searched if any given InjectableId is not bound within this Container.
@@ -180,9 +180,8 @@ export class Container implements Binder {
 					});
 			});
 		};
-		if (parentRecursion && typeof (this.parent as Binder)?.resolveSingletons === 'function') {
-			const pb: Binder = this.parent as Binder;
-			return pb.resolveSingletons(asyncOnly, parentRecursion).then(() => {
+		if (parentRecursion && this.parent instanceof Container) {
+			return this.parent.resolveSingletons(asyncOnly, parentRecursion).then(() => {
 				return makePromiseToResolve().then(() => this);
 			});
 		}

@@ -1,4 +1,4 @@
-import {AbstractConstructor, ClassConstructor, InjectableId, Injector} from './injector';
+import {InjectableId, Injector} from './injector';
 
 /**
  * Type definition for functions that return a value.
@@ -16,7 +16,7 @@ export type AsyncFactory<T> = (injector: Injector) => Promise<T>;
  * You may bind an error handler which will be invoked if the bound InjectableId could not be put into service.
  * An error handler *must* not throw, but may return an Error that will be propagated back up the call chain.
  *
- * @param binder   The Binder that experienced the error.
+ * @param injector   The Injector that experienced the error.
  * @param id   The identifier for what was trying to be made.
  * @param maker   The thing that made (or tried to provideAsState).  Will be one of type ClassConstructor, SyncFactory, or AsyncFactory, depending on how you registered the binding.
  * @param error   Identifies the problem that occurred.
@@ -36,10 +36,10 @@ export type OnErrorCallback<T, M> = (injector: Injector, id: InjectableId<T>, ma
  * In such a scenario, the success handler should perform whatever care and feeding the class expected from the `@PostConstruct` decorator.
  * A success handler *must* not throw, but may return an Error that will be propagated back up the call chain.
  *
- * @param binder   The Binder that performed the construction.
+ * @param value   The thing that was made.
+ * @param injector   The Injector that performed the construction.
  * @param id   The identifier for what was made.
  * @param maker   The thing that made.  Will be one of type ClassConstructor, SyncFactory, or AsyncFactory, depending on how you registered the binding.
- * @param value   The thing that was made.
  * @returns one of 3 results...
  * An Error which will be propagated back up the call chain.
  * Undefined, which means the object is ready to be placed into service.
@@ -73,52 +73,3 @@ export interface BindAs<T, M> extends BindHandler<T, M> {
 	asSingleton(): BindHandler<T, M>;
 }
 
-/**
- * Bind Ids to producers.
- *
- * @deprecated {@link Binder} was removed from index.ts long ago will be removed in a future release.
- * Use {@link Container} to build a context root — it provides all binding methods directly.
- * For type annotations, use {@link Injector}, which {@link Container} implements.
- */
-export interface Binder extends Injector {
-
-	/**
-	 * Bind an InjectableId to a constant value.
-	 * Constants are by their very nature singleton, and are assumed to be error proof.
-	 */
-	bindConstant<T>(id: InjectableId<T>, value: T): T;
-
-	/**
-	 * Bind an InjectableId to a class (actually it's constructor).
-	 * As a shortcut, you may use the class constructor as the 'id' (e.g. container.bindClass(A); ).
-	 * The container will also invoke any `@PostConstruct` present on the class.
-	 */
-	bindClass<T>(id: ClassConstructor<T>, constructor?: ClassConstructor<T>): BindAs<T, ClassConstructor<T>>;
-
-	bindClass<T>(id: string | symbol | AbstractConstructor<T> | InjectableId<T>, constructor: ClassConstructor<T>): BindAs<T, ClassConstructor<T>>;
-
-	/**
-	 * Bind an InjectableId to a synchronous factory that will be invoked on demand when the object is needed.
-	 * The factory should produce the needed value
-	 * NOTE:  The container will not invoke any `@PostConstruct` present on the class, this is the responsibility of the factory.
-	 */
-	bindFactory<T>(id: InjectableId<T>, factory: SyncFactory<T>): BindAs<T, SyncFactory<T>>;
-
-	/**
-	 * Bind an InjectableId to an asynchronous factory that will be invoked on demand when the object is needed.
-	 * The factory should produce the needed value (asynchronously of course).
-	 * NOTE:  The container will not invoke any `@PostConstruct` present on the class, this is the responsibility of the factory.
-	 * WARNING!!! The factory may not throw and must return a valid Promise (which can be pending, resolved, rejected, etc.).
-	 */
-	bindAsyncFactory<T>(id: InjectableId<T>, factory: AsyncFactory<T>): BindAs<T, AsyncFactory<T>>;
-
-	/**
-	 * This essentially pre creates/loads all *singleton* InjectableIds currently known to the Binder.
-	 * This *may* be helpful if you wish to use Injector.get on a dependency tree that has asynchronous singletons within the tree.
-	 *
-	 * @param asyncOnly     Only resolve AsyncFactorys as well as any bound classes that have an asynchronous `@PostConstruct` decorator.  WARNING: If true, SyncFactorys will *not* be resolved even if they are Singletons.
-	 * @param parentRecursion   If true and the the container has a parent, resolveIfSingleton will first be called for the parent
-	 * @returns A Promise that resolves when all Singleton's have been resolved, OR rejects if one or more of the Singleton's failed to resolve.  NOTE: Rejection does not occur until all Singleton resolutions have settled, and the rejection reason/err will be a Map<InjectableId, Error>
-	 */
-	resolveSingletons(asyncOnly?: boolean, parentRecursion?: boolean): Promise<this>;
-}

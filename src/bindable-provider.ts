@@ -1,4 +1,4 @@
-import {AsyncFactory, BindAs, OnErrorCallback, OnSuccessCallback, SyncFactory} from './binder';
+import {AsyncFactory, BindAs, OnErrorCallback, OnSuccessCallback, SyncFactory} from './binding';
 import {ClassConstructor, InjectableId, Injector} from './injector';
 import {Provider} from './provider';
 import {isErrorObj} from './utils';
@@ -25,7 +25,7 @@ export abstract class BindableProvider<T, M = ClassConstructor<T> | SyncFactory<
 	protected errorHandler?: OnErrorCallback<T, any>;
 
 	/**
-	 * Invoked by the Binder to create chain-able configuration
+	 * Invoked by the Container to create chain-able configuration
 	 *
 	 * @see BindAs
 	 */

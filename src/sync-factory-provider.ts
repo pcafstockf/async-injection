@@ -1,5 +1,5 @@
 import {BindableProvider} from './bindable-provider';
-import {SyncFactory} from './binder';
+import {SyncFactory} from './binding';
 import {InjectableId, Injector} from './injector';
 import {State} from './state';
 
