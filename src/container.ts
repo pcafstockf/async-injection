@@ -78,14 +78,14 @@ export class Container implements Injector {
 		return Promise.resolve(state.fulfilled);
 	}
 
-	// noinspection JSUnusedGlobalSymbols
 	/**
-	 * This method is not part of the Binding interface, because it is highly unusual.
-	 * But that doesn't mean we can't imagine scenarios where you might require it.
+	 * Removes a binding from this Container (and optionally its ancestor chain).
+	 * Most useful in unit tests to replace or clear bindings between test cases.
+	 * **Caution:** Removing a binding after initialization may have unexpected consequences if other parts of the application still hold or expect to obtain an instance of the removed id.
 	 *
-	 * @param id    The id to be removed.
-	 * @param ascending  If true, this will remove all bindings of the specified id all the way up the parent container chain (if it exists).
-	 * @param releaseIfSingleton  If true, @Provider.releaseIfSingleton will be invoked before the binding is removed.
+	 * @param id    The id of the binding to remove.
+	 * @param ascending  If true, the binding is also removed from every Container in the parent chain.
+	 * @param releaseIfSingleton  If true, Provider.releaseIfSingleton is called before removal.
 	 */
 	public removeBinding<T>(id: InjectableId<T>, ascending?: boolean, releaseIfSingleton?: boolean): void {
 		if (releaseIfSingleton) {
@@ -216,11 +216,11 @@ export class Container implements Injector {
 	// noinspection JSUnusedGlobalSymbols
 	/**
 	 * Convenience method to assist in releasing non-garbage-collectable resources that Singletons in this Container may have allocated.
-	 * It will walk through all registered Providers (of this Container only), and invoke their @see Provider.releaseIfSingleton method.
-	 * This method is not part of the Binding interface, because you normally only create (and release) Containers.
+	 * It will walk through all registered Providers (of this Container only), and invoke their Provider.releaseIfSingleton method.
+	 * This method is not part of the Injector interface, because you normally only create (and release) from Containers.
 	 * NOTE:
 	 * This *only* releases active/pending Singleton's that have already been created by this Container.
-	 * The most likely use of this method would be when you have created a new child Container for a limited duration transaction, and you want to easily cleanup temporary resources.
+	 * The most likely use of this method would be when you have created a new child Container for a limited-duration transaction, and you want to easily clean up temporary resources.
 	 * For example, your service object may need to know when it should unsubscribe from an RxJs stream (failure to do so can result in your Singleton not being garbage collected at the end of a transaction).
 	 * In theory, you could handle all unsubscription and cleanup yourself, but the @Release decorator and this method are meant to simply make that easier.
 	 */
@@ -232,7 +232,7 @@ export class Container implements Injector {
 
 	/**
 	 * Releases a Singleton instance if it exists.
-	 * However, it does **not** remove the binding, so if you call @get or @resolve (directly or indirectly) on the id, a new Singleton will be created.
+	 * However, it does **not** remove the binding, so if you call get or resolve (directly or indirectly) on the id, a new Singleton will be created.
 	 * If not a singleton, this method returns undefined.
 	 * If the singleton has been resolved, it is returned, otherwise null is returned.
 	 * If the singleton is pending resolution, a Promise for the singleton (or for null) is returned.
@@ -246,7 +246,7 @@ export class Container implements Injector {
 	}
 
 	/**
-	 * Make a copy of this @see Container.
+	 * Make a copy of this Container.
 	 * This is an experimental feature!
 	 * I have not thought through all the dark corners, so use at your own peril!
 	 * Here are some notes:
@@ -258,7 +258,7 @@ export class Container implements Injector {
 	 *      If released by the clone, they will be considered released by "this" container.
 	 *      If a singleton is currently being asynchronously constructed any callbacks will reference "this" Container, however both Containers should have no problem awaiting resolution.
 	 *      If a singleton is not resolved when the container is cloned, then if both containers resolve, you will create *two* "singletons".
-	 *      The way to avoid this last effect is to @see resolveSingletons
+	 *      The way to avoid this last effect is to call resolveSingletons first
 	 */
 	clone(clazz?: ClassConstructor<Container>): Container {
 		if (!clazz)

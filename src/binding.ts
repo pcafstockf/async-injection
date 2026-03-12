@@ -18,7 +18,7 @@ export type AsyncFactory<T> = (injector: Injector) => Promise<T>;
  *
  * @param injector   The Injector that experienced the error.
  * @param id   The identifier for what was trying to be made.
- * @param maker   The thing that made (or tried to provideAsState).  Will be one of type ClassConstructor, SyncFactory, or AsyncFactory, depending on how you registered the binding.
+ * @param maker   The thing that made (or tried to make) the value.  Will be one of type ClassConstructor, SyncFactory, or AsyncFactory, depending on how you registered the binding.
  * @param error   Identifies the problem that occurred.
  * @param value   If the 'maker' was able to create the thing, but it had an error during post construction, the made thing will be passed here.
  * @returns one of 3 results...

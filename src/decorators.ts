@@ -64,7 +64,7 @@ export function Injectable(): ClassDecorator {
 }
 
 /**
- * Placed just before a constructor parameter, this parameter decorator allows for specificity and control over the type of the type of Object that will be injected into the parameter.
+ * Placed just before a constructor parameter, this parameter decorator allows for specificity and control over the type of Object that will be injected into the parameter.
  * In the absence of this decorator the container will use whatever is bound to a parameter's type (or throw an error if it is unable to recognize the type).
  *
  * @param id  The identifier of the bound type that should be injected.

@@ -60,13 +60,13 @@ export abstract class BindableProvider<T, M = ClassConstructor<T> | SyncFactory<
 			// Error handler wants us to propagate an error.
 			if (isErrorObj(handlerResult))
 				throw handlerResult;
-			// Error handler has no opinion, so provideAsState a state that reflects the error we just caught.
+			// Error handler has no opinion, so propagate the error we just caught.
 			if (typeof handlerResult === 'undefined')
 				throw err;
 			// Error handler provided a valid (fully resolved) replacement.
 			return handlerResult;
 		}
-		// No error handler, provideAsState a state that reflects the error we just caught.
+		// No error handler, propagate the error we just caught.
 		throw err;
 	}
 

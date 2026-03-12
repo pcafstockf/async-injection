@@ -703,6 +703,9 @@ describe('Asynchronous error handling', () => {
 			expect((err as Error).message).toBe('Failed post construction of A');
 		}
 	});
+});
+
+describe('Container clone', () => {
 	it('Clone should share already-resolved singletons with the original', async () => {
 		@Injectable()
 		class B {
@@ -789,6 +792,9 @@ describe('Asynchronous error handling', () => {
 		clone.releaseSingletons();
 		expect(b.b).toEqual('released');
 	});
+});
+
+describe('Asynchronous optional dependencies', () => {
 	it('Async initialization optionally depending on an Async dependency should succeed', async () => {
 		@Injectable()
 		class A {
