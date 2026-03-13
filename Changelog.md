@@ -3,7 +3,7 @@
   * Same as constructor injection.
 * Remove deprecated `Binder` interface.
 * API enhancements to simplify migration from other DI frameworks.
-* Documentation [additions](./support) and updates.
+* Many documentation [additions](./support) and updates.
 
 ## 2.3.0 / 2026-03-10
 * Upgrade to TypeScript 5.9 `strict`, downleveling to `es2017`.
