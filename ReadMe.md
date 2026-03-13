@@ -73,6 +73,9 @@ But when you are **blending** the two in the same container, it requires a littl
 
 ### `get` vs `resolve`
 
+Think of `get(X)` / `resolve(X)` as a request not just for `X`, but for the entire tree of objects `X` depends on.  
+`get` is only safe when every node in that tree is already settled.
+
 | Condition | When to use |
 |---|---|
 | All dependencies are synchronous, **or** async singletons are already resolved | `container.get(X)` |
@@ -99,9 +102,14 @@ const tx = container.get(TransactionHandler);
 const tx = await container.resolve(TransactionHandler);
 ```
 
+> **Note:**  
+> A factory takes full responsibility for constructing and initializing its object — `@PostConstruct` is not called on factory-returned instances.  
+> `bindFactory` and `bindAsyncFactory` are therefore the right choice when you need complete control over how an object is built, or when you cannot annotate the class.
+
 #### **`@PostConstruct`** — mark an initialization method to run on the fully constructed object after the constructor returns.  
-This is especially useful when a base class constructor cannot call methods overridden by a subclass.  
-The method can be synchronous or asynchronous, and its parameters may be annotated with `@Inject` and `@Optional` — the container resolves and injects them before calling the method.  
+The method can be synchronous or asynchronous, which is especially useful since a class constructor can never be async.  
+It is also useful because a base class constructor cannot call methods overridden by a subclass.  
+The method can have parameters which can be annotated with `@Inject` and `@Optional` — the container resolves and injects them before calling the method.  
 This lets you avoid storing dependencies from the constructor solely for post-construction use:
 
 ```typescript
