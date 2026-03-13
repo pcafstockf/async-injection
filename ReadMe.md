@@ -20,17 +20,6 @@ npm install async-injection
 Works in Node, browsers, Electron, and other runtimes.  
 Ships as both ESM and CJS side by side.
 
-Reflection metadata is required.  
-Rather than mandate a specific library, you have the freedom to bring your own — choose whichever fits your project:
-* [reflect-metadata](https://www.npmjs.com/package/reflect-metadata) 
-* [core-js/es7/reflect](https://www.npmjs.com/package/core-js) 
-* [@abraham/reflection](https://www.npmjs.com/package/@abraham/reflection)
-
-Remember to import reflection once at your entry point, before anything else:
-```typescript
-import 'reflect-metadata';
-```
-
 ## Quick start
 
 ```typescript
@@ -52,16 +41,35 @@ container.bindConstant('LogLevel', 'info');        // override defaulted 'warn' 
 const tx = container.get(TransactionHandler);
 ```
 
-> **Tip:** Real-world projects should follow best practices like [separation of concerns](https://medium.com/machine-words/separation-of-concerns-1d735b703a60), having a [composition root](https://medium.com/@cfryerdev/dependency-injection-composition-root-418a1bb19130), and should avoid anti-patterns like [service locator](http://scotthannen.org/blog/2018/11/27/stop-worrying-love-service-locator.html).
+> **Tip:**  
+> Real-world projects should follow best practices like [separation of concerns](https://medium.com/machine-words/separation-of-concerns-1d735b703a60), having a [composition root](https://medium.com/@cfryerdev/dependency-injection-composition-root-418a1bb19130), and should avoid anti-patterns like [service locator](http://scotthannen.org/blog/2018/11/27/stop-worrying-love-service-locator.html).
+
+## Setup
+
+Two `tsconfig.json` settings are required:
+
+```json
+{
+  "experimentalDecorators": true,
+  "emitDecoratorMetadata": true
+}
+```
+
+Reflection metadata is also required.  Rather than mandate a specific library, you have the freedom to bring your own — choose whichever fits your project:
+* [reflect-metadata](https://www.npmjs.com/package/reflect-metadata)
+* [core-js/es7/reflect](https://www.npmjs.com/package/core-js)
+* [@abraham/reflection](https://www.npmjs.com/package/@abraham/reflection)
+
+Import it once at your entry point, before anything else:
+```typescript
+import 'reflect-metadata';
+```
 
 ## Async dependencies
 
 Synchronous injection is straightforward and well understood.  
 Asynchronous injection is also well established.  
-If you are **blending** the two in the same container, it requires a little care.
-> **Tip:**  
-> Call `resolveSingletons(true)` after your last `bindXXX` call and before any `get` call to avoid hard-to-debug timing issues.
-
+But when you are **blending** the two in the same container, it requires a little care.
 
 ### `get` vs `resolve`
 
@@ -70,6 +78,8 @@ If you are **blending** the two in the same container, it requires a little care
 | All dependencies are synchronous, **or** async singletons are already resolved | `container.get(X)` |
 | Any dependency in the tree may still be pending | `await container.resolve(X)` |
 
+> **Tip:**  
+> Call `resolveSingletons(true)` after your last `bindXXX` call and before any `get` call to avoid hard-to-debug timing issues.
 
 **When a dependency must do async work before it is usable** — open a database connection, load remote config, etc. — there are two ways to handle it:
 
