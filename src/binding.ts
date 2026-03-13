@@ -1,4 +1,4 @@
-import {InjectableId, Injector} from './injector';
+import {ClassConstructor, InjectableId, Injector} from './injector';
 
 /**
  * Type definition for functions that return a value.
@@ -46,6 +46,16 @@ export type OnErrorCallback<T, M = unknown> = (injector: Injector, id: Injectabl
  * A Promise that resolves to one of the above two values (undefined or Error).
  */
 export type OnSuccessCallback<T, M = unknown> = (value: T, injector: Injector, id: InjectableId<T>, maker: M) => Promise<Error | void> | Error | void;
+
+/**
+ * Descriptor object used with {@link Container.register} to specify how an id should be bound.
+ * Mirrors the TSyringe registration API.
+ */
+export type RegisterDescriptor<T> =
+	| { useClass: ClassConstructor<T> }
+	| { useValue: T }
+	| { useFactory: SyncFactory<T> }
+	| { useAsyncFactory: AsyncFactory<T> };
 
 /**
  * An interface allowing binding of an error handler.

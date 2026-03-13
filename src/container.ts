@@ -1,6 +1,6 @@
 import {AsyncFactoryBasedProvider} from './async-factory-provider';
 import {BindableProvider} from './bindable-provider';
-import {AsyncFactory, BindAs, SyncFactory} from './binding';
+import {AsyncFactory, BindAs, RegisterDescriptor, SyncFactory} from './binding';
 import {ClassBasedProvider} from './class-provider';
 import {ConstantProvider} from './constant-provider';
 import {INJECTABLE_METADATA_KEY} from './constants';
@@ -100,6 +100,55 @@ export class Container implements Injector {
 		}
 	}
 
+
+	/**
+	 * Alias for {@link isIdKnown}. Familiar to users migrating from TypeDI.
+	 */
+	public has<T>(id: InjectableId<T>, ascending?: boolean): boolean {
+		return this.isIdKnown(id, ascending);
+	}
+
+	/**
+	 * Alias for {@link removeBinding}. Familiar to users migrating from InversifyJS.
+	 */
+	public unbind<T>(id: InjectableId<T>, ascending?: boolean, releaseIfSingleton?: boolean): void {
+		this.removeBinding(id, ascending, releaseIfSingleton);
+	}
+
+	/**
+	 * Creates a new child Container that inherits unbound ids from this Container.
+	 * Familiar to users migrating from TSyringe.
+	 */
+	public createChildContainer(): Container {
+		return new Container(this);
+	}
+
+	/**
+	 * Descriptor-based binding dispatching to the appropriate bindXXX method.
+	 * Familiar to users migrating from TSyringe.
+	 * Returns a {@link BindAs} chain for class and factory bindings; returns undefined for value bindings (which are always singletons).
+	 */
+	public register<T>(id: InjectableId<T>, descriptor: RegisterDescriptor<T>): BindAs<T, any> | undefined {
+		if ('useClass' in descriptor)
+			return this.bindClass(id as any, descriptor.useClass);
+		if ('useValue' in descriptor) {
+			this.bindConstant(id, descriptor.useValue);
+			return undefined;
+		}
+		if ('useFactory' in descriptor)
+			return this.bindFactory(id, descriptor.useFactory);
+		// useAsyncFactory
+		return this.bindAsyncFactory(id, (descriptor as {useAsyncFactory: AsyncFactory<T>}).useAsyncFactory);
+	}
+
+	/**
+	 * Binds a class as a singleton in one step.
+	 * Shorthand for {@link bindClass}(...).{@link BindAs.asSingleton asSingleton}().
+	 * Familiar to users migrating from TSyringe.
+	 */
+	public registerSingleton<T>(id: InjectableId<T>, constructor: ClassConstructor<T>): void {
+		this.bindClass(id as any, constructor).asSingleton();
+	}
 	/**
 	 * @inheritDoc
 	 */

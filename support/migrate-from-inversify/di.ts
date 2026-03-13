@@ -4,6 +4,15 @@
 export type ClassConstructor<T> = new (...args: any[]) => T;
 
 /**
+ * Descriptor object used with {@link Container.register} to specify how an id should be bound.
+ * Mirrors the TSyringe registration API.
+ */
+export type RegisterDescriptor<T> =
+	| { useClass: ClassConstructor<T> }
+	| { useValue: T }
+	| { useFactory: SyncFactory<T> };
+
+/**
  * Universal id that can be associated with a constant, class, or factory.
  */
 export type InjectableId<T> = (symbol & T) | symbol;
@@ -33,7 +42,7 @@ export interface Container {
 	 * Bind an InjectableId to a constant value.
 	 * Constants are by their very nature singleton.
 	 */
-	bindConstant<T>(id: InjectableId<T>, value: T): void;
+	bindConstant<T>(id: InjectableId<T>, value: T): T;
 
 	/**
 	 * Bind an InjectableId to a class (actually it's constructor).
@@ -48,11 +57,23 @@ export interface Container {
 	bindFactory<T>(id: InjectableId<T>, factory: SyncFactory<T>): BindAs<T, SyncFactory<T>>;
 
 	/**
-	 * This should be a highly unusual invocation.  But in case you require it...
+	 * Remove the binding for the given id.
 	 *
 	 * @param id    The id to be removed.
 	 */
 	unbind<T>(id: InjectableId<T>): void;
+
+	/** Alias for isBound. */
+	has<T>(id: InjectableId<T>): boolean;
+
+	/** Creates a new child Container that inherits unbound ids from this one. */
+	createChildContainer(): Container;
+
+	/** Descriptor-based binding; dispatches to bindConstant, bindClass, or bindFactory. */
+	register<T>(id: InjectableId<T>, descriptor: RegisterDescriptor<T>): BindAs<T, any> | undefined;
+
+	/** Binds a class as a singleton in one step. */
+	registerSingleton<T>(id: InjectableId<T>, constructor: ClassConstructor<T>): void;
 }
 
 /**

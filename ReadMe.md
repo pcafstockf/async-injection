@@ -1,43 +1,37 @@
 # Async-Injection
-[![CI Actions](https://github.com/pcafstockf/async-injection/workflows/CI/badge.svg)](https://github.com/pcafstockf/async-injection/actions)
-[![Publish Actions](https://github.com/pcafstockf/async-injection/workflows/NPM%20Publish/badge.svg)](https://github.com/pcafstockf/async-injection/actions)
+
+[![CI](https://github.com/pcafstockf/async-injection/workflows/CI/badge.svg)](https://github.com/pcafstockf/async-injection/actions)
+[![npm version](https://img.shields.io/npm/v/async-injection)](https://www.npmjs.com/package/async-injection)
 [![codecov](https://codecov.io/gh/pcafstockf/async-injection/graph/badge.svg)](https://codecov.io/gh/pcafstockf/async-injection)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 ![OSS Lifecycle](https://img.shields.io/osslifecycle/pcafstockf/async-injection.svg)
-[![npm version](https://img.shields.io/npm/v/async-injection)](https://www.npmjs.com/package/async-injection)
 
-A robust lightweight dependency injection library for TypeScript.
+**Lightweight TypeScript dependency injection — with first-class async support.**
 
-## About
-Async-Injection is a small IoC container with support for both synchronous and asynchronous dependency injection, as well as isolated and/or hierarchical scopes.
+Most DI containers assume your dependencies are ready the moment they are constructed.  `async-injection` doesn't.  
+Synchronous and asynchronous dependencies can coexist naturally in the same container, and the library resolves each correctly — whether you get them immediately or need to await them.
 
-## Installation
+## Install
 
-You can get the latest release from [npm](https://www.npmjs.com/package/async-injection):
-
-```
-$ npm install async-injection --save
+```bash
+npm install async-injection
 ```
 
-To enhance flexibility, Async-Injection does not dictate which Reflect API implementation you use.  However, you will need to explicitly choose and load one.  
-You can use:
+Works in Node, browsers, Electron, and other runtimes.  
+Ships as both ESM and CJS side by side.
 
-- [reflect-metadata](https://www.npmjs.com/package/reflect-metadata)
-- [core-js (core-js/es7/reflect)](https://www.npmjs.com/package/core-js)
-- [reflection](https://www.npmjs.com/package/@abraham/reflection)
+Reflection metadata is required.  
+Rather than mandate a specific library, you have the freedom to bring your own — choose whichever fits your project:
+* [reflect-metadata](https://www.npmjs.com/package/reflect-metadata) 
+* [core-js/es7/reflect](https://www.npmjs.com/package/core-js) 
+* [@abraham/reflection](https://www.npmjs.com/package/@abraham/reflection)
 
-The Reflect polyfill import should only be added once, and before Async-Injection is used:
-
+Remember to import reflection once at your entry point, before anything else:
 ```typescript
-// entry.ts
-import "reflect-metadata";
-// Your code here...
+import 'reflect-metadata';
 ```
 
-Please note that this library supports a wide variety of runtimes and is distributed as both esm and cjs modules, side by side.  
-
-## Basic Usage (synchronous)
-Here we 'get' a new transaction handling object, that itself, relies on a shared service:
+## Quick start
 
 ```typescript
 @Injectable()
@@ -50,209 +44,132 @@ class TransactionHandler {
     constructor(svc: SharedService) { }
 }
 
-// Create a simple container (we will bind providers into it).
 const container = new Container();
+container.bindClass(SharedService).asSingleton();  // one shared instance
+container.bindClass(TransactionHandler);           // new instance on each get
+container.bindConstant('LogLevel', 'info');        // override defaulted 'warn' level
 
-// A single instance will be created and shared by everyone.
-container.bindClass(SharedService).asSingleton();
-
-// A new instance will be created each time one is requested.
-container.bindClass(TransactionHandler);
-
-// If we omit this line, the logLevel of SharedService will be initialized to 'warn'
-container.bindConstant('LogLevel', 'info');
-
-// In our request processing code (which would be an anti-pattern)...
-// Instantiate a new transaction handler (it will be injected with the shared service).
 const tx = container.get(TransactionHandler);
 ```
-**NOTE:**  
-The examples in this ReadMe are contrived to quickly communicate concepts and usage.  
-Your real world project should of course follow best practices like [separation of concerns](https://medium.com/machine-words/separation-of-concerns-1d735b703a60), having a [composition root](https://medium.com/@cfryerdev/dependency-injection-composition-root-418a1bb19130), and should avoid anti-patterns like [service locator](http://scotthannen.org/blog/2018/11/27/stop-worrying-love-service-locator.html).
 
-## Scopes
-Scopes can be created using multiple Containers, and/or a hierarchy of Containers.
+> **Tip:** Real-world projects should follow best practices like [separation of concerns](https://medium.com/machine-words/separation-of-concerns-1d735b703a60), having a [composition root](https://medium.com/@cfryerdev/dependency-injection-composition-root-418a1bb19130), and should avoid anti-patterns like [service locator](http://scotthannen.org/blog/2018/11/27/stop-worrying-love-service-locator.html).
 
-## IoC Modules
-Why reinvent the wheel?  TypeScript is great!  
-Implement the "module" you want and just import it:
+## Async dependencies
 
-`my-http-ioc-module.ts`
+Synchronous injection is straightforward and well understood.  
+Asynchronous injection is also well established.  
+If you are **blending** the two in the same container, it requires a little care.
+> **Tip:**  
+> Call `resolveSingletons(true)` after your last `bindXXX` call and before any `get` call to avoid hard-to-debug timing issues.
+
+
+### `get` vs `resolve`
+
+| Condition | When to use |
+|---|---|
+| All dependencies are synchronous, **or** async singletons are already resolved | `container.get(X)` |
+| Any dependency in the tree may still be pending | `await container.resolve(X)` |
+
+
+**When a dependency must do async work before it is usable** — open a database connection, load remote config, etc. — there are two ways to handle it:
+
+#### **Async factory** — bind an async factory that performs the initialization and returns the ready instance:
+
 ```typescript
-import {myContainer} from './app';
-import {Logger, HttpClient} from './services';
-import {HttpClientGotWrapper} from './impl';
-
-myContainer.bind(Logger).asSingleton();
-myContainer.bind(HttpClient, HttpClientGotWrapper);
-```
-
-## Asynchronous Support
-For simplicity, it is recommended that you use traditional synchronous injection for any class where that is possible.  
-But when that's just to much work, you can "blend" synchronous and asynchronous injection.
-To support "blending", we introduce three new methods on the `Container` which will be explained below.
-
-## Asynchronous Usage
-Perhaps in the example above, our `SharedService` is useless until it has established a database connection.  
-Of course such a simple scenario could easily be handled in user-land code, but as application complexity grows, this becomes more tedious and difficult to maintain.  
-Let's modify the example as follows:
-```typescript
-@Injectable()
-class SharedService {
-    constructor() { }
-    connect(): Promise<void> { ... }
-}
-
-const container = new Container();
-
-// Bind a factory function that awaits until it can fully create a SharedService.
 container.bindAsyncFactory(SharedService, async () => {
-    let svc = new SharedService();
-    return await svc.connect();
+    const svc = new SharedService();
+    return svc.connect();           // returns Promise<SharedService>
 }).asSingleton();
 
-// A new transient instance will be created each time one is requested.
-container.bindClass(TransactionHandler);    
-
-// Wait for all bound asynchronous factory functions to complete.
-// This step is optional.  You could omit and use Container.resolve instead (see alternative below).
+// Option A — resolve everything up front, then use get() as normal
 await container.resolveSingletons(true);
-// We are now connected to the database
-
-// In our request processing code...
 const tx = container.get(TransactionHandler);
-```
-As an alternative, we could **remove** the call to `Container.resolveSingletons`, and in our request processing code, simply call `Container.resolve`.
-```typescript
+
+// Option B — resolve on demand
 const tx = await container.resolve(TransactionHandler);
 ```
 
-## Important - Container.resolve vs Container.get
-Blending synchronous and asynchronous injection adds complexity to your application.  
-The key to successful blending is to think of the object you are requesting, not as an object, but as a tree of objects with your object at the top.  
-Keep in mind that you may have **transient** objects which need to be created each time, as well as existing **singleton** objects in your dependency tree.  
-If you know ahead of time that every object which you depend on is immediately (synchronously) available, **or** if they are asynchronous **singletons** which have already been resolved (via `Container.resolveSingletons`, or a previous call to `Container.resolve`), then no need to wait, you can just `Container.get` the tree.  
-Otherwise you need to await the full resolution of the tree with `await Container.resolve`.  
-
-## @PostConstruct Support
-It is not always possible to fully initialize your object in the class constructor.
-This (albeit contrived) demo shows that the `Employee` class is not yet initialized when the `Person` subclass tries to call the overridden `state` method.
-```typescript
-class Person {
-	public constructor() { this.describe(); }
-	protected state() { return "relaxing"; }
-	public describe() { console.log("Hi I'm '" + this.state() + "'"); }
-}
-class Employee extends Person {
-	constructor(private manager: boolean) {	super(); }
-	protected state() { return this.manager ? "busy" : "producing"; }
-}
-// This will print: 
-//  "Hi I'm 'producing", even though the author probably expected 
-//  "Hi I'm busy", because they passed true for the 'manager' parameter.
-new Employee(true); 
-```
-Can we refactor code to work around this?  Sure.  You may have to submit a couple of PR's, re-write legacy code that has no unit tests, trash encapsulation, skip a few nights sleep, etc.  But why?  
-A PostConstruct annotation ensure's your initialization method is working on a fully constructed version of your object.
-Even better, since constructors cannot be asynchronous, PostConstruct gives you an easy way to asynchronously prepare an object before it's put into service.
-
-## @PostConstruct Usage
-Post construction methods can be either synchronous or asynchronous.
+#### **`@PostConstruct`** — mark an initialization method to run on the fully constructed object after the constructor returns.  
+This is especially useful when a base class constructor cannot call methods overridden by a subclass.  
+The method can be synchronous or asynchronous:
 
 ```typescript
-class A {
-    public constructor() { }
-
-    // Called before the object is placed into the container (or is returned from get/resolve)
+@Injectable()
+class DatabasePool {
     @PostConstruct()
-    public init(): void { ... } 
-}
-class D {
-    public constructor() { }
-
-    // Will not be placed into the container (or returned) until the Promise has been resolved.
-    @PostConstruct()
-    public init(): Promise<void> { ... }    
+    async init(): Promise<void> {
+        this.pool = await createPool(this.config);
+    }
 }
 ```
 
-### @PostConstruct Guidelines:
-- Ensure your post construction method signature properly **declares** it's return type.  
-**WARNING!**  An unspecified return type signature where the type is implied by `return new Promise(...)` is not sufficient!  You must explicitly declare the return type.  
-- `Container.get` will throw an exception if you try to retrieve a class with `@PostConstruct` on a method that returns a `Promise`, but which does not **declare** it's return type to be `Promise`.
-- The library will not invoke @PostConstruct on an object returned from a factory.  It is the factory's responsibility to construct and initialize before returning.
-- You will likely want a `Container.resolveSingletons(true)` call between your last `Container.bindXXX()` call and any `Container.get` call.
+> **Important:** Always explicitly declare the return type (`void` or `Promise<void>`, never leave it to be inferred).  
+> `container.get()` will throw if the return type is missing and the method actually does return a Promise.
 
-## API Overview
-Async-Injection tries to follow the common API patterns found in most other DI implementations.  Please refer to the examples above or the linked elements below for specific syntax.
-- The 
-[Container](https://pcafstockf.github.io/async-injection/api-docs/container.html) class implements a 
-[Binder](https://pcafstockf.github.io/async-injection/api-docs/binder.html) interface, which allows you to bind a 
-[Constant](https://pcafstockf.github.io/async-injection/api-docs/container.html#bindconstant), 
-[Factory](https://pcafstockf.github.io/async-injection/api-docs/container.html#bindfactory), 
-[AsyncFactory](https://pcafstockf.github.io/async-injection/api-docs/container.html#bindasyncfactory), or 
-[Class](https://pcafstockf.github.io/async-injection/api-docs/container.html#bindclass) value to an 
-[InjectableId](https://pcafstockf.github.io/async-injection/api-docs/globals.html#injectableid) (aka key) within a 
-[Container](https://pcafstockf.github.io/async-injection/api-docs/container.html).
-- The 
-[Container](https://pcafstockf.github.io/async-injection/api-docs/container.html) also implements an 
-[Injector](https://pcafstockf.github.io/async-injection/api-docs/injector.html) interface which allows you to synchronously 
-[get](https://pcafstockf.github.io/async-injection/api-docs/container.html#get) or asynchronously 
-[resolve](https://pcafstockf.github.io/async-injection/api-docs/container.html#resolve) anything that has been bound.
-- When binding a 
-[Factory](https://pcafstockf.github.io/async-injection/api-docs/container.html#bindfactory), 
-[AsyncFactory](https://pcafstockf.github.io/async-injection/api-docs/container.html#bindasyncfactory) or 
-[Class](https://pcafstockf.github.io/async-injection/api-docs/container.html#bindclass) to an 
-[InjectableId](https://pcafstockf.github.io/async-injection/api-docs/globals.html#injectableid), you can chain the result of the call to specify the binding as a 
-[Singleton](https://pcafstockf.github.io/async-injection/api-docs/bindas.html#assingleton), and/or configure an 
-[Error Handler](https://pcafstockf.github.io/async-injection/api-docs/bindas.html#onerror).
-- Containers may be nested by passing a parent Container to the 
-[constructor](https://pcafstockf.github.io/async-injection/api-docs/container.html#constructor) of a child Container.
-- To bind a 
-[Class](https://pcafstockf.github.io/async-injection/api-docs/container.html#bindclass) into the 
-[Container](https://pcafstockf.github.io/async-injection/api-docs/container.html), you must add the 
-[@Injectable](https://pcafstockf.github.io/async-injection/api-docs/globals.html#injectable) decorator (aka annotation) to your class (see examples above).
-- You may optionally add a 
-[@PostConstruct](https://pcafstockf.github.io/async-injection/api-docs/globals.html#postconstruct) decorator to a method of your class to perform synchronous or asynchronous initialization of a new instance.
-- By default, Async-Injection will examine the parameters of a class constructor and do it's best to match those to a bound 
-[InjectableId](https://pcafstockf.github.io/async-injection/api-docs/globals.html#injectableid).  
-- You may use the 
-[@Inject](https://pcafstockf.github.io/async-injection/api-docs/globals.html#inject) decorator to explicitly declare which 
-[InjectableId](https://pcafstockf.github.io/async-injection/api-docs/globals.html#injectableid) should be used (generally required for a 
-[Constant](https://pcafstockf.github.io/async-injection/api-docs/container.html#bindconstant) binding as in the logLevel example above).
-- The 
-[@Optional](https://pcafstockf.github.io/async-injection/api-docs/globals.html#optional) decorator allows you to specify a default value for a class constructor parameter in the event that no matching 
-[InjectableId](https://pcafstockf.github.io/async-injection/api-docs/globals.html#injectableid) can be found.
-- The Container's 
-[resolveSingletons](https://pcafstockf.github.io/async-injection/api-docs/container.html#resolvesingletons) method may be used to wait for any bound (a)synchronous [Singletons](https://en.wikipedia.org/wiki/Singleton_pattern) to finish initialization before continuing execution of your application.
+## Scopes
+
+Create isolated or hierarchical scopes using multiple containers.  
+A child container searches its own bindings first, then walks up the parent hierarchy:
+
+```typescript
+const child = new Container(parent);
+```
+
+## IoC modules
+
+No special module system needed — TypeScript's own `import` is your module system.  Create a file, import your container, and register your bindings.
+
+## API
+
+A Container's life follows a simple arc: *configure* it by registering bindings, *activate* it so async singletons can initialize, then *use* it to retrieve objects.
+
+#### Configure
+
+| |                                                                |
+|---|----------------------------------------------------------------|
+| `new Container(parent?)` | Create a container; optionally inherit bound ids from a parent |
+| `bindConstant(id, value)` | Bind a fixed value                                             |
+| `bindClass(id, class?)` | Bind a class (requires `@Injectable`)                          |
+| `bindFactory(id, fn)` | Bind a synchronous factory function                            |
+| `bindAsyncFactory(id, fn)` | Bind an asynchronous factory function                          |
+| `.asSingleton()` | Chain: share one instance across the Container                 |
+| `.onError(cb)` | Chain: handle construction errors                              |
+
+#### Activate
+
+| | |
+|---|---|
+| `resolveSingletons(true)` | Await all async singleton initializations |
+
+#### Use
+
+| | |
+|---|---|
+| `get(id)` | Synchronously retrieve a bound value |
+| `resolve(id)` | Asynchronously retrieve a bound value (see [`get` vs `resolve`](#get-vs-resolve)) |
+
+#### Annotate your classes
+
+| | |
+|---|---|
+| `@Injectable()` | Required on any class bound with `bindClass` |
+| `@Inject(id)` | Explicitly declare which id to inject into a constructor parameter |
+| `@Optional(default)` | Provide a default if the id is not bound |
+| `@PostConstruct()` | Mark a method to run after full construction (sync or async) |
+| `@Release()` | Mark a method to call when a singleton is released |
+| `InjectionToken<T>` | Create a typed token for binding interfaces or primitives |
 
 ## Acknowledgements
-Thanks to all the contributors at [InversifyJS](https://github.com/inversify/InversifyJS).  It is a powerful, clean, flexible, inspiring design.
 
-Thanks to everyone at [NestJS](https://docs.nestjs.com/fundamentals/async-providers) for giving us Asynchronous providers.
+Inspired by [InversifyJS](https://github.com/inversify/InversifyJS), [NestJS async providers](https://docs.nestjs.com/fundamentals/async-providers), [Darcy Rayner's DI walkthrough](https://dev.to/darcyrayner/typescript-dependency-injection-in-200-loc-12j7), and Carlos Delgado's [QueryablePromise](https://ourcodeworld.com/articles/read/317/how-to-check-if-a-javascript-promise-has-been-fulfilled-rejected-or-resolved) idea.
 
-Thanks to Darcy Rayner for describing a [DI implementation](https://dev.to/darcyrayner/typescript-dependency-injection-in-200-loc-12j7) so simply and clearly.
+## Support Resources
+The [`support/`](./support) directory contains supplementary guides that are **not** part of the library itself:
+- [`lazy-loading/`](./support/lazy-loading.md) — patterns for on-demand, split-bundle DI module loading
+- [`migrate-from-inversify/`](./support/migrate-from-inversify/ReadMe.md) — shim files and a two-phase migration guide for InversifyJS users
+- [`migrate-from-tsyringe/`](./support/migrate-from-tsyringe.md) — migration guide for TSyringe users
+- [`migrate-from-typedi/`](./support/migrate-from-typedi.md) — migration guide for TypeDI users
 
-Thanks to Carlos Delgado for the idea of a ["QuerablePromise"](https://ourcodeworld.com/articles/read/317/how-to-check-if-a-javascript-promise-has-been-fulfilled-rejected-or-resolved) which allowed us to blend asynchronous DI with the simplicity of synchronous DI.
+## License
 
-## MIT License
-
-Copyright (c) 2020-2023 Frank Stock
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+[MIT](./License.txt) © 2020–2024 Frank Stock

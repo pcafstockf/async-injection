@@ -1,14 +1,12 @@
 /*
-Inversify thinks a Promise should not be injectable (! async-injection).
-Luckily there is a choke point in the InversifyJS code that we can patch.
-The monkey patch below tail patches the two choke points that check if the object is a Promise.
-If a FastifyInstance, FastifyRequest, or FastifyReply is found, this patch lies and tells Inversify that it is *not* a Promise.
-This allows all the normal Fastify misbehavior that everyone else expects, but works around lame async-injection hackon in InversifyJS.
+Inversify rejects Promises as injectable values, which conflicts with async-injection's approach.
+The patch below intercepts the two InversifyJS choke points that check whether an object is a Promise,
+allowing you to selectively override that behavior for objects Inversify would otherwise mishandle.
 */
 const inversifyasync = require('inversify/lib/utils/async');
 
 function useDefaultInversifyPromiseHandling(obj: any): boolean {
-	//TODO: If you have promises for which you want the default InversifyJS behavior, test for them here and return true.
+	// Return true for any object that Inversify should treat as a Promise using its default logic.
 	return false;
 }
 const oldIPromise = inversifyasync.isPromise;
@@ -25,7 +23,7 @@ inversifyasync.isPromiseOrContainsPromise = function (object: any) {
 } as any;
 import {Container as InversifyContainer, inject as Inject, injectable as Injectable, interfaces, optional as Optional, postConstruct as PostConstruct, preDestroy as Release} from 'inversify';
 import 'reflect-metadata';
-import {BindAs, ClassConstructor, Container, InjectableId, SyncFactory} from './di';
+import {BindAs, ClassConstructor, Container, InjectableId, RegisterDescriptor, SyncFactory} from './di';
 
 /**
  * @inheritDoc
@@ -60,8 +58,9 @@ export class InversifyContainerAdapter extends InversifyContainer implements Con
 	/**
 	 * @inheritDoc
 	 */
-	bindConstant<T>(id: InjectableId<T>, value: T): void {
+	bindConstant<T>(id: InjectableId<T>, value: T): T {
 		this.bind(id as symbol | string).toConstantValue(value);
+		return value;
 	}
 
 	/**
@@ -110,6 +109,34 @@ export class InversifyContainerAdapter extends InversifyContainer implements Con
 				singletonState = 1;
 			}
 		};
+	}
+
+	/** @inheritDoc */
+	has<T>(id: InjectableId<T>): boolean {
+		return this.isBound(id);
+	}
+
+	/** @inheritDoc */
+	createChildContainer(): Container {
+		return new InversifyContainerAdapter();
+	}
+
+	/** @inheritDoc */
+	register<T>(id: InjectableId<T>, descriptor: RegisterDescriptor<T>): BindAs<T, any> | undefined {
+		if ('useClass' in descriptor)
+			return this.bindClass(id, descriptor.useClass);
+		if ('useValue' in descriptor) {
+			this.bindConstant(id, descriptor.useValue);
+			return undefined;
+		}
+		if ('useFactory' in descriptor)
+			return this.bindFactory(id, descriptor.useFactory);
+		return undefined;
+	}
+
+	/** @inheritDoc */
+	registerSingleton<T>(id: InjectableId<T>, constructor: ClassConstructor<T>): void {
+		this.bindClass(id, constructor).asSingleton();
 	}
 
 	/**
