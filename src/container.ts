@@ -262,7 +262,6 @@ export class Container implements Injector {
 		return provider.provideAsState() as State<T>;
 	}
 
-	// noinspection JSUnusedGlobalSymbols
 	/**
 	 * Convenience method to assist in releasing non-garbage-collectable resources that Singletons in this Container may have allocated.
 	 * It will walk through all registered Providers (of this Container only), and invoke their Provider.releaseIfSingleton method.

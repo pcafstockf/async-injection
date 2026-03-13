@@ -1,4 +1,6 @@
 ## 3.0.0 / 2026-03-14
+* `@PostConstruct` methods now support injected parameters.
+  * Same as constructor injection.
 * Remove deprecated `Binder` interface.
 * API enhancements to simplify migration from other DI frameworks.
 * Documentation [additions](./support) and updates.

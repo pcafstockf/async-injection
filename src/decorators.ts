@@ -1,7 +1,7 @@
 /**
  * These decorators all apply the information they collect (whether class, method, or parameter data) as tagged metadata on the class's constructor
  */
-import {INJECT_METADATA_KEY, INJECTABLE_METADATA_KEY, OPTIONAL_METADATA_KEY, POSTCONSTRUCT_ASYNC_METADATA_KEY, POSTCONSTRUCT_SYNC_METADATA_KEY, REFLECT_RETURN, RELEASE_METADATA_KEY} from './constants';
+import {INJECT_METADATA_KEY, INJECTABLE_METADATA_KEY, OPTIONAL_METADATA_KEY, POSTCONSTRUCT_ASYNC_METADATA_KEY, POSTCONSTRUCT_SYNC_METADATA_KEY, REFLECT_PARAMS, REFLECT_RETURN, RELEASE_METADATA_KEY} from './constants';
 import {InjectableId} from './injector';
 
 // Help user locate misapplied decorators.
@@ -29,12 +29,28 @@ function makeParamIdxKey(idx: number): string {
 	return `index-${idx}`;
 }
 
+// Key for @Inject/@Optional metadata stored on a method parameter.
+function makeMethodParamIdxKey(methodName: string | symbol, idx: number): string {
+	return `${String(methodName)}:index-${idx}`;
+}
+
 // Validate that the specified target is a parameter of a class constructor
 function validateConstructorParam(decorator: string, target: Function, idx: number): string {
 	if (!isClassConstructor(target)) {
 		throw new Error('@' + decorator + ' is not valid here [' + targetHint(target) + ']');
 	}
 	return makeParamIdxKey(idx);
+}
+
+// Validate that the target is an instance method parameter (non-constructor).
+function validateMethodParam(decorator: string, target: object, methodName: string | symbol, idx: number): string {
+	if (typeof target !== 'object' || typeof (target as any).constructor !== 'function') {
+		throw new Error('@' + decorator + ' is not valid here [' + targetHint(target as Function) + ']');
+	}
+	if (!Reflect.hasOwnMetadata(REFLECT_PARAMS, target, methodName)) {
+		// REFLECT_PARAMS not yet set (decoration order), so we cannot pre-validate the method; accept silently.
+	}
+	return makeMethodParamIdxKey(methodName, idx);
 }
 
 // Validate the decorator was only applied once.
@@ -66,13 +82,14 @@ export function Injectable(): ClassDecorator {
 /**
  * Placed just before a constructor parameter, this parameter decorator allows for specificity and control over the type of Object that will be injected into the parameter.
  * In the absence of this decorator the container will use whatever is bound to a parameter's type (or throw an error if it is unable to recognize the type).
+ * This decorator may also be placed on a parameter of a method annotated with @PostConstruct, in which case the container will resolve and inject the value before invoking that method.
  *
  * @param id  The identifier of the bound type that should be injected.
  */
 export function Inject(id: InjectableId<any>): ParameterDecorator {
 	/**
-	 * @param target  The constructor function of the class (we don't allow @Inject on anything else).
-	 * @param parameterName The name of the parameter
+	 * @param target  The constructor function of the class (for constructor params), or the class prototype (for method params).
+	 * @param parameterName The name of the parameter (undefined for constructor params, the method name for method params)
 	 * @param parameterIndex The ordinal index of the parameter in the function’s parameter list
 	 * @returns Undefined (nothing), as this decorator does not modify the parameter in any way.
 	 */
@@ -80,8 +97,16 @@ export function Inject(id: InjectableId<any>): ParameterDecorator {
 		if (id === undefined) {
 			throw new Error('Undefined id passed to @Inject [' + targetHint(target as Function) + ']');
 		}
-		const paramKey = validateSingleConstructorParam('Inject', target as Function, parameterIndex);
-		Reflect.defineMetadata(INJECT_METADATA_KEY, id, target, paramKey);
+		if (parameterName === undefined) {
+			// Constructor parameter
+			const paramKey = validateSingleConstructorParam('Inject', target as Function, parameterIndex);
+			Reflect.defineMetadata(INJECT_METADATA_KEY, id, target, paramKey);
+		}
+		else {
+			// Method parameter — silently accepted (intended for @PostConstruct methods)
+			const paramKey = validateMethodParam('Inject', target, parameterName, parameterIndex);
+			Reflect.defineMetadata(INJECT_METADATA_KEY, id, target, paramKey);
+		}
 	};
 }
 
@@ -97,19 +122,35 @@ export function _getInjectedIdAt(target: Function, parameterIndex: number): Inje
 }
 
 /**
+ * Retrieve the @Inject metadata for a specifically indexed parameter of a named method.
+ */
+export function _getInjectedIdForMethod(prototype: object, methodName: string | symbol, parameterIndex: number): InjectableId<any> {
+	return Reflect.getMetadata(INJECT_METADATA_KEY, prototype, makeMethodParamIdxKey(methodName, parameterIndex)) as InjectableId<any>;
+}
+
+/**
  * Placed just before a constructor parameter, this parameter decorator signals the container that it should supply the 'alt' constant value (undefined by default) if for *any* reason it is unable to otherwise resolve the type of the parameter.
+ * This decorator may also be placed on a parameter of a method annotated with @PostConstruct.
  * WARNING!  It is your responsibility to ensure that alt is of the appropriate type/value.
  */
 export function Optional(alt?: any): ParameterDecorator {
 	/**
-	 * @param target  The constructor function of the class (we don't allow @Optional on anything else).
-	 * @param _parameterName The name of the parameter
+	 * @param target  The constructor function of the class (for constructor params), or the class prototype (for method params).
+	 * @param parameterName The name of the parameter (undefined for constructor params, the method name for method params)
 	 * @param parameterIndex The ordinal index of the parameter in the function’s parameter list
 	 * @returns Undefined (nothing), as this decorator does not modify the parameter in any way.
 	 */
-	return function (target: object, _parameterName: string | symbol | undefined, parameterIndex: number): void {
-		const paramKey = validateSingleConstructorParam('Optional', target as Function, parameterIndex);
-		Reflect.defineMetadata(OPTIONAL_METADATA_KEY, {value: alt}, target, paramKey);
+	return function (target: object, parameterName: string | symbol | undefined, parameterIndex: number): void {
+		if (parameterName === undefined) {
+			// Constructor parameter
+			const paramKey = validateSingleConstructorParam('Optional', target as Function, parameterIndex);
+			Reflect.defineMetadata(OPTIONAL_METADATA_KEY, {value: alt}, target, paramKey);
+		}
+		else {
+			// Method parameter — silently accepted (intended for @PostConstruct methods)
+			const paramKey = validateMethodParam('Optional', target, parameterName, parameterIndex);
+			Reflect.defineMetadata(OPTIONAL_METADATA_KEY, {value: alt}, target, paramKey);
+		}
 	};
 }
 
@@ -126,8 +167,16 @@ export function _getOptionalDefaultAt(target: Function, parameterIndex: number):
 }
 
 /**
+ * Retrieve the @Optional metadata for a specifically indexed parameter of a named method.
+ */
+export function _getOptionalDefaultForMethod(prototype: object, methodName: string | symbol, parameterIndex: number): { value: any } {
+	return Reflect.getMetadata(OPTIONAL_METADATA_KEY, prototype, makeMethodParamIdxKey(methodName, parameterIndex)) as { value: any };
+}
+
+/**
  * Placed just before a class method, this method decorator flags a method that should be called after an object has been instantiated by the container, but before it is put into service.
- * The method will be assumed to be synchronous unless the method signature explicitly declares it's return type to be ": Promise<something>"
+ * The method will be assumed to be synchronous unless the method signature explicitly declares its return type to be ": Promise<something>".
+ * Parameters will be resolved by the container just as they are for constructors.
  * This decorator will throw if placed on a non-method or a static method of a class, or if placed on a method more than once, or if placed on more than one method for a class.
  */
 export function PostConstruct(): MethodDecorator {
@@ -137,7 +186,6 @@ export function PostConstruct(): MethodDecorator {
 	 * @param _descriptor   The Property Descriptor for the method.
 	 * @returns Undefined (nothing), as this decorator does not modify the method in any way.
 	 */
-	// noinspection JSUnusedLocalSymbols
 	return function (target: Object, methodName: string | symbol, _descriptor: PropertyDescriptor) {
 		if (typeof target !== 'object' || typeof target.constructor !== 'function') {
 			throw new Error('@PostConstruct not applied to instance method [' + target.toString() + '/' + methodName.toString() + ']');
@@ -155,7 +203,6 @@ export function PostConstruct(): MethodDecorator {
 	};
 }
 
-// noinspection JSUnusedGlobalSymbols
 /**
  * Placed just before a class method, this decorator identifies a method which should be called when an object is removed from service.
  * If invoked by the container, the container will drop any references it has to the object when the method returns.
@@ -175,7 +222,6 @@ export function Release(): MethodDecorator {
 	 * @param _descriptor   The Property Descriptor for the method.
 	 * @returns Undefined (nothing), as this decorator does not modify the method in any way.
 	 */
-	// noinspection JSUnusedLocalSymbols
 	return function (target: Object, methodName: string | symbol, _descriptor: PropertyDescriptor) {
 		if (typeof target !== 'object' || typeof target.constructor !== 'function') {
 			throw new Error('@Release not applied to instance method [' + target.toString() + '/' + methodName.toString() + ']');

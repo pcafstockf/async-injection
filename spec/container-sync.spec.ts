@@ -3,7 +3,7 @@
 import 'jasmine';
 import 'reflect-metadata';
 // noinspection ES6PreferShortImport
-import {Container, Inject, Injectable, InjectionToken, PostConstruct, Release} from '../src/index';
+import {Container, Inject, Injectable, InjectionToken, Optional, PostConstruct, Release} from '../src/index';
 
 describe('Simple Transient classes', () => {
 	it('Should support class binding and retrieval', () => {
@@ -275,9 +275,7 @@ describe('PostConstruct execution', () => {
 			public a!: string;
 
 			@PostConstruct()
-			public init(value?: string) {
-				if (value)
-					this.i = value;
+			public init() {
 				this.a = 'A';
 			}
 		}
@@ -299,12 +297,197 @@ describe('PostConstruct execution', () => {
 		// onSuccess path
 		const container2 = new Container();
 		container2.bindClass(A).onSuccess((value) => {
-			return value.init('onSuccess');
+			value.i = 'onSuccess';
 		});
 		container2.bindClass(B);
 		const b2 = container2.get(B);
 		expect(b2.a.a).toEqual('A');
 		expect(b2.a.i).toEqual('onSuccess');
+	});
+});
+
+describe('@PostConstruct with injected parameters', () => {
+	it('Should inject an @Inject-annotated parameter', () => {
+		@Injectable()
+		class Config {
+			public url = 'http://example.com';
+		}
+
+		@Injectable()
+		class Service {
+			public endpoint!: string;
+
+			@PostConstruct()
+			public init(@Inject(Config) config: Config): void {
+				this.endpoint = config.url;
+			}
+		}
+
+		const container = new Container();
+		container.bindClass(Config).asSingleton();
+		container.bindClass(Service);
+
+		const svc = container.get(Service);
+		expect(svc.endpoint).toBe('http://example.com');
+	});
+
+	it('Should use @Optional fallback when the annotated param is not bound', () => {
+		@Injectable()
+		class Service {
+			public logLevel!: string;
+
+			@PostConstruct()
+			public init(@Inject('LogLevel') @Optional('warn') level: string): void {
+				this.logLevel = level;
+			}
+		}
+
+		const container = new Container();
+		container.bindClass(Service);
+
+		const svc = container.get(Service);
+		expect(svc.logLevel).toBe('warn');
+	});
+
+	it('Should use the bound value when an @Optional param is bound', () => {
+		@Injectable()
+		class Service {
+			public logLevel!: string;
+
+			@PostConstruct()
+			public init(@Inject('LogLevel') @Optional('warn') level: string): void {
+				this.logLevel = level;
+			}
+		}
+
+		const container = new Container();
+		container.bindClass(Service);
+		container.bindConstant('LogLevel', 'debug');
+
+		const svc = container.get(Service);
+		expect(svc.logLevel).toBe('debug');
+	});
+
+	it('Should resolve unannotated class-typed param by reflected type (no @Inject needed)', () => {
+		@Injectable()
+		class Config {
+			public url = 'http://example.com';
+		}
+
+		@Injectable()
+		class Service {
+			public endpoint!: string;
+
+			@PostConstruct()
+			public init(config: Config): void {
+				// config is unannotated but its type is a user-defined class — resolved automatically
+				this.endpoint = config.url;
+			}
+		}
+
+		const container = new Container();
+		container.bindClass(Config).asSingleton();
+		container.bindClass(Service);
+
+		const svc = container.get(Service);
+		expect(svc.endpoint).toBe('http://example.com');
+	});
+
+	it('Should throw if an unannotated primitive-typed @PostConstruct param is not bound', () => {
+		@Injectable()
+		class Config {
+			public value = 42;
+		}
+
+		@Injectable()
+		class Service {
+			public result!: string;
+
+			@PostConstruct()
+			public init(suffix: string, @Inject(Config) cfg: Config): void {
+				this.result = cfg.value + '-' + suffix;
+			}
+		}
+
+		const container = new Container();
+		container.bindClass(Config).asSingleton();
+		container.bindClass(Service);
+
+		// String is now a valid injection token (same as constructor resolution);
+		// since it is not bound and has no @Optional, an error is thrown.
+		expect(() => container.get(Service)).toThrowError(/Symbol not bound/);
+	});
+
+	it('Should resolve an unannotated primitive-typed @PostConstruct param when it is bound', () => {
+		@Injectable()
+		class Service {
+			public result!: string;
+
+			@PostConstruct()
+			public init(suffix: string): void {
+				this.result = 'hello-' + suffix;
+			}
+		}
+
+		const container = new Container();
+		container.bindConstant(String, 'world');
+		container.bindClass(Service);
+
+		const svc = container.get(Service);
+		expect(svc.result).toBe('hello-world');
+	});
+
+	it('Should call @PostConstruct then onSuccess in order when both are configured', () => {
+		const order: string[] = [];
+
+		@Injectable()
+		class Service {
+			@PostConstruct()
+			public init(): void {
+				order.push('PostConstruct');
+			}
+		}
+
+		const container = new Container();
+		container.bindClass(Service).onSuccess(() => {
+			order.push('onSuccess');
+		});
+		container.get(Service);
+
+		expect(order).toEqual(['PostConstruct', 'onSuccess']);
+	});
+
+	it('Should inject using string id (no type reflection needed)', () => {
+		@Injectable()
+		class Service {
+			public dsn!: string;
+
+			@PostConstruct()
+			public init(@Inject('DB_DSN') dsn: string): void {
+				this.dsn = dsn;
+			}
+		}
+
+		const container = new Container();
+		container.bindConstant('DB_DSN', 'postgres://localhost/mydb');
+		container.bindClass(Service);
+
+		const svc = container.get(Service);
+		expect(svc.dsn).toBe('postgres://localhost/mydb');
+	});
+
+	it('Should propagate unresolvable @Inject param error to errorHandler', () => {
+		@Injectable()
+		class Service {
+			@PostConstruct()
+			public init(@Inject('MISSING') _dep: any): void {
+			}
+		}
+
+		const container = new Container();
+		container.bindClass(Service);
+
+		expect(() => container.get(Service)).toThrowError(/Symbol not bound/);
 	});
 });
 

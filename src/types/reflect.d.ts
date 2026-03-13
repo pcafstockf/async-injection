@@ -1,5 +1,3 @@
-// noinspection JSUnusedGlobalSymbols
-
 /**
  * Polyfill-agnostic ambient augmentation of the global Reflect object.
  * This file is intentionally a global ambient file which declares only the metadata API methods used by this library.
@@ -10,8 +8,6 @@
  */
 declare namespace Reflect {
 	function getMetadata(metadataKey: unknown, target: object, propertyKey?: string | symbol): unknown;
-
 	function defineMetadata(metadataKey: unknown, metadataValue: unknown, target: object, propertyKey?: string | symbol): void;
-
 	function hasOwnMetadata(metadataKey: unknown, target: object, propertyKey?: string | symbol): boolean;
 }

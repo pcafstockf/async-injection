@@ -120,9 +120,7 @@ describe('Async factories', () => {
 			public a!: string;
 
 			@PostConstruct()
-			public init(value?: string): Promise<void> {
-				if (value)
-					this.i = value;
+			public init(): Promise<void> {
 				return new Promise<void>((resolve) => {
 					setTimeout(() => {
 						this.a = 'A';
@@ -160,9 +158,7 @@ describe('Async factories', () => {
 			public a!: string;
 
 			@PostConstruct()
-			public init(value?: string): Promise<void> {
-				if (value)
-					this.i = value;
+			public init(): Promise<void> {
 				return new Promise<void>((resolve) => {
 					setTimeout(() => {
 						this.a = 'A';
@@ -180,7 +176,7 @@ describe('Async factories', () => {
 
 		const container = new Container();
 		container.bindClass(A).asSingleton().onSuccess((value) => {
-			return value.init('onSuccess');
+			value.i = 'onSuccess';
 		});
 		container.bindFactory(B, (i) => {
 			return new B(i.get(A));
@@ -849,5 +845,131 @@ describe('Asynchronous optional dependencies', () => {
 		let c = await container.resolve(C);
 		expect(c.b.b).toBe('fallback');
 
+	});
+});
+
+describe('@PostConstruct with injected parameters (async)', () => {
+	it('Should inject an async singleton into a sync @PostConstruct method', async () => {
+		@Injectable()
+		class DbPool {
+			public connected = false;
+
+			@PostConstruct()
+			public connect(): Promise<void> {
+				return new Promise<void>((resolve) => {
+					setTimeout(() => {
+						this.connected = true;
+						resolve();
+					}, 10);
+				});
+			}
+		}
+
+		@Injectable()
+		class Service {
+			public pool!: DbPool;
+
+			@PostConstruct()
+			public init(@Inject(DbPool) pool: DbPool): void {
+				this.pool = pool;
+			}
+		}
+
+		const container = new Container();
+		container.bindClass(DbPool).asSingleton();
+		container.bindClass(Service).asSingleton();
+
+		await container.resolveSingletons(true);
+		const svc = container.get(Service);
+		expect(svc.pool).toBeInstanceOf(DbPool);
+		expect(svc.pool.connected).toBeTrue();
+	});
+
+	it('Should await an async @PostConstruct method that has an injected parameter', async () => {
+		@Injectable()
+		class Config {
+			public value = 'async-test';
+		}
+
+		@Injectable()
+		class Service {
+			public result!: string;
+
+			@PostConstruct()
+			public init(@Inject(Config) config: Config): Promise<void> {
+				return new Promise<void>((resolve) => {
+					setTimeout(() => {
+						this.result = config.value;
+						resolve();
+					}, 10);
+				});
+			}
+		}
+
+		const container = new Container();
+		container.bindClass(Config).asSingleton();
+		container.bindClass(Service).asSingleton();
+
+		await container.resolveSingletons(true);
+		const svc = container.get(Service);
+		expect(svc.result).toBe('async-test');
+	});
+
+	it('Should call async @PostConstruct then async onSuccess in order', async () => {
+		const order: string[] = [];
+
+		@Injectable()
+		class Service {
+			@PostConstruct()
+			public init(): Promise<void> {
+				return new Promise<void>((resolve) => {
+					setTimeout(() => {
+						order.push('PostConstruct');
+						resolve();
+					}, 10);
+				});
+			}
+		}
+
+		const container = new Container();
+		container.bindClass(Service).asSingleton().onSuccess(() => {
+			return new Promise<void>((resolve) => {
+				setTimeout(() => {
+					order.push('onSuccess');
+					resolve();
+				}, 10);
+			});
+		});
+
+		await container.resolveSingletons(true);
+		container.get(Service);
+		expect(order).toEqual(['PostConstruct', 'onSuccess']);
+	});
+
+	it('Should use @Optional fallback for a pending async param that rejects', async () => {
+		@Injectable()
+		class UnreliableService {
+			@PostConstruct()
+			public init(): Promise<void> {
+				return Promise.reject(new Error('unavailable'));
+			}
+		}
+
+		@Injectable()
+		class Service {
+			public ready = false;
+
+			@PostConstruct()
+			public init(@Inject(UnreliableService) @Optional(null) _dep: UnreliableService | null): void {
+				this.ready = true;   // succeeds even without the optional dep
+			}
+		}
+
+		const container = new Container();
+		container.bindClass(UnreliableService).asSingleton();
+		container.bindClass(Service).asSingleton();
+
+		const svc = await container.resolve(Service);
+		expect(svc.ready).toBeTrue();
 	});
 });

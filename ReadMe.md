@@ -101,20 +101,23 @@ const tx = await container.resolve(TransactionHandler);
 
 #### **`@PostConstruct`** — mark an initialization method to run on the fully constructed object after the constructor returns.  
 This is especially useful when a base class constructor cannot call methods overridden by a subclass.  
-The method can be synchronous or asynchronous:
+The method can be synchronous or asynchronous, and its parameters may be annotated with `@Inject` and `@Optional` — the container resolves and injects them before calling the method.  
+This lets you avoid storing dependencies from the constructor solely for post-construction use:
 
 ```typescript
 @Injectable()
 class DatabasePool {
     @PostConstruct()
-    async init(): Promise<void> {
-        this.pool = await createPool(this.config);
+    async init(@Inject(DbConfig) config: DbConfig): Promise<void> {
+        this.pool = await createPool(config);  // config is injected, not stored
     }
 }
 ```
 
-> **Important:** Always explicitly declare the return type (`void` or `Promise<void>`, never leave it to be inferred).  
-> `container.get()` will throw if the return type is missing and the method actually does return a Promise.
+> **Important:**  
+> Always explicitly declare the return type (`void` or `Promise<void>`, never leave it to be inferred).  
+> `container.get()` will throw if the return type is missing and the method actually does return a Promise.  
+> Constructor and `@PostConstruct` parameters follow the same rules: class-typed params are auto-resolved by reflected type; use `@Inject` for interface or primitive types. Use `@Optional()` with no argument to pass `undefined` if you want to allow a JS parameter default.
 
 ## Scopes
 
@@ -164,8 +167,8 @@ A Container's life follows a simple arc: *configure* it by registering bindings,
 |---|---|
 | `@Injectable()` | Required on any class bound with `bindClass` |
 | `@Inject(id)` | Explicitly declare which id to inject into a constructor parameter |
-| `@Optional(default)` | Provide a default if the id is not bound |
-| `@PostConstruct()` | Mark a method to run after full construction (sync or async) |
+| `@Optional(default?)` | Provide a fallback if the id is not bound; omit the argument to let a JS parameter default apply |
+| `@PostConstruct()` | Mark a method to run after full construction (sync or async); parameters annotated with `@Inject`/`@Optional` are injected by the container |
 | `@Release()` | Mark a method to call when a singleton is released |
 | `InjectionToken<T>` | Create a typed token for binding interfaces or primitives |
 
