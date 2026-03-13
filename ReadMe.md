@@ -166,6 +166,7 @@ Inspired by [InversifyJS](https://github.com/inversify/InversifyJS), [NestJS asy
 ## Support Resources
 The [`support/`](./support) directory contains supplementary guides that are **not** part of the library itself:
 - [`lazy-loading/`](./support/lazy-loading.md) — patterns for on-demand, split-bundle DI module loading
+- [`react-integration/`](./support/react-integration.md) — using with React applications, including scoped child containers and testing patterns
 - [`migrate-from-inversify/`](./support/migrate-from-inversify/ReadMe.md) — shim files and a two-phase migration guide for InversifyJS users
 - [`migrate-from-tsyringe/`](./support/migrate-from-tsyringe.md) — migration guide for TSyringe users
 - [`migrate-from-typedi/`](./support/migrate-from-typedi.md) — migration guide for TypeDI users

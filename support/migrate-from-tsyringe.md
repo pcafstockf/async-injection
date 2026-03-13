@@ -1,8 +1,8 @@
 # Migrating from TSyringe to async-injection
 
-> [!NOTE]
-> The files in this directory are not built as part of this project.
-> They are provided as a starting point to assist you in migrating off TSyringe.
+> **NOTE**  
+> The files in this directory are not built as part of this project.  
+> They are provided as illustrative starting points for common integration patterns.
 
 `async-injection` was designed with TSyringe migrants in mind.  The API surface is intentionally close, and the new methods added in v3 close most of the remaining gaps.
 

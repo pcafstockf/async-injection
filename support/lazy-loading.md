@@ -6,8 +6,8 @@ letting you defer parts of your application — and their DI bindings — until 
 `async-injection` supports this naturally: write an `async` setup function per feature, call it at
 the right moment, and the bundler does the rest. No special library support required.
 
-> [!NOTE]
-> The files in this directory are not built as part of this project.
+> **NOTE**  
+> The files in this directory are not built as part of this project.  
 > They are provided as illustrative starting points for common integration patterns.
 
 ---
@@ -34,7 +34,7 @@ export async function setupFeatureA(di: Container): Promise<void> {
 }
 ```
 
-> [!TIP]
+> **TIP:**  
 > - Token and implementation come from the same dynamic import — simple and sufficient for most cases.
 > - `isIdKnown` makes the setup function safely idempotent — call it multiple times, binds only once.
 > - `resolveSingletons(true)` ensures new async singletons are fully initialized before any `container.get()` call.
@@ -126,7 +126,7 @@ http.createServer(async (req, res) => {
 }).listen(3000);
 ```
 
-> [!NOTE]
+> **NOTE:**  
 > The `setupCache` ensures setup runs exactly once regardless of concurrent first requests;
 > subsequent requests pay no cost.
 

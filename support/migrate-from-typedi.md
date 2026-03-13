@@ -1,8 +1,8 @@
 # Migrating from TypeDI to async-injection
 
-> [!NOTE]
-> The files in this directory are not built as part of this project.
-> They are provided as a starting point to assist you in migrating off TypeDI.
+> **NOTE**  
+> The files in this directory are not built as part of this project.  
+> They are provided as illustrative starting points for common integration patterns.
 
 TypeDI and `async-injection` share similar goals but differ in philosophy: TypeDI leans on a global static `Container` and auto-registration via `@Service()`, while `async-injection` keeps the container explicit and injectable. The migration is straightforward — and you gain first-class async injection along the way.
 

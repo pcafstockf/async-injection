@@ -1,3 +1,8 @@
+## 3.0.0 / 2026-03-14
+* Remove deprecated `Binder` interface.
+* API enhancements to simplify migration from other DI frameworks.
+* Documentation [additions](./support) and updates.
+
 ## 2.3.0 / 2026-03-10
 * Upgrade to TypeScript 5.9 `strict`, downleveling to `es2017`.
   * Effectively obsoleting eslint for this project; removed.
