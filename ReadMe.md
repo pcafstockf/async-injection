@@ -8,7 +8,9 @@
 
 **Lightweight TypeScript dependency injection — with first-class async support.**
 
-Most DI containers assume your dependencies are ready the moment they are constructed.  `async-injection` doesn't.  
+`async-injection` is a general-purpose DI library for TypeScript. It keeps ordinary dependency injection simple, while supporting asynchronous initialization when your application needs it.
+
+Most DI containers assume your dependencies are ready the moment they are constructed. `async-injection` doesn't.  
 Synchronous and asynchronous dependencies can coexist naturally in the same container, and the library resolves each correctly — whether you get them immediately or need to await them.
 
 ## Install
@@ -20,6 +22,16 @@ npm install async-injection
 Works in Node, browsers, Electron, and other runtimes.  
 Ships as both ESM and CJS side by side.
 
+## Why async-injection?
+
+Designed to be a practical default choice for dependency injection in TypeScript applications.
+
+- **TypeScript-first:** Fits naturally into real TypeScript code.
+- **Simple for common cases:** Covers constructor injection, constants, factories, singletons, scopes, and lifecycle hooks without unnecessary complexity.
+- **Async-capable by design:** Handles asynchronous initialization without requiring special-case wiring.
+- **Framework-independent:** Works in backend services, frontend applications, Electron, libraries, or shared packages.
+- **Scales with your application:** Starts with straightforward synchronous DI and makes it easy to add async dependencies later.
+
 ## Quick start
 
 ```typescript
@@ -30,22 +42,26 @@ class SharedService {
 
 @Injectable()
 class TransactionHandler {
-    constructor(svc: SharedService) { }
+    constructor(private svc: SharedService) { }
 }
 
 const container = new Container();
 container.bindClass(SharedService).asSingleton();  // one shared instance
 container.bindClass(TransactionHandler);           // new instance on each get
 container.bindConstant('LogLevel', 'info');        // override defaulted 'warn' level
-
+```
+If all dependencies are ready, we can simply:
+```typescript
 const tx = container.get(TransactionHandler);
 ```
-
-> **Tip:**  
-> Real-world projects should follow best practices like [separation of concerns](https://medium.com/machine-words/separation-of-concerns-1d735b703a60), having a [composition root](https://medium.com/@cfryerdev/dependency-injection-composition-root-418a1bb19130), and should avoid anti-patterns like [service locator](http://scotthannen.org/blog/2018/11/27/stop-worrying-love-service-locator.html).
+If any dependency could still be [asynchronously initializing](#async-dependencies), use:
+```typescript
+const tx = await container.resolve(TransactionHandler);
+```
 
 ## Setup
 
+Decorator-based dependency injection in TypeScript relies on emitted type metadata.  
 Two `tsconfig.json` settings are required:
 
 ```json
@@ -54,8 +70,7 @@ Two `tsconfig.json` settings are required:
   "emitDecoratorMetadata": true
 }
 ```
-
-Reflection metadata is also required.  Rather than mandate a specific library, you have the freedom to bring your own — choose whichever fits your project:
+Reflection metadata support is also required.  Rather than mandate a specific library, you have the freedom to bring your own — choose whichever fits your project:
 * [reflect-metadata](https://www.npmjs.com/package/reflect-metadata)
 * [core-js/es7/reflect](https://www.npmjs.com/package/core-js)
 * [@abraham/reflection](https://www.npmjs.com/package/@abraham/reflection)
@@ -69,7 +84,7 @@ import 'reflect-metadata';
 
 Synchronous injection is straightforward and well understood.  
 Asynchronous injection is also well established.  
-But when you are **blending** the two in the same container, it requires a little care.
+The subtle part is when both need to coexist in the same container.
 
 ### `get` vs `resolve`
 
@@ -129,16 +144,33 @@ class DatabasePool {
 
 ## Scopes
 
-Create isolated or hierarchical scopes using multiple containers.  
-A child container searches its own bindings first, then walks up the parent hierarchy:
+A child container inherits bindings from a parent container and can add or override bindings locally.
 
+This is useful when a local scope needs its own bindings or singleton lifetime while still inheriting from a root container.
 ```typescript
-const child = new Container(parent);
+const root = new Container();
+const child = new Container(root);
 ```
+The child checks its own bindings first, then falls back to the parent.
+When the scope ends, release its singletons:
+```typescript
+await child.releaseSingletons();
+```
+For Node-specific ambient request context that should flow implicitly through async calls, Node's AsyncLocalStorage is often a better fit.
 
 ## IoC modules
 
-No special module system needed — TypeScript's own `import` is your module system.  Create a file, import your container, and register your bindings.
+No special module system is needed. TypeScript's own `import` mechanism is enough: create a file, import your container, and register your bindings.
+
+## Features
+
+- Constructor injection
+- Constants, sync factories, and async factories
+- Singleton and transient lifetimes
+- Parent/child containers for scoped resolution
+- `@PostConstruct` and `@Release` lifecycle hooks
+- Typed injection tokens for interfaces and primitives
+- Support for both synchronous and asynchronous dependency trees
 
 ## API
 
@@ -180,10 +212,6 @@ A Container's life follows a simple arc: *configure* it by registering bindings,
 | `@Release()` | Mark a method to call when a singleton is released |
 | `InjectionToken<T>` | Create a typed token for binding interfaces or primitives |
 
-## Acknowledgements
-
-Inspired by [InversifyJS](https://github.com/inversify/InversifyJS), [NestJS async providers](https://docs.nestjs.com/fundamentals/async-providers), [Darcy Rayner's DI walkthrough](https://dev.to/darcyrayner/typescript-dependency-injection-in-200-loc-12j7), and Carlos Delgado's [QueryablePromise](https://ourcodeworld.com/articles/read/317/how-to-check-if-a-javascript-promise-has-been-fulfilled-rejected-or-resolved) idea.
-
 ## Support Resources
 The [`support/`](./support) directory contains supplementary guides that are **not** part of the library itself:
 - [`lazy-loading/`](./support/lazy-loading.md) — patterns for on-demand, split-bundle DI module loading
@@ -192,6 +220,91 @@ The [`support/`](./support) directory contains supplementary guides that are **n
 - [`migrate-from-tsyringe/`](./support/migrate-from-tsyringe.md) — migration guide for TSyringe users
 - [`migrate-from-typedi/`](./support/migrate-from-typedi.md) — migration guide for TypeDI users
 
+## Acknowledgements
+
+Inspired by [InversifyJS](https://github.com/inversify/InversifyJS), [NestJS async providers](https://docs.nestjs.com/fundamentals/async-providers), [Darcy Rayner's DI walkthrough](https://dev.to/darcyrayner/typescript-dependency-injection-in-200-loc-12j7), and Carlos Delgado's [QueryablePromise](https://ourcodeworld.com/articles/read/317/how-to-check-if-a-javascript-promise-has-been-fulfilled-rejected-or-resolved) idea.
+
 ## License
 
 [MIT](./License.txt) © 2020–2024 Frank Stock
+
+# Child Containers with async-injection
+
+A child container inherits bindings from a parent container and can add or override bindings locally.
+
+Use a child container when you want an explicit local scope with its own bindings or singleton lifetime, while still reusing services from the application's root container.
+
+> **NOTE**  
+> The files in this directory are not built as part of this project.  
+> They are provided as illustrative starting points for common integration patterns.
+
+---
+
+## Creating a child container
+```
+typescript
+import {Container} from 'async-injection';
+
+const root = new Container();
+const child = new Container(root);
+```
+The child checks its own bindings first, then falls back to the parent.
+
+---
+
+## When to use one
+
+Child containers are useful for:
+
+- feature-local singletons
+- temporary overrides
+- isolated test setup
+- operation-specific service graphs
+
+This is different from Node's `AsyncLocalStorage`, which is usually a better fit for ambient request context that should flow implicitly through async calls.
+
+Use a child container when you want explicit scoped bindings, local singleton lifetime, and explicit cleanup.
+
+---
+
+## Example
+```
+typescript
+const root = new Container();
+root.bindConstant('AppName', 'demo');
+
+const child = new Container(root);
+child.bindConstant('RequestId', 'req-123');
+
+const appName = child.get('AppName');     // inherited from root
+const requestId = child.get('RequestId'); // local to child
+```
+---
+
+## Scoped singletons
+
+A child container can have its own singletons that live only for that scope:
+```
+typescript
+child.bindClass(SessionService).asSingleton();
+await child.resolveSingletons(true);
+
+const session = child.get(SessionService);
+```
+When the scope ends, release its singletons:
+```
+typescript
+await child.releaseSingletons();
+```
+If a scoped singleton has cleanup work, mark a method with `@Release()`.
+
+---
+
+## Summary
+
+Use child containers when you need:
+
+- inherited root bindings
+- local overrides
+- scoped singletons
+- explicit cleanup at the end of a feature, test, or operation
