@@ -6,6 +6,5 @@
 	"helpers": [
 		"../tst/reporter.js"
 	],
-	"stopSpecOnExpectationFailure": false,
 	"random": false
 }

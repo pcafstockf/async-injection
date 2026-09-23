@@ -1,6 +1,6 @@
 {
 	"name": "async-injection",
-	"version": "3.0.0",
+	"version": "3.0.1",
 	"description": "A robust lightweight dependency injection library for TypeScript.",
 	"author": "Frank Stock",
 	"license": "MIT",
@@ -58,8 +58,8 @@
 	"devDependencies": {
 		"@istanbuljs/nyc-config-typescript": "~1.0.2",
 		"@types/jasmine": "~6.0.0",
-		"@types/node": "^20.19.39",
-		"jasmine": "~6.1.0",
+		"@types/node": "^20.19.43",
+		"jasmine": "~6.3.0",
 		"jasmine-console-reporter": "~3.1.0",
 		"nyc": "~18.0.0",
 		"reflect-metadata": "~0.2.2",

@@ -1,3 +1,6 @@
+## 3.0.1 / 2026-09-22
+* Updated devDependencies
+
 ## 3.0.0 / 2026-03-14
 * `@PostConstruct` methods now support injected parameters.
   * Same as constructor injection.
