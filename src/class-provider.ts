@@ -16,6 +16,27 @@ interface StateResolvingInjector extends Injector {
 }
 
 /**
+ * Awaits only pending params; fulfilled values (even Promises, e.g. from bindConstant) pass through unadopted.
+ */
+async function resolvePendingParams(params: State[], optionalDefaultAt: (idx: number) => { value: any } | undefined): Promise<any[]> {
+	const args = params.map(p => p.fulfilled as unknown);
+	await Promise.all(params.map(async (p, idx) => {
+		if (!p.pending)
+			return;
+		try {
+			args[idx] = await p.promise!;
+		}
+		catch (err) {
+			const md = optionalDefaultAt(idx);
+			if (!md)
+				throw err;
+			args[idx] = md.value;
+		}
+	}));
+	return args;
+}
+
+/**
  * @inheritDoc
  * This specialization invokes it's configured class constructor synchronously and then scans for (and invokes) any @PostConstruct (which may be synchronous or asynchronous).
  */
@@ -105,23 +126,10 @@ export class ClassBasedProvider<T> extends BindableProvider<T, ClassConstructor<
 
 		if (paramStates.some(p => p.pending)) {
 			// One or more params require async resolution — wait for them, then invoke.
-			const paramsPromise = Promise.all(paramStates.map(async (p, idx) => {
-				if (p.pending) {
-					try {
-						return await p.promise!;
-					}
-					catch (err) {
-						const md = _getOptionalDefaultForMethod(ctor.prototype, pcMethodName!, idx);
-						if (!md) throw err;
-						return md.value;
-					}
-				}
-				return p.fulfilled;
-			}));
 			return State.MakeState<T>((async () => {
 				let args: any[];
 				try {
-					args = await paramsPromise;
+					args = await resolvePendingParams(paramStates, idx => _getOptionalDefaultForMethod(ctor.prototype, pcMethodName!, idx));
 				}
 				catch (err) {
 					return this.queryErrorHandler(err, obj);
@@ -258,25 +266,7 @@ export class ClassBasedProvider<T> extends BindableProvider<T, ClassConstructor<
 			return firstRejectedParam as State<T>;
 		if (params.some(p => p.pending)) {
 			// Some of the parameters needed for construction are not yet available, wait for them and then attempt construction.
-			// We do this by mapping each param to a Promise (pending or not), and then awaiting them all.
-			// This might create some unnecessary (but immediately resolved) Promise objects,
-			// BUT, it allows us to chain for failure *and* substitute the Optional (if one exists).
-			const objPromise = this.makePromiseForObj<any[]>(Promise.all(params.map(async (p, idx) => {
-				if (p.pending) {
-					try {
-						return await p.promise!;
-					}
-					catch (err) {
-						// This was a promised param that failed to resolve.
-						// If there is an Optional decorator, use that, otherwise, failure is failure.
-						const md = _getOptionalDefaultAt(this.maker, idx);
-						if (!md)
-							throw err;
-						return md.value as unknown;
-					}
-				}
-				return p.fulfilled;
-			})), (values) => {
+			const objPromise = this.makePromiseForObj<any[]>(resolvePendingParams(params, idx => _getOptionalDefaultAt(this.maker, idx)), (values) => {
 				if (values) {
 					// All the parameters are now available, instantiate the class.
 					// If this throws, it will be handled by our caller.
