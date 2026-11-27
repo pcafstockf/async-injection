@@ -973,3 +973,56 @@ describe('@PostConstruct with injected parameters (async)', () => {
 		expect(svc.ready).toBeTrue();
 	});
 });
+
+describe('Promise-valued constants beside pending dependencies', () => {
+	const Pending = 'Pending';
+	const Deferred = 'Deferred';
+
+	function bind(container: Container) {
+		let release!: (value: string) => void;
+		const deferred = new Promise<string>((resolve) => release = resolve);
+		container.bindAsyncFactory(Pending, () => Promise.resolve('ready')).asSingleton();
+		container.bindConstant(Deferred, deferred);
+		return {deferred, release};
+	}
+
+	it('Should inject the Promise itself into a constructor without waiting on it', async () => {
+		@Injectable()
+		class Consumer {
+			public constructor(@Inject(Pending) public pending: string, @Inject(Deferred) public deferred: Promise<string>) {
+			}
+		}
+
+		const container = new Container();
+		const {deferred, release} = bind(container);
+		container.bindClass(Consumer);
+
+		const consumer = await container.resolve(Consumer); // would hang if construction waited on the constant
+		expect(consumer.pending).toEqual('ready');
+		expect(consumer.deferred).toBe(deferred);
+		release('later');
+		expect(await consumer.deferred).toEqual('later');
+	});
+
+	it('Should inject the Promise itself into a @PostConstruct method without waiting on it', async () => {
+		@Injectable()
+		class Consumer {
+			public pending!: string;
+			public deferred!: Promise<string>;
+
+			@PostConstruct()
+			public init(@Inject(Pending) pending: string, @Inject(Deferred) deferred: Promise<string>): void {
+				this.pending = pending;
+				this.deferred = deferred;
+			}
+		}
+
+		const container = new Container();
+		const {deferred} = bind(container);
+		container.bindClass(Consumer);
+
+		const consumer = await container.resolve(Consumer);
+		expect(consumer.pending).toEqual('ready');
+		expect(consumer.deferred).toBe(deferred);
+	});
+});
