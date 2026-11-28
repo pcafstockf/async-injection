@@ -6,5 +6,7 @@
 	"helpers": [
 		"../tst/reporter.js"
 	],
-	"random": false
+	"env": {
+		"random": false
+	}
 }

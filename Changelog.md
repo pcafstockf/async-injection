@@ -1,3 +1,8 @@
+## 3.0.2 / 2026-11-27
+* Merge pull request `Don't adopt promise-valued params while awaiting pending ones` [#20](https://github.com/pcafstockf/async-injection/pull/20).  
+  Thanks to [@dmtaub](https://github.com/pcafstockf/async-injection/issues/19) for finding and fixing this one.
+* Updated devDependencies
+
 ## 3.0.1 / 2026-09-22
 * Updated devDependencies
 
